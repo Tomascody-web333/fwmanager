@@ -37,7 +37,9 @@ def _parse_entry(sid: object, raw: object) -> Service:
     if not isinstance(raw, dict) or set(raw) - {"title", "ports"}:
         raise ValidationError("malformed service entry", code="invalid_service")
     title = raw.get("title", service_id)
-    if not isinstance(title, str) or not title.strip() or len(title) > MAX_TITLE_LEN:
+    if not isinstance(title, str) or not title.isprintable() or not title.strip():
+        raise ValidationError("invalid service title", code="invalid_service")
+    if len(title) > MAX_TITLE_LEN:
         raise ValidationError("invalid service title", code="invalid_service")
     specs = raw.get("ports")
     if not isinstance(specs, list) or not 0 < len(specs) <= MAX_PORT_ENTRIES:

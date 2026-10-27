@@ -73,7 +73,10 @@ def _interactive_apply(mgr: FirewallManager, args, options: RenderOptions) -> in
     mgr.apply(_find_profile(args.profile), options, timeout=args.timeout)
 
     def on_stdin(fd, _cond) -> bool:
-        line = os.read(fd, 256).decode(errors="replace").strip().lower()
+        data = os.read(fd, 256)
+        if not data:  # EOF (no terminal): never counts as a confirmation
+            return False
+        line = data.decode(errors="replace").strip().lower()
         if line in ("r", "n"):
             mgr.rollback()
         else:
