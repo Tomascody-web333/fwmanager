@@ -151,6 +151,27 @@ def short_time(when: str) -> str:
     return when
 
 
+def network_text(net) -> str:
+    """The current network in a few words (``net`` is a netinfo.CurrentNetwork or None)."""
+    if net is None:
+        return _("Not connected")
+    if not net.is_wifi:
+        return _("Wired: {name}").format(name=net.name)
+    if net.open:
+        return _("Wi-Fi: {name} (no password)").format(name=net.ssid or net.name)
+    return _("Wi-Fi: {name}").format(name=net.ssid or net.name)
+
+
+def open_wifi_warning(net, profile: str) -> str:
+    """Empty unless ``profile`` would let strangers in on a Wi-Fi anyone nearby can join."""
+    if net is None or not net.is_wifi or not net.open or profile == "publico":
+        return ""
+    return _(
+        "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could "
+        "also connect to this computer. Public is the safe choice here."
+    ).format(profile=profile_title(profile))
+
+
 def countdown_text(profile: str, seconds: int) -> str:
     return _("{profile} will be undone in {n} s unless you confirm.").format(
         profile=profile_title(profile), n=seconds

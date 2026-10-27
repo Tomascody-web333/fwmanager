@@ -89,6 +89,9 @@ msgstr "Aplicar"
 msgid "Apply anyway"
 msgstr "Aplicar mesmo assim"
 
+msgid "Applying…"
+msgstr "A aplicar…"
+
 msgid "BROKEN by this profile: {p}"
 msgstr "PARTIDO por este perfil: {p}"
 
@@ -394,6 +397,9 @@ msgstr "Não foram encontradas tentativas bloqueadas."
 
 msgid "No other firewall manager is in the way"
 msgstr "Nenhum outro gestor de firewall está a atrapalhar"
+
+msgid "No password: anyone nearby can join"
+msgstr "Sem palavra-passe: qualquer pessoa por perto pode entrar"
 
 msgid "No problems found in the rules."
 msgstr "Não foram encontrados problemas nas regras."
@@ -701,6 +707,9 @@ msgstr "O mais restritivo: cafés, aeroportos, hotéis."
 msgid "There is no change waiting for confirmation."
 msgstr "Não há nenhuma alteração à espera de confirmação."
 
+msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
+msgstr "Este Wi-Fi não tem palavra-passe, por isso qualquer pessoa por perto pode entrar nele. Com o perfil {profile}, essas pessoas também poderiam ligar-se a este computador. Aqui, o Público é a escolha segura."
+
 msgid "This account may use fwmanager"
 msgstr "Esta conta pode usar o fwmanager"
 
@@ -784,6 +793,9 @@ msgstr "As redes Wi-Fi para as quais não escolheu um perfil usam o perfil Públ
 
 msgid "Wi-Fi: {name}"
 msgstr "Wi-Fi: {name}"
+
+msgid "Wi-Fi: {name} (no password)"
+msgstr "Wi-Fi: {name} (sem palavra-passe)"
 
 msgid "Wired: {name}"
 msgstr "Por cabo: {name}"

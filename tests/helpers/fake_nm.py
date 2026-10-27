@@ -1,7 +1,8 @@
 """A minimal fake of org.freedesktop.NetworkManager for tests on a private bus.
 
-Usage: python fake_nm.py BUS_ADDRESS KIND NAME UUID [SSID]
+Usage: python fake_nm.py BUS_ADDRESS KIND NAME UUID [SSID [KEY_MGMT]]
 KIND is "802-11-wireless" or "802-3-ethernet", or "none" for no primary connection.
+KEY_MGMT is the Wi-Fi security ("wpa-psk", "sae", ...); without it the Wi-Fi is open.
 """
 
 import sys
@@ -25,6 +26,7 @@ XML = """
 def main() -> None:
     address, kind, name, uuid = sys.argv[1:5]
     ssid = sys.argv[5] if len(sys.argv) > 5 else ""
+    key_mgmt = sys.argv[6] if len(sys.argv) > 6 else ""
     conn = Gio.DBusConnection.new_for_address_sync(
         address,
         Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT
@@ -53,6 +55,8 @@ def main() -> None:
         body = {"connection": {"id": GLib.Variant("s", name)}}
         if kind == "802-11-wireless":
             body["802-11-wireless"] = {"ssid": GLib.Variant("ay", ssid.encode())}
+            if key_mgmt:
+                body["802-11-wireless-security"] = {"key-mgmt": GLib.Variant("s", key_mgmt)}
         inv.return_value(GLib.Variant("(a{sa{sv}})", (body,)))
 
     props = node.lookup_interface("org.freedesktop.DBus.Properties")

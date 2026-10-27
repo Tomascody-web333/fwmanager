@@ -200,6 +200,7 @@ opcional: `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
 - Uma rede é reconhecida pela sua ligação do NetworkManager (nome do Wi-Fi e id da ligação). Um
   ponto de acesso falso com o mesmo nome e a mesma palavra-passe é tratado como o verdadeiro, por
   isso mantenha serviços abertos só em redes protegidas por uma palavra-passe de confiança
-  (WPA2/WPA3).
+  (WPA2/WPA3). A janela avisa quando escolhe Casa, Trabalho ou Personalizado para um Wi-Fi sem
+  palavra-passe.
 - A unidade systemd é menos restritiva do que o mínimo (`CAP_NET_RAW`, `AF_INET`, escrita em
   `/etc/ufw`) porque o ufw e o iptables o exigem.

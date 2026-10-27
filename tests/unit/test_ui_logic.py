@@ -320,3 +320,19 @@ def test_a_settings_file_that_is_not_utf8_gives_the_defaults(tmp_path):
     p = tmp_path / "settings.toml"
     p.write_bytes(b"\xff\xfe\x00 lang = 'pt'")
     assert us.load(p) == us.UserSettings(None, True)
+
+
+def test_network_text_and_open_wifi_warning():
+    from fwmanager.ui.netinfo import CurrentNetwork
+
+    locked = CurrentNetwork("Casa", "Casa WiFi", "u", "802-11-wireless")
+    open_ = CurrentNetwork("Café", "Café", "u", "802-11-wireless", open=True)
+    wired = CurrentNetwork("Cable", "", "u", "802-3-ethernet")
+    assert state.network_text(None) == "Not connected"
+    assert state.network_text(locked) == "Wi-Fi: Casa WiFi"
+    assert state.network_text(open_) == "Wi-Fi: Café (no password)"
+    assert state.network_text(wired) == "Wired: Cable"
+    assert "anyone nearby can join it" in state.open_wifi_warning(open_, "casa")
+    assert "With Work" in state.open_wifi_warning(open_, "trabalho")
+    for net, profile in ((open_, "publico"), (locked, "casa"), (wired, "casa"), (None, "casa")):
+        assert state.open_wifi_warning(net, profile) == ""

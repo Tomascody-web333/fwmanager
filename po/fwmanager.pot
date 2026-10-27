@@ -89,6 +89,9 @@ msgstr ""
 msgid "Apply anyway"
 msgstr ""
 
+msgid "Applying…"
+msgstr ""
+
 msgid "BROKEN by this profile: {p}"
 msgstr ""
 
@@ -393,6 +396,9 @@ msgid "No blocked attempts found."
 msgstr ""
 
 msgid "No other firewall manager is in the way"
+msgstr ""
+
+msgid "No password: anyone nearby can join"
 msgstr ""
 
 msgid "No problems found in the rules."
@@ -701,6 +707,9 @@ msgstr ""
 msgid "There is no change waiting for confirmation."
 msgstr ""
 
+msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
+msgstr ""
+
 msgid "This account may use fwmanager"
 msgstr ""
 
@@ -783,6 +792,9 @@ msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. 
 msgstr ""
 
 msgid "Wi-Fi: {name}"
+msgstr ""
+
+msgid "Wi-Fi: {name} (no password)"
 msgstr ""
 
 msgid "Wired: {name}"

@@ -190,6 +190,7 @@ install/uninstall test changes the machine, so it is opt-in:
   the polkit prompt and the desktop look (see [docs/VALIDATION.md](docs/VALIDATION.md)).
 - A network is recognised by its NetworkManager connection (Wi-Fi name and connection id). A
   fake access point with the same name and password is treated as the real one, so keep
-  services open only on networks protected by a password you trust (WPA2/WPA3).
+  services open only on networks protected by a password you trust (WPA2/WPA3). The window
+  warns when you pick Home, Work or Custom for a Wi-Fi without a password.
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.

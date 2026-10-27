@@ -89,6 +89,9 @@ msgstr "Apply"
 msgid "Apply anyway"
 msgstr "Apply anyway"
 
+msgid "Applying…"
+msgstr "Applying…"
+
 msgid "BROKEN by this profile: {p}"
 msgstr "BROKEN by this profile: {p}"
 
@@ -394,6 +397,9 @@ msgstr "No blocked attempts found."
 
 msgid "No other firewall manager is in the way"
 msgstr "No other firewall manager is in the way"
+
+msgid "No password: anyone nearby can join"
+msgstr "No password: anyone nearby can join"
 
 msgid "No problems found in the rules."
 msgstr "No problems found in the rules."
@@ -701,6 +707,9 @@ msgstr "The strictest: cafés, airports, hotels."
 msgid "There is no change waiting for confirmation."
 msgstr "There is no change waiting for confirmation."
 
+msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
+msgstr "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
+
 msgid "This account may use fwmanager"
 msgstr "This account may use fwmanager"
 
@@ -784,6 +793,9 @@ msgstr "Wi-Fi networks you have not chosen a profile for use the Public profile.
 
 msgid "Wi-Fi: {name}"
 msgstr "Wi-Fi: {name}"
+
+msgid "Wi-Fi: {name} (no password)"
+msgstr "Wi-Fi: {name} (no password)"
 
 msgid "Wired: {name}"
 msgstr "Wired: {name}"

@@ -30,16 +30,25 @@ def fake_nm(private_bus):
 
 
 def test_wifi_connection(fake_nm, private_bus):
-    fake_nm("802-11-wireless", "Casa WiFi (auto)", UUID, "Casa ☕ WiFi")
+    fake_nm("802-11-wireless", "Casa WiFi (auto)", UUID, "Casa ☕ WiFi", "wpa-psk")
     got = current_network(private_bus)
     assert got == CurrentNetwork("Casa WiFi (auto)", "Casa ☕ WiFi", UUID, "802-11-wireless")
-    assert got.is_wifi
+    assert got.is_wifi and not got.open
+
+
+@pytest.mark.parametrize(
+    "key_mgmt,is_open",
+    [("", True), ("none", True), ("owe", True), ("sae", False), ("wpa-eap", False)],
+)
+def test_wifi_anyone_can_join_is_reported_as_open(fake_nm, private_bus, key_mgmt, is_open):
+    fake_nm("802-11-wireless", "Café", UUID, "Café", key_mgmt)
+    assert current_network(private_bus).open is is_open
 
 
 def test_ethernet_has_no_ssid(fake_nm, private_bus):
     fake_nm("802-3-ethernet", "Wired connection 1", UUID)
     got = current_network(private_bus)
-    assert got.ssid == "" and got.uuid == UUID and not got.is_wifi
+    assert got.ssid == "" and got.uuid == UUID and not got.is_wifi and not got.open
 
 
 def test_offline(fake_nm, private_bus):

@@ -9,6 +9,10 @@ from gi.repository import Gio, GLib
 NM = "org.freedesktop.NetworkManager"
 PROPS = "org.freedesktop.DBus.Properties"
 WIFI = "802-11-wireless"
+WIFI_SECURITY = "802-11-wireless-security"
+# Only these need a password (or an account) to join. "none" is WEP, broken for decades, and
+# "owe" (Enhanced Open) is encrypted but lets anyone in.
+PASSWORD_KEY_MGMT = ("wpa-psk", "sae", "wpa-eap", "wpa-eap-suite-b-192")
 
 
 @dataclass(frozen=True)
@@ -17,6 +21,7 @@ class CurrentNetwork:
     ssid: str  # empty unless Wi-Fi
     uuid: str
     kind: str  # e.g. "802-11-wireless", "802-3-ethernet"
+    open: bool = False  # a Wi-Fi anyone nearby can join (no password)
 
     @property
     def is_wifi(self) -> bool:
@@ -54,7 +59,7 @@ def current_network(bus_address: str | None = None) -> CurrentNetwork | None:
         name = str(_get(conn, active, ac, "Id"))
         uuid = str(_get(conn, active, ac, "Uuid"))
         kind = str(_get(conn, active, ac, "Type"))
-        ssid = ""
+        ssid, is_open = "", False
         if kind == WIFI:
             settings_path = _get(conn, active, ac, "Connection")
             reply = conn.call_sync(
@@ -62,8 +67,11 @@ def current_network(bus_address: str | None = None) -> CurrentNetwork | None:
                 "GetSettings", None, GLib.VariantType("(a{sa{sv}})"),
                 Gio.DBusCallFlags.NONE, 2000, None,
             )  # fmt: skip
-            raw = reply.unpack()[0].get(WIFI, {}).get("ssid", b"")
+            settings = reply.unpack()[0]
+            raw = settings.get(WIFI, {}).get("ssid", b"")
             ssid = bytes(raw).decode("utf-8", errors="replace")
+            key_mgmt = settings.get(WIFI_SECURITY, {}).get("key-mgmt", "")
+            is_open = key_mgmt not in PASSWORD_KEY_MGMT
     except GLib.Error:
         return None
-    return CurrentNetwork(name, ssid, uuid, kind)
+    return CurrentNetwork(name, ssid, uuid, kind, is_open)

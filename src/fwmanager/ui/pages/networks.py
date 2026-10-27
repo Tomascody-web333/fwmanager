@@ -10,7 +10,15 @@ from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.i18n import _  # noqa: E402
 from fwmanager.ui import state  # noqa: E402
-from fwmanager.ui.common import button, clear, label_for_screen_readers, toast, toast_error  # noqa: E402
+from fwmanager.ui.common import (  # noqa: E402
+    button,
+    clear,
+    label_for_screen_readers,
+    show_warning,
+    toast,
+    toast_error,
+    warning_row,
+)
 
 
 class NetworksPage(Adw.PreferencesPage):
@@ -34,7 +42,10 @@ class NetworksPage(Adw.PreferencesPage):
         self.remember_btn = button(_("Remember"), suggested=True)
         self.remember_btn.connect("clicked", self._remember_current)
         self.current_row.add_suffix(self.remember_btn)
+        self.current_row.connect("notify::selected", lambda *_: self._update_open_warning())
         self.current_group.add(self.current_row)
+        self.open_warning = warning_row()
+        self.current_group.add(self.open_warning)
         self.add(self.current_group)
 
         self.saved_group = Adw.PreferencesGroup(
@@ -102,7 +113,15 @@ class NetworksPage(Adw.PreferencesPage):
         self.current_group.set_visible(net is not None)
         if net is not None:
             self.current_row.set_title(net.ssid or net.name)
+            self.current_row.set_subtitle(
+                _("No password: anyone nearby can join") if net.open else ""
+            )
             self._preselect()
+        self._update_open_warning()
+
+    def _update_open_warning(self) -> None:
+        profile = self._names[self.current_row.get_selected()]
+        show_warning(self.open_warning, state.open_wifi_warning(self._current, profile))
 
     def _preselect(self) -> None:
         """Show the profile already remembered for the current network, if any."""

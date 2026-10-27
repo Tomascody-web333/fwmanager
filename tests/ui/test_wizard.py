@@ -352,3 +352,34 @@ def test_problems_after_setup_use_the_normal_problem_screen(make):
     e.controller.refresh()
     pump(0.3)
     assert e.win.stack.get_visible_child_name() == "problem"
+
+
+def test_the_apply_button_says_it_is_working(make):
+    e = make(stage="profile")
+    goto_profile(e)
+    e.controller.applying = "casa"
+    e.wizard.on_snapshot(e.controller.snapshot)
+    assert e.wizard.apply_btn.get_label() == "Applying…"
+    assert not e.wizard.apply_btn.get_sensitive() and not e.wizard.test_btn.get_sensitive()
+    e.controller.applying = ""
+    e.wizard.on_snapshot(e.controller.snapshot)
+    assert e.wizard.apply_btn.get_label() == "Apply" and e.wizard.apply_btn.get_sensitive()
+
+
+def test_choosing_home_on_an_open_wifi_warns(make):
+    e = make(stage="profile")
+    goto_profile(e, CurrentNetwork("Café", "Café", "u-9", "802-11-wireless", open=True))
+    assert "Wi-Fi: Café (no password)" in texts(e.wizard)
+    assert not e.wizard.open_warning.get_visible()  # Public is preselected: fine
+    e.wizard._choice_rows["casa"].set_active(True)
+    assert e.wizard.open_warning.get_visible()
+    assert "With Home they could" in e.wizard.open_warning.get_title()
+    e.wizard._choice_rows["publico"].set_active(True)
+    assert not e.wizard.open_warning.get_visible()
+
+
+def test_no_warning_on_a_wifi_with_a_password(make):
+    e = make(stage="profile")
+    goto_profile(e, CurrentNetwork("Casa", "Casa WiFi", "u-7", "802-11-wireless"))
+    e.wizard._choice_rows["casa"].set_active(True)
+    assert not e.wizard.open_warning.get_visible()

@@ -14,8 +14,10 @@ from fwmanager.ui.common import (  # noqa: E402
     button,
     clear,
     label_for_screen_readers,
+    show_warning,
     toast,
     toast_error,
+    warning_row,
 )
 from fwmanager.ui.dialogs import PolicyTestDialog  # noqa: E402
 from fwmanager.ui.pages.settings import LANGUAGES  # noqa: E402
@@ -286,9 +288,12 @@ class SetupWizard(Adw.Bin):
             )
             row.add_prefix(check)
             row.set_activatable_widget(check)
+            check.connect("toggled", lambda *_: self._update_open_warning())
             self._choice_rows[name] = check
             self.network_group.add(row)
         self._choice_rows["publico"].set_active(True)  # the safe default
+        self.open_warning = warning_row()
+        self.network_group.add(self.open_warning)
         self.remember = Adw.SwitchRow(
             title=_("Remember this choice for this network"), active=True, visible=False
         )
@@ -327,22 +332,26 @@ class SetupWizard(Adw.Bin):
 
     def _network_loaded(self, net, _error) -> None:
         self._network = net
-        if net is None:
-            self.network_row.set_subtitle(_("Not connected"))
-        elif net.is_wifi:
-            self.network_row.set_subtitle(_("Wi-Fi: {name}").format(name=net.ssid or net.name))
-        else:
-            self.network_row.set_subtitle(_("Wired: {name}").format(name=net.name))
+        self.network_row.set_subtitle(state.network_text(net))
         self.remember.set_visible(net is not None)
+        self._update_open_warning()
+
+    def _update_open_warning(self) -> None:
+        if not hasattr(self, "open_warning"):  # the choices are built before the warning row
+            return
+        chosen = [n for n, c in self._choice_rows.items() if c.get_active()]
+        if chosen:  # while a radio group switches, for a moment nothing is active
+            show_warning(self.open_warning, state.open_wifi_warning(self._network, chosen[0]))
 
     def on_snapshot(self, snap) -> None:
         """Keep the countdown honest while a choice waits for confirmation."""
         st = snap.status or {}
         pending = st.get("pending_profile", "")
         self.confirm_group.set_visible(bool(pending) and self.stage == "profile")
-        busy = bool(pending)
+        busy = bool(pending or self._c.applying)
         for w in (self.apply_btn, self.test_btn):
             w.set_sensitive(not busy)
+        self.apply_btn.set_label(_("Applying…") if self._c.applying else _("Apply"))
         if pending:
             self.confirm_row.set_subtitle(state.countdown_text(pending, st.get("seconds_left", 0)))
         if self.stage == "requirements" and not self.helper_running:

@@ -96,6 +96,19 @@ def button(label: str, *, suggested: bool = False, flat: bool = False, icon: str
     return btn
 
 
+def warning_row() -> Adw.ActionRow:
+    """A row for a warning sentence, hidden until it has something to say."""
+    row = Adw.ActionRow(title_lines=0, visible=False)
+    row.add_prefix(Gtk.Image.new_from_icon_name("dialog-warning-symbolic"))
+    row.add_css_class("warning")
+    return row
+
+
+def show_warning(row: Adw.ActionRow, text: str) -> None:
+    row.set_title(text)
+    row.set_visible(bool(text))
+
+
 def clear(group: Adw.PreferencesGroup, rows: list) -> None:
     for row in rows:
         group.remove(row)
