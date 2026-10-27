@@ -189,5 +189,10 @@ opcional: `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
 - Ainda não foram exercitados numa máquina real: o endurecimento do systemd, o hook do
   NetworkManager, o DHCP, o pedido do polkit e o aspeto no ambiente de trabalho (ver
   [docs/VALIDATION.pt.md](docs/VALIDATION.pt.md)).
+- Uma rede é reconhecida pela sua ligação do NetworkManager (nome do Wi-Fi e id da ligação). Um
+  ponto de acesso falso com o mesmo nome e a mesma palavra-passe é tratado como o verdadeiro, por
+  isso mantenha serviços abertos só em redes protegidas por uma palavra-passe de confiança
+  (WPA2/WPA3).
+- Uma rede sem perfil atribuído recebe `publico`, incluindo uma ligação por cabo.
 - A unidade systemd é menos restritiva do que o mínimo (`CAP_NET_RAW`, `AF_INET`, escrita em
   `/etc/ufw`) porque o ufw e o iptables o exigem.

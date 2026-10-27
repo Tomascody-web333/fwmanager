@@ -21,6 +21,20 @@
   auxiliar não aceita argumentos livres: adiciona ao grupo `fwmanager` a conta que executou o
   `pkexec` (`PKEXEC_UID`, nunca um valor da linha de comandos) e arranca o serviço. A
   autorização é `auth_admin_keep`: uma palavra-passe, sem credencial guardada.
+- **Os programas que correm como root nunca importam da pasta atual.** Os lançadores instalados
+  arrancam o Python em modo isolado (`-I`), por isso um ficheiro como `json.py` deixado em `/tmp`
+  não é executado quando um administrador escreve `sudo fwmanager-cli` nessa pasta.
+- **O texto vindo de fora aparece tal como foi escrito.** Os nomes de Wi-Fi vêm de qualquer
+  ponto de acesso ao alcance; a janela nunca os interpreta (nem a qualquer outro texto) como
+  markup.
+- **A lista de “tentativas bloqueadas recentes” vem do kernel.** É lida do diário do próprio
+  kernel, onde os utilizadores não podem escrever; o `/var/log/ufw.log`, onde qualquer pessoa
+  pode acrescentar uma linha parecida com `logger`, é só uma alternativa, e só se mostram linhas
+  marcadas como vindas do kernel.
+- **Os ficheiros de estado são privados.** `/var/lib/fwmanager` só pode ser lido pelo root (tem a
+  lista das redes que usa).
+- **Limites de tamanho.** Um perfil pode precisar no máximo de 40 regras do ufw, para que
+  aplicá-lo demore segundos e não minutos em que o serviço não responderia a ninguém.
 - **Nada é enviado para lado nenhum.** Sem acesso à rede, contas ou telemetria; os registos
   nunca contêm o conteúdo das regras.
 - **Outras firewalls nunca são desativadas automaticamente.** O firewalld bloqueia o fwmanager

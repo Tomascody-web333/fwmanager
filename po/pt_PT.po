@@ -629,6 +629,9 @@ msgstr "Testar {name}"
 msgid "Testing…"
 msgstr "A testar…"
 
+msgid "That would make the profile too large to apply quickly. Use fewer networks or fewer services."
+msgstr "Isso tornaria o perfil demasiado grande para ser aplicado depressa. Use menos redes ou menos serviços."
+
 msgid "The background service is running"
 msgstr "O serviço em segundo plano está a funcionar"
 
@@ -826,6 +829,9 @@ msgstr "O fwmanager não deve correr como root: essa parte é feita pelo serviç
 
 msgid "fwmanager needs GTK 4 and libadwaita 1.5 or newer, and they were not found. On Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
 msgstr "O fwmanager precisa do GTK 4 e do libadwaita 1.5 ou superior, e não foram encontrados. No Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+
+msgid "fwmanager needs a graphical session to open its window. Over SSH or in a text console, use fwmanager-cli."
+msgstr "O fwmanager precisa de uma sessão gráfica para abrir a janela. Por SSH ou numa consola de texto, use o fwmanager-cli."
 
 msgid "fwmanager needs its background service. Start it with this command:"
 msgstr "O fwmanager precisa do seu serviço em segundo plano. Inicie-o com este comando:"

@@ -180,5 +180,9 @@ install/uninstall test changes the machine, so it is opt-in:
   host with IPv6 enabled.
 - Not yet exercised on a real machine: the systemd hardening, the NetworkManager hook, DHCP,
   the polkit prompt and the desktop look (see [docs/VALIDATION.md](docs/VALIDATION.md)).
+- A network is recognised by its NetworkManager connection (Wi-Fi name and connection id). A
+  fake access point with the same name and password is treated as the real one, so keep
+  services open only on networks protected by a password you trust (WPA2/WPA3).
+- A network with no profile assigned gets `publico`, including a wired connection.
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.
