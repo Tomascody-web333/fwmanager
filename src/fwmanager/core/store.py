@@ -95,8 +95,10 @@ class Store:
         data = {"version": VERSION, **data}
         tmp = self._dir / f".{name}.tmp"
         try:
-            self._dir.mkdir(parents=True, exist_ok=True)
-            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o644)
+            # Only root needs these; the list of known Wi-Fi networks is nobody else's business.
+            self._dir.mkdir(mode=0o700, parents=True, exist_ok=True)
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+            os.fchmod(fd, 0o600)  # a leftover temp file keeps its old mode otherwise
             with os.fdopen(fd, "w", encoding="utf-8") as fh:
                 json.dump(data, fh, indent=2)
                 fh.flush()

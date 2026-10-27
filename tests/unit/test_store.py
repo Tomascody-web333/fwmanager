@@ -71,9 +71,19 @@ def test_write_failure_is_a_store_error(tmp_path):
         Store(f / "sub").save_state("casa")  # parent is a file
 
 
-def test_state_file_permissions(store):
+def test_state_files_are_readable_by_root_only(store):
+    (store._dir).mkdir()
+    (store._dir / ".networks.json.tmp").write_text("left over")
+    os.chmod(store._dir / ".networks.json.tmp", 0o644)
     store.save_state("casa")
-    assert (os.stat(store._dir / "state.json").st_mode & 0o777) == 0o644
+    store.save_networks([Network("Casa WiFi", UUID, "casa")])
+    for name in ("state.json", "networks.json"):
+        assert (os.stat(store._dir / name).st_mode & 0o777) == 0o600, name
+
+
+def test_a_new_state_directory_is_private(tmp_path):
+    Store(tmp_path / "new").save_state("casa")
+    assert (os.stat(tmp_path / "new").st_mode & 0o777) == 0o700
 
 
 def test_networks_roundtrip(store):
