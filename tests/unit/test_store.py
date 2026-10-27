@@ -197,3 +197,49 @@ def test_corrupt_options(store):
     (store._dir / "options.json").write_text('{"version": 1, "log_level": "loud"}')
     with pytest.raises(StoreCorrupt):
         store.load_options()
+
+
+# -- plain-language rules -------------------------------------------------------
+
+
+def test_rules_roundtrip_keeps_lists(store):
+    from fwmanager.core.rulebook import Rule
+
+    rules = [
+        Rule("r1", "allow_only_in", {"service": "web", "profiles": ("casa", "trabalho")}),
+        Rule("r2", "hide", {"profiles": ("publico",)}),
+    ]
+    store.save_rules(rules)
+    loaded = store.load_rules()
+    assert [r.id for r in loaded] == ["r1", "r2"]
+    assert loaded[0].params == {"service": "web", "profiles": ["casa", "trabalho"]}
+    assert (store._dir / "rules.json").exists()
+
+
+def test_rules_missing_is_empty(store):
+    assert store.load_rules() == []
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"version": 1, "rules": "x"},
+        {"version": 1, "rules": [{"id": "r1"}]},
+        {"version": 1, "rules": [{"id": "R 1", "template": "hide", "params": {}}]},
+        {"version": 1, "rules": [{"id": "r1", "template": "hide", "params": "x"}]},
+        {"version": 1, "rules": [{"id": "r1", "template": "hide", "params": {}}] * 65},
+    ],
+)
+def test_corrupt_rules(store, payload):
+    store._dir.mkdir()
+    (store._dir / "rules.json").write_text(json.dumps(payload))
+    with pytest.raises(StoreCorrupt):
+        store.load_rules()
+
+
+def test_too_many_rules_refused(store):
+    from fwmanager.core.rulebook import MAX_RULES, Rule
+
+    many = [Rule(f"r{i}", "hide", {"profiles": ["casa"]}) for i in range(MAX_RULES + 1)]
+    with pytest.raises(ValidationError):
+        store.save_rules(many)

@@ -12,7 +12,7 @@ from collections.abc import Callable
 
 from gi.repository import Gio, GLib
 
-from fwmanager.core import blocklog
+from fwmanager.core import blocklog, rulebook
 from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
@@ -43,7 +43,9 @@ class ControlService:
         self._timeout = confirm_timeout
         self._mgr = manager
         self._defaults = dict(profiles)
-        self._profiles = dict(profiles)
+        self._base = dict(profiles)  # built-in profiles + the user's hand edits
+        self._rules: list[rulebook.Rule] = []
+        self._profiles = dict(profiles)  # base + rules: what is really applied
         self._options = Options()
         self._events: deque[tuple[int, str, str]] = deque(maxlen=200)
         self._authorize = authorize
@@ -57,13 +59,26 @@ class ControlService:
         if self._store is None:
             return
         try:
-            self._profiles.update(self._store.load_profiles())
+            self._base.update(self._store.load_profiles())
         except FwError:
             log.exception("saved profiles are damaged; using the built-in ones")
+        try:
+            kept, dropped = rulebook.usable_rules(
+                self._store.load_rules(), self._mgr.catalog, frozenset(self._defaults)
+            )
+            self._rules = kept
+            if dropped:
+                log.warning("ignored %d saved rule(s) that no longer validate", dropped)
+        except FwError:
+            log.exception("saved rules are damaged; ignoring them")
+        self._recompute()
         try:
             self._options = self._store.load_options()
         except FwError:
             log.exception("saved options are damaged; using the defaults")
+
+    def _recompute(self) -> None:
+        self._profiles = rulebook.compile_profiles(self._base, self._rules)
 
     def _record(self, kind: str, detail: str = "") -> None:
         self._events.append((int(time.time()), kind, detail))
@@ -173,7 +188,8 @@ class ControlService:
             return self._set_profile(*args)
         if method == "ResetProfile":
             name = self._get_profile(args[0]).name
-            self._profiles[name] = self._defaults[name]
+            self._base[name] = self._defaults[name]
+            self._recompute()
             self._save_profiles()
             return None
         if method == "ListServices":
@@ -205,6 +221,39 @@ class ControlService:
                 "(a(ssssss))",
                 ([(b.when, b.iface, b.src, b.dst, b.proto, b.dport) for b in items],),
             )
+        if method == "ListRules":
+            return GLib.Variant(
+                "(a(ssa{sv}))",
+                ([(r.id, r.template, self._params_variant(r.params)) for r in self._rules],),
+            )
+        if method == "PreviewRule":
+            rule = self._new_rule(*args, assign_id=False)
+            after = rulebook.compile_profiles(self._base, [*self._rules, rule])
+            return GLib.Variant(
+                "(a(sasassssas))",
+                ([self._change_tuple(c) for c in rulebook.diff_profiles(self._profiles, after)],),
+            )
+        if method == "AddRule":
+            rule = self._new_rule(*args)
+            if len(self._rules) >= rulebook.MAX_RULES:
+                raise ValidationError("too many rules", code="too_many_rules")
+            self._require_store().save_rules([*self._rules, rule])  # persisted before it counts
+            self._rules.append(rule)
+            self._recompute()
+            self._record("rule_added", rule.id)
+            return GLib.Variant("(s)", (rule.id,))
+        if method == "RemoveRule":
+            rid = args[0]
+            if not rulebook.RULE_ID_RE.fullmatch(rid or "") or all(
+                r.id != rid for r in self._rules
+            ):
+                raise ValidationError("unknown rule", code="unknown_rule")
+            kept = [r for r in self._rules if r.id != rid]
+            self._require_store().save_rules(kept)
+            self._rules = kept
+            self._recompute()
+            self._record("rule_removed", rid)
+            return None
         if method == "ListNetworks":
             nets = self._load_networks()
             return GLib.Variant("(a(sss))", ([(n.ssid, n.uuid, n.profile) for n in nets],))
@@ -231,6 +280,34 @@ class ControlService:
             return GLib.Variant("(s)", (find_profile(self._load_networks(), ssid, uuid) or "",))
         raise ValidationError("unknown method", code="invalid_input")
 
+    def _new_rule(self, template, params, assign_id: bool = True) -> rulebook.Rule:
+        clean = rulebook.validate_params(
+            template, params, self._mgr.catalog, frozenset(self._defaults)
+        )
+        rid = rulebook.next_rule_id(self._rules) if assign_id else "preview"
+        return rulebook.Rule(rid, template, clean)
+
+    @staticmethod
+    def _params_variant(params) -> dict:
+        out = {}
+        for key, value in params.items():
+            if isinstance(value, str):
+                out[key] = GLib.Variant("s", value)
+            else:
+                out[key] = GLib.Variant("as", list(value))
+        return out
+
+    @staticmethod
+    def _change_tuple(c: rulebook.ProfileChange) -> tuple:
+        def tri(v):
+            return "" if v is None else ("on" if v else "off")
+
+        src = c.source
+        return (
+            c.name, list(c.opened), list(c.closed), tri(c.ping), tri(c.mdns),
+            src.kind if src else "", list(src.cidrs) if src else [],
+        )  # fmt: skip
+
     def _get_profile(self, name: str) -> Profile:
         name = validate_name(name, "profile")
         profile = self._profiles.get(name)
@@ -246,11 +323,12 @@ class ControlService:
             "mdns": GLib.Variant("b", p.mdns),
             "source_kind": GLib.Variant("s", p.source.kind),
             "cidrs": GLib.Variant("as", list(p.source.cidrs)),
-            "customized": GLib.Variant("b", p != self._defaults[p.name]),
+            "customized": GLib.Variant("b", self._base[p.name] != self._defaults[p.name]),
+            "affected_by_rules": GLib.Variant("b", self._base[p.name] != p),
         }
 
     def _set_profile(self, name, services, ping, mdns, kind, cidrs) -> None:
-        current = self._get_profile(name)  # only the built-in profiles can be edited
+        current = self._base[self._get_profile(name).name]  # only built-in profiles are editable
         catalog = self._mgr.catalog
         if len(services) > len(catalog):
             raise ValidationError("too many services", code="invalid_service")
@@ -261,16 +339,17 @@ class ControlService:
         new = Profile(
             current.name, tuple(services), bool(ping), bool(mdns), Source(kind, tuple(cidrs))
         )
-        self._profiles[new.name] = new
+        self._base[new.name] = new
         try:
             self._save_profiles()
         except FwError:
-            self._profiles[new.name] = current  # keep memory and disk in step
+            self._base[new.name] = current  # keep memory and disk in step
             raise
+        self._recompute()
         self._record("profile_edited", new.name)
 
     def _save_profiles(self) -> None:
-        custom = {n: p for n, p in self._profiles.items() if p != self._defaults[n]}
+        custom = {n: p for n, p in self._base.items() if p != self._defaults[n]}
         self._require_store().save_profiles(custom)
 
     def _require_store(self) -> Store:

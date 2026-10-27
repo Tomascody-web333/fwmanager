@@ -86,7 +86,11 @@ def main(argv: list[str] | None = None) -> int:
         startup_options = Options()
     try:
         outcome = startup_apply(
-            manager, store, effective_profiles(store, DEFAULT_PROFILES), detect, startup_options
+            manager,
+            store,
+            effective_profiles(store, DEFAULT_PROFILES, backend.catalog),
+            detect,
+            startup_options,
         )
     except Exception:  # the daemon must still come up so the UI can explain the problem
         log.exception("startup apply failed")

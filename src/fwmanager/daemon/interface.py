@@ -58,6 +58,22 @@ INTROSPECTION_XML = f"""
       <arg type="u" name="limit" direction="in"/>
       <arg type="a(ssssss)" name="packets" direction="out"/>
     </method>
+    <method name="ListRules">
+      <arg type="a(ssa{{sv}})" name="rules" direction="out"/>
+    </method>
+    <method name="PreviewRule">
+      <arg type="s" name="template" direction="in"/>
+      <arg type="a{{sv}}" name="params" direction="in"/>
+      <arg type="a(sasassssas)" name="changes" direction="out"/>
+    </method>
+    <method name="AddRule">
+      <arg type="s" name="template" direction="in"/>
+      <arg type="a{{sv}}" name="params" direction="in"/>
+      <arg type="s" name="id" direction="out"/>
+    </method>
+    <method name="RemoveRule">
+      <arg type="s" name="id" direction="in"/>
+    </method>
     <method name="ListNetworks">
       <arg type="a(sss)" name="networks" direction="out"/>
     </method>

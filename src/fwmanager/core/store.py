@@ -14,11 +14,13 @@ from pathlib import Path
 
 from fwmanager.core.backend import Options
 from fwmanager.core.profiles import Profile, Source
+from fwmanager.core.rulebook import MAX_RULES, Rule
 from fwmanager.core.validate import validate_name
 from fwmanager.errors import StoreCorrupt, StoreError, ValidationError
 
 PROFILES_FILE = "profiles.json"
 OPTIONS_FILE = "options.json"
+RULES_FILE = "rules.json"
 STATE_FILE = "state.json"
 NETWORKS_FILE = "networks.json"
 VERSION = 1
@@ -65,6 +67,10 @@ def find_profile(networks: list[Network], ssid: str, uuid: str) -> str | None:
             if n.ssid == ssid and not (n.uuid and uuid):
                 return n.profile
     return None
+
+
+def _jsonable(params) -> dict:
+    return {k: list(v) if isinstance(v, (tuple, list)) else v for k, v in params.items()}
 
 
 class Store:
@@ -179,6 +185,33 @@ class Store:
                     }
                     for n, p in profiles.items()
                 }
+            },
+        )
+
+    # -- plain-language rules ----------------------------------------------------------
+
+    def load_rules(self) -> list[Rule]:
+        data = self._read(RULES_FILE)
+        if data is None:
+            return []
+        items = data.get("rules")
+        if not isinstance(items, list) or len(items) > MAX_RULES:
+            raise StoreCorrupt("rules.json is malformed")
+        try:
+            return [Rule(i["id"], i["template"], dict(i["params"])) for i in items]
+        except (ValidationError, KeyError, TypeError, ValueError) as exc:
+            raise StoreCorrupt("rules.json holds an invalid rule") from exc
+
+    def save_rules(self, rules: list[Rule]) -> None:
+        if len(rules) > MAX_RULES:
+            raise ValidationError("too many rules", code="too_many_rules")
+        self._write(
+            RULES_FILE,
+            {
+                "rules": [
+                    {"id": r.id, "template": r.template, "params": _jsonable(r.params)}
+                    for r in rules
+                ]
             },
         )
 

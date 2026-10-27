@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
+from fwmanager.core import rulebook
 from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import FirewallManager
@@ -25,13 +26,23 @@ FAILED = "apply_failed"
 UFW_MISSING = "ufw_missing"
 
 
-def effective_profiles(store: Store, defaults: dict[str, Profile]) -> dict[str, Profile]:
-    """Built-in profiles overlaid with the user's edits; damaged edits are ignored."""
+def effective_profiles(
+    store: Store, defaults: dict[str, Profile], catalog: dict | None = None
+) -> dict[str, Profile]:
+    """Built-in profiles + the user's edits + the plain-language rules; damaged parts ignored."""
+    base = dict(defaults)
     try:
-        return {**defaults, **store.load_profiles()}
+        base.update(store.load_profiles())
     except FwError:
         log.exception("saved profiles are damaged; using the built-in ones")
-        return dict(defaults)
+    if catalog is None:
+        return base
+    try:
+        rules, _dropped = rulebook.usable_rules(store.load_rules(), catalog, frozenset(defaults))
+    except FwError:
+        log.exception("saved rules are damaged; ignoring them")
+        return base
+    return rulebook.compile_profiles(base, rules)
 
 
 def startup_apply(

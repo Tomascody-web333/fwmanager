@@ -106,6 +106,28 @@ class Client:
     def get_recent_blocked(self, limit: int = 50) -> list[tuple[str, ...]]:
         return self._call("GetRecentBlocked", GLib.Variant("(u)", (limit,)), "(a(ssssss))")[0]
 
+    @staticmethod
+    def _params(params: dict) -> dict:
+        return {
+            k: GLib.Variant("s", v) if isinstance(v, str) else GLib.Variant("as", list(v))
+            for k, v in params.items()
+        }
+
+    def list_rules(self) -> list[tuple[str, str, dict]]:
+        return self._call("ListRules", reply="(a(ssa{sv}))")[0]
+
+    def preview_rule(self, template: str, params: dict) -> list[tuple]:
+        """Per profile that would change: (name, opened, closed, ping, mdns, source, cidrs)."""
+        args = GLib.Variant("(sa{sv})", (template, self._params(params)))
+        return self._call("PreviewRule", args, "(a(sasassssas))")[0]
+
+    def add_rule(self, template: str, params: dict) -> str:
+        args = GLib.Variant("(sa{sv})", (template, self._params(params)))
+        return self._call("AddRule", args, "(s)")[0]
+
+    def remove_rule(self, rule_id: str) -> None:
+        self._call("RemoveRule", GLib.Variant("(s)", (rule_id,)))
+
     def list_networks(self) -> list[tuple[str, str, str]]:
         return self._call("ListNetworks", reply="(a(sss))")[0]
 
