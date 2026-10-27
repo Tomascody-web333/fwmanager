@@ -44,6 +44,8 @@ NetworkManager dispatcher (root)  ─┘            only fixed commands
   If you do not confirm, the previous configuration is restored byte for byte.
 - **Per-network profiles**: the NetworkManager dispatcher applies the profile mapped to the
   network that just connected, then checks the gateway is still reachable; if not, it reverts.
+  A Wi-Fi or mobile network with no profile gets `publico`; a cable with no profile keeps the
+  current one, so plugging in never locks out an SSH session.
 - **The daemon never accepts rule text.** Clients can only call fixed commands (apply a
   profile by name, confirm, roll back, read state); every argument is validated, and the
   only thing run is `ufw` with an argument list (no shell). Callers must be in the
@@ -183,6 +185,5 @@ install/uninstall test changes the machine, so it is opt-in:
 - A network is recognised by its NetworkManager connection (Wi-Fi name and connection id). A
   fake access point with the same name and password is treated as the real one, so keep
   services open only on networks protected by a password you trust (WPA2/WPA3).
-- A network with no profile assigned gets `publico`, including a wired connection.
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.

@@ -39,7 +39,10 @@ class NetworksPage(Adw.PreferencesPage):
 
         self.saved_group = Adw.PreferencesGroup(
             title=_("Remembered networks"),
-            description=_("Networks you have not chosen a profile for use the Public profile."),
+            description=_(
+                "Wi-Fi networks you have not chosen a profile for use the Public profile. "
+                "A cable keeps the current profile."
+            ),
         )
         self.add(self.saved_group)
 

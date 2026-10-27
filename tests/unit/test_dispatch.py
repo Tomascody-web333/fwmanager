@@ -45,9 +45,9 @@ def test_unusable_gateways_dropped(gw):
 # -- nmcli ---
 
 
-def fake_run(stdout="", rc=0, exc=None):
+def fake_run(stdout="", rc=0, exc=None, field="802-11-wireless.ssid"):
     def run(argv, **kw):
-        assert argv[-2:] == ["uuid", UUID] and "802-11-wireless.ssid" in argv
+        assert argv[-2:] == ["uuid", UUID] and field in argv
         if exc:
             raise exc
         return subprocess.CompletedProcess(argv, rc, stdout, "")
@@ -68,6 +68,16 @@ def test_lookup_ssid(with_nmcli):
     assert d.lookup_ssid(UUID, fake_run("", exc=subprocess.TimeoutExpired("x", 5))) == ""
     assert d.lookup_ssid(UUID, fake_run("x" * 40)) == ""  # not a valid SSID
     assert d.lookup_ssid("", fake_run("Casa")) == ""
+
+
+def test_lookup_kind(with_nmcli):
+    def kind(out, **kw):
+        return d.lookup_kind(UUID, fake_run(out, field="connection.type", **kw))
+
+    assert kind("802-3-ethernet\n") == "802-3-ethernet"
+    assert kind("802-11-wireless\n") == "802-11-wireless"
+    assert kind("", rc=10) == "" and kind("", exc=OSError()) == ""
+    assert kind("eth; reboot\n") == "" and kind("x" * 40) == ""
 
 
 # -- ICMP packet ---
@@ -147,6 +157,33 @@ def test_unknown_network_gets_publico():
     client = FakeClient()
     ping, _ = pinger()
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
+    assert client.calls[0] == ("apply", "publico")
+
+
+@pytest.mark.parametrize("kind", ["802-3-ethernet", "bond", "vlan"])
+def test_an_unknown_wired_connection_keeps_the_current_profile(kind):
+    client = FakeClient(active="casa")
+    ping, state = pinger()
+    c = d.Context("eth0", UUID, (GW4,))
+    assert d.dispatch(client, c, ping=ping, sleep=lambda s: None, kind=kind) == d.EXIT_OK
+    assert client.calls == [] and state["log"] == []
+
+
+def test_a_wired_connection_with_a_profile_still_gets_it():
+    client = FakeClient({UUID: "trabalho"}, active="casa")
+    ping, state = pinger()
+    orig = client.apply_profile
+    client.apply_profile = lambda n: (state.update(applied=True), orig(n))
+    c = d.Context("eth0", UUID, (GW4,))
+    assert d.dispatch(client, c, ping=ping, sleep=lambda s: None, kind="802-3-ethernet") == 0
+    assert client.calls == [("apply", "trabalho"), ("confirm",)]
+
+
+@pytest.mark.parametrize("kind", ["802-11-wireless", "gsm", ""])
+def test_unknown_wifi_mobile_or_unidentified_still_get_publico(kind):
+    client = FakeClient(active="casa")
+    ping, _ = pinger()
+    assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None, kind=kind) == 0
     assert client.calls[0] == ("apply", "publico")
 
 
@@ -231,6 +268,7 @@ def test_daemon_errors_do_not_confirm(monkeypatch):
     client = FakeClient({UUID: "casa"}, apply_exc=FwError("x", code="apply_pending"))
     monkeypatch.setattr(d, "Client", lambda addr: client)
     monkeypatch.setattr(d, "lookup_ssid", lambda u: "")
+    monkeypatch.setattr(d, "lookup_kind", lambda u: "")
     assert d.run("wlan0", env={"CONNECTION_UUID": UUID}) == d.EXIT_ERROR
     assert ("confirm",) not in client.calls
 
@@ -242,3 +280,12 @@ def test_unidentifiable_network_falls_back_without_asking_the_daemon():
     c = d.Context("eth0", "", ())
     assert d.dispatch(client, c, ping=ping, sleep=lambda s: None) == d.EXIT_OK
     assert client.calls[0] == ("apply", "publico")
+
+
+def test_run_asks_networkmanager_for_the_connection_type(monkeypatch):
+    client = FakeClient(active="casa")
+    monkeypatch.setattr(d, "Client", lambda addr: client)
+    monkeypatch.setattr(d, "lookup_ssid", lambda u: "")
+    monkeypatch.setattr(d, "lookup_kind", lambda u: "802-3-ethernet")
+    assert d.run("eth0", env={"CONNECTION_UUID": UUID}) == d.EXIT_OK
+    assert client.calls == []

@@ -4,9 +4,10 @@ Called by the NetworkManager dispatcher as root. Everything NetworkManager passe
 (interface, connection UUID, gateways) is validated before use; the only thing sent to
 the daemon is a profile *name* chosen from the saved network mapping.
 
-Flow: pick profile -> ping gateways (baseline) -> apply -> ping again ->
-confirm if still reachable, otherwise roll back at once. If nobody confirms, the
-daemon reverts by itself after the timeout, so a killed script cannot lock the user out.
+Flow: pick profile (an unknown wired connection keeps the current one) -> ping gateways
+(baseline) -> apply -> ping again -> confirm if still reachable, otherwise roll back at once.
+If nobody confirms, the daemon reverts by itself after the timeout, so a killed script cannot
+lock the user out.
 """
 
 from __future__ import annotations
@@ -31,6 +32,11 @@ from fwmanager.errors import FwError, ValidationError
 EXIT_OK, EXIT_ERROR, EXIT_REVERTED = 0, 1, 2
 
 UNKNOWN_NETWORK_PROFILE = "publico"  # most restrictive profile for networks we do not know
+# A cable you plug in is rarely a stranger's network, and switching a wired machine to the
+# strictest profile can shut an SSH session out. Unknown wired connections keep the current
+# profile; only Wi-Fi, mobile broadband and anything unidentified fall back to the strict one.
+WIRED_KINDS = ("802-3-ethernet", "bond", "team", "vlan", "bridge")
+KIND_RE = re.compile(r"^[a-z0-9-]{1,32}$")
 IFACE_RE = re.compile(r"^[A-Za-z0-9_.:-]{1,15}$")
 PING_TRIES = 3
 PING_TIMEOUT = 1.5
@@ -79,26 +85,37 @@ def parse_context(iface: str, env: Mapping[str, str]) -> Context:
     return Context(iface, uuid, tuple(gateways))
 
 
-def lookup_ssid(uuid: str, run: Callable = subprocess.run) -> str:
-    """Wi-Fi SSID of a connection via nmcli; empty string when unknown or not Wi-Fi."""
+def _nmcli_field(uuid: str, field_name: str, run: Callable) -> str:
+    """One field of a connection via nmcli (unescaped); empty string when unknown."""
     nmcli = next((p for p in NMCLI_PATHS if os.access(p, os.X_OK)), None) or shutil.which("nmcli")
     if not uuid or not nmcli:
         return ""
     try:
         out = run(
-            [nmcli, "-g", "802-11-wireless.ssid", "connection", "show", "uuid", uuid],
+            [nmcli, "-g", field_name, "connection", "show", "uuid", uuid],
             capture_output=True, text=True, timeout=5, check=False,
         )  # fmt: skip
     except (OSError, subprocess.TimeoutExpired):
         return ""
     if out.returncode != 0:
         return ""
-    ssid = out.stdout.rstrip("\n").replace("\\:", ":").replace("\\\\", "\\")
+    return out.stdout.rstrip("\n").replace("\\:", ":").replace("\\\\", "\\")
+
+
+def lookup_ssid(uuid: str, run: Callable = subprocess.run) -> str:
+    """Wi-Fi SSID of a connection via nmcli; empty string when unknown or not Wi-Fi."""
+    ssid = _nmcli_field(uuid, "802-11-wireless.ssid", run)
     try:
         Network(ssid, "", "publico") if ssid else None
     except ValidationError:
         return ""
     return ssid
+
+
+def lookup_kind(uuid: str, run: Callable = subprocess.run) -> str:
+    """NetworkManager's connection type (``802-3-ethernet``, ``802-11-wireless``...)."""
+    kind = _nmcli_field(uuid, "connection.type", run)
+    return kind if KIND_RE.fullmatch(kind) else ""
 
 
 # -- ICMP echo ---
@@ -177,9 +194,13 @@ def dispatch(
     ssid: str = "",
     ping: Callable = icmp_echo,
     sleep: Callable[[float], None] = time.sleep,
+    kind: str = "",
 ) -> int:
     # A network we cannot identify at all falls back to the restrictive profile.
     mapped = client.get_network_profile(ssid, ctx.uuid) if (ssid or ctx.uuid) else ""
+    if not mapped and kind in WIRED_KINDS:
+        log(f"wired connection without a profile on {ctx.iface}; keeping the current profile")
+        return EXIT_OK
     target = mapped or UNKNOWN_NETWORK_PROFILE
     status = client.status()
     if status["blocking_conflicts"]:
@@ -216,7 +237,7 @@ def run(iface: str, bus_address: str | None = None, env: Mapping[str, str] | Non
     ctx = parse_context(iface, os.environ if env is None else env)
     client = Client(bus_address)
     try:
-        return dispatch(client, ctx, lookup_ssid(ctx.uuid))
+        return dispatch(client, ctx, lookup_ssid(ctx.uuid), kind=lookup_kind(ctx.uuid))
     except FwError as exc:
         log(f"failed: {exc.code}")
         return EXIT_ERROR

@@ -371,9 +371,6 @@ msgstr "Networks"
 msgid "Networks (e.g. 192.168.1.0/24)"
 msgstr "Networks (e.g. 192.168.1.0/24)"
 
-msgid "Networks you have not chosen a profile for use the Public profile."
-msgstr "Networks you have not chosen a profile for use the Public profile."
-
 msgid "No blocked attempts found."
 msgstr "No blocked attempts found."
 
@@ -751,6 +748,9 @@ msgstr "Who can connect"
 
 msgid "Wi-Fi name"
 msgstr "Wi-Fi name"
+
+msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile."
+msgstr "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile."
 
 msgid "Wi-Fi: {name}"
 msgstr "Wi-Fi: {name}"

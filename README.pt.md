@@ -44,7 +44,9 @@ dispatcher do NetworkManager (root)            ─┘            só comandos fi
 - **Alterações seguras**: cada alteração guarda uma cópia da configuração do ufw e inicia um
   temporizador de 30 s. Se não confirmar, a configuração anterior é restaurada byte a byte.
 - **Perfis por rede**: o dispatcher do NetworkManager aplica o perfil associado à rede que
-  acabou de ligar e verifica se a gateway continua acessível; se não, reverte.
+  acabou de ligar e verifica se a gateway continua acessível; se não, reverte. Uma rede Wi-Fi
+  ou móvel sem perfil recebe `publico`; um cabo sem perfil mantém o atual, para que ligar um
+  cabo nunca feche uma sessão SSH.
 - **O serviço nunca aceita texto de regras.** Os clientes só podem chamar comandos fixos
   (aplicar um perfil pelo nome, confirmar, reverter, ler o estado); todos os argumentos são
   validados e só se executa o `ufw` com uma lista de argumentos (sem shell). Quem chama tem de
@@ -193,6 +195,5 @@ opcional: `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
   ponto de acesso falso com o mesmo nome e a mesma palavra-passe é tratado como o verdadeiro, por
   isso mantenha serviços abertos só em redes protegidas por uma palavra-passe de confiança
   (WPA2/WPA3).
-- Uma rede sem perfil atribuído recebe `publico`, incluindo uma ligação por cabo.
 - A unidade systemd é menos restritiva do que o mínimo (`CAP_NET_RAW`, `AF_INET`, escrita em
   `/etc/ufw`) porque o ufw e o iptables o exigem.
