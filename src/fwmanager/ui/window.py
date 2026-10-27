@@ -1,0 +1,162 @@
+"""The main window: pages, banner, pending-confirmation, and the explanatory problem screen."""
+
+from __future__ import annotations
+
+import gi
+
+gi.require_version("Gtk", "4.0")
+gi.require_version("Adw", "1")
+from gi.repository import Adw, Gdk, Gtk  # noqa: E402
+
+from fwmanager.i18n import _  # noqa: E402
+from fwmanager.ui import state  # noqa: E402
+from fwmanager.ui.dialogs import PolicyTestDialog  # noqa: E402
+from fwmanager.ui.pages.home import HomePage  # noqa: E402
+from fwmanager.ui.pages.log import LogPage  # noqa: E402
+from fwmanager.ui.pages.networks import NetworksPage  # noqa: E402
+from fwmanager.ui.pages.problem import ProblemPage  # noqa: E402
+from fwmanager.ui.pages.profiles import ProfilesPage  # noqa: E402
+from fwmanager.ui.pages.settings import SettingsPage  # noqa: E402
+
+
+class MainWindow(Adw.ApplicationWindow):
+    def __init__(self, app, controller, user_settings, on_language, on_notifications) -> None:
+        super().__init__(
+            application=app,
+            title="fwmanager",
+            default_width=780,
+            default_height=680,
+            width_request=360,
+            height_request=400,
+        )
+        self.controller = controller
+        self._was_ok = False
+        self.toasts = Adw.ToastOverlay()
+
+        # -- pages ---
+        self.home = HomePage(controller, self.open_policy_test)
+        self.profiles = ProfilesPage(controller, self.home.load)
+        self.networks = NetworksPage(controller)
+        self.log = LogPage(controller)
+        self.settings = SettingsPage(controller, user_settings, on_language, on_notifications)
+        self.pages = [
+            ("home", self.home),
+            ("profiles", self.profiles),
+            ("networks", self.networks),
+            ("log", self.log),
+            ("settings", self.settings),
+        ]
+        self.views = Adw.ViewStack()
+        for name, page in self.pages:
+            self.views.add_titled_with_icon(page, name, page.get_title(), page.get_icon_name())
+        self.views.connect("notify::visible-child-name", self._on_page_changed)
+
+        # -- chrome ---
+        self.switcher = Adw.ViewSwitcher(stack=self.views, policy=Adw.ViewSwitcherPolicy.WIDE)
+        header = Adw.HeaderBar(title_widget=self.switcher)
+        self.banner = Adw.Banner(revealed=False)
+        self.bottom_bar = Adw.ViewSwitcherBar(stack=self.views)
+        main = Adw.ToolbarView()
+        main.add_top_bar(header)
+        main.add_top_bar(self.banner)
+        main.set_content(self.views)
+        main.add_bottom_bar(self.bottom_bar)
+
+        self.problem = ProblemPage(controller)
+        problem_view = Adw.ToolbarView()
+        problem_view.add_top_bar(Adw.HeaderBar())
+        problem_view.set_content(self.problem)
+
+        self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
+        self.stack.add_named(main, "main")
+        self.stack.add_named(problem_view, "problem")
+        loading = Adw.StatusPage(title=_("Connecting to the service…"))
+        loading.set_child(Gtk.Spinner(spinning=True, width_request=32, height_request=32))
+        self.stack.add_named(loading, "loading")
+        self.stack.set_visible_child_name("loading")
+        self.toasts.set_child(self.stack)
+        self.set_content(self.toasts)
+
+        # Narrow windows: the page switcher moves to the bottom.
+        bp = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 560sp"))
+        bp.add_setter(self.bottom_bar, "reveal", True)
+        bp.add_setter(self.switcher, "visible", False)
+        self.add_breakpoint(bp)
+
+        self._add_shortcuts()
+        controller.listeners.append(self.on_snapshot)
+        self.connect("close-request", self._on_close)
+        if controller.snapshot.status is not None or controller.snapshot.problem is not None:
+            self.on_snapshot(controller.snapshot)  # e.g. a window rebuilt after a language change
+        controller.start_polling()
+
+    # -- keyboard: Ctrl+1..5 jumps between pages ---
+
+    def _add_shortcuts(self) -> None:
+        ctl = Gtk.ShortcutController()
+        for i, (name, _page) in enumerate(self.pages, start=1):
+            trigger = Gtk.ShortcutTrigger.parse_string(f"<Control>{i}")
+            action = Gtk.CallbackAction.new(
+                lambda *_a, n=name: self.views.set_visible_child_name(n)
+            )
+            ctl.add_shortcut(Gtk.Shortcut.new(trigger, action))
+        self.add_controller(ctl)
+
+    # -- reacting to the daemon ---
+
+    def on_snapshot(self, snap) -> None:
+        if snap.screen != state.OK:
+            self._was_ok = False
+            if snap.problem:
+                self.problem.show(snap.problem)
+            self.stack.set_visible_child_name("problem")
+            return
+        self.stack.set_visible_child_name("main")
+        if not self._was_ok:  # first time (or back after a problem): load everything
+            self._was_ok = True
+            self.home.load()
+            self.profiles.load()
+            self.settings.load()
+            self.networks.load()
+            self.controller.current_network(self._network_loaded)
+        self.home.on_snapshot(snap)
+        self._update_banner(snap.status or {})
+
+    def _network_loaded(self, net, _error) -> None:
+        self.home.set_current_network(net)
+
+    def _update_banner(self, status: dict) -> None:
+        text = ""
+        if status.get("startup") == "state_corrupt":
+            text = _("The saved settings were damaged, so the strictest profile was used.")
+        elif status.get("warnings"):
+            text = _(
+                "Docker or virtual machines were found. They manage their own rules, "
+                "which fwmanager leaves alone."
+            )
+        self.banner.set_title(text)
+        self.banner.set_revealed(bool(text))
+
+    def _on_page_changed(self, *_args) -> None:
+        name = self.views.get_visible_child_name()
+        if name == "log":
+            self.log.load()
+        elif name == "networks":
+            self.networks.load()
+
+    def _on_close(self, *_args) -> bool:
+        self.controller.listeners.remove(self.on_snapshot)
+        return False
+
+    # -- dialogs ---
+
+    def open_policy_test(self, profile: str) -> None:
+        dialog = PolicyTestDialog(self.controller, profile, self._apply_after_test)
+        dialog.present(self)
+        dialog.start()
+
+    def _apply_after_test(self, profile: str) -> None:
+        self.controller.apply(profile)
+
+
+__all__ = ["MainWindow", "Gdk"]

@@ -123,7 +123,8 @@ def analyze_config(config_dir: Path, ipv6: bool) -> Report:
 
 
 def _describe(rule: Rule) -> str:
-    return f"{rule.proto} {','.join(rule.ports)} from {rule.source}"
+    # Language-neutral on purpose (it is shown as-is in every language): "source → port".
+    return f"{rule.source} → {rule.proto} {','.join(rule.ports)}"
 
 
 def _listed(rules: list[Rule]) -> str:

@@ -6,8 +6,8 @@ and rely on a safety net that undoes any change that cuts your connection.
 
 100% local: no accounts, no servers, no telemetry.
 
-> Status: work in progress. The core, the daemon, the NetworkManager hook and the command-line
-> client are done; the GTK4 interface and the plain-language rules come next.
+> Status: work in progress. The core, the daemon, the NetworkManager hook, the command-line
+> client and the GTK4 interface are done; the plain-language rules come next.
 
 ## How it works
 
@@ -33,6 +33,30 @@ NetworkManager dispatcher (root)  ─┘            only fixed commands
 
 Requirements: Python 3.11+, PyGObject, **ufw**, systemd and D-Bus. NetworkManager is optional
 (needed only for automatic per-network profiles).
+
+## The interface
+
+Run `fwmanager` as your normal user (it refuses to run as root). Pages: **Home** (state, quick
+profile switching, a "waiting for confirmation" card with a countdown), **Profiles** (edit what
+each profile opens), **Networks** (which profile for which Wi-Fi), **Log** (what the service did
+and recent blocked attempts) and **Settings**. Every profile has a **Test** button that runs the
+policy test below before you apply anything. Ctrl+1..5 jump between pages, and the page switcher
+moves to the bottom on narrow windows.
+
+If the service is not running, your account is not in the `fwmanager` group, ufw is missing or
+firewalld is active, the window explains it in your language and shows the command that fixes it.
+
+## Languages
+
+Portuguese (Portugal) and English. The language is chosen in this order: your choice in
+**Settings** (`~/.config/fwmanager/settings.toml`) > `/etc/fwmanager/config.toml` > the system
+locale (`pt*` gives Portuguese, anything else English). Changing it in Settings rebuilds the window
+at once; it needs no password and never touches the service. The service itself always logs in
+English; the interface translates its status and error codes.
+
+Translations live in `po/*.po`; the `.mo` files are compiled by `dev-install.sh` (no gettext
+tools needed). After changing user-visible text run `python3 scripts/update-po.py`, translate the
+new entries, and `python3 scripts/update-po.py --check` (also run by the tests) must pass.
 
 ## Dev install (VM/container only)
 
@@ -81,6 +105,8 @@ python3 -m venv --system-site-packages .venv   # system site packages provide Py
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/pytest tests/unit tests/security      # no privileges needed
 sudo .venv/bin/pytest tests                     # everything: real ufw + D-Bus in a private netns
+xvfb-run -a pytest tests/ui                     # GTK windows on a virtual display (or let the
+                                                # tests start their own Xvfb)
 ```
 
 Integration tests never touch the host firewall: they run ufw inside a throw-away network

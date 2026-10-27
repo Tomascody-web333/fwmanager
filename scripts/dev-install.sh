@@ -90,12 +90,24 @@ if [ -f "$REPO/data/networkmanager/90-fwmanager" ]; then
     install -m 755 "$REPO/data/networkmanager/90-fwmanager" "$ROOT/etc/NetworkManager/dispatcher.d/"
 fi
 
-for mo in "$REPO"/locale/*/LC_MESSAGES/fwmanager.mo; do
-    [ -f "$mo" ] || continue
-    lang=$(basename "$(dirname "$(dirname "$mo")")")
-    install -d -m 755 "$ROOT/usr/share/locale/$lang/LC_MESSAGES"
-    install -m 644 "$mo" "$ROOT/usr/share/locale/$lang/LC_MESSAGES/fwmanager.mo"
-done
+# Translations: .po files are compiled here, so the repository never carries binaries.
+if [ -d "$REPO/po" ]; then
+    LOCALE_TMP=$(mktemp -d)
+    "$PYTHON" -E -c 'import sys; sys.path.insert(0, sys.argv[1]); from fwmanager.i18n_build import main; sys.exit(main(["compile", sys.argv[2], sys.argv[3]]))' \
+        "$REPO/src" "$REPO/po" "$LOCALE_TMP" >/dev/null
+    for mo in "$LOCALE_TMP"/*/LC_MESSAGES/fwmanager.mo; do
+        [ -f "$mo" ] || continue
+        lang=$(basename "$(dirname "$(dirname "$mo")")")
+        install -d -m 755 "$ROOT/usr/share/locale/$lang/LC_MESSAGES"
+        install -m 644 "$mo" "$ROOT/usr/share/locale/$lang/LC_MESSAGES/fwmanager.mo"
+    done
+    rm -rf "$LOCALE_TMP"
+fi
+
+if [ -f "$REPO/data/applications/org.fwmanager.App.desktop" ]; then
+    install -d -m 755 "$ROOT/usr/share/applications"
+    install -m 644 "$REPO/data/applications/org.fwmanager.App.desktop" "$ROOT/usr/share/applications/"
+fi
 
 if [ -n "$LANG_CHOICE" ]; then
     install -d -m 755 "$ROOT/etc/fwmanager"

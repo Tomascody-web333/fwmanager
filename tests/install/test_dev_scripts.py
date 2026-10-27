@@ -46,6 +46,10 @@ def test_staged_install_places_every_file(staged):
         "etc/systemd/system/fwmanagerd.service",
         "etc/fwmanager/config.toml",
         "etc/NetworkManager/dispatcher.d/90-fwmanager",
+        "usr/local/bin/fwmanager",
+        "usr/share/locale/pt_PT/LC_MESSAGES/fwmanager.mo",
+        "usr/share/locale/en/LC_MESSAGES/fwmanager.mo",
+        "usr/share/applications/org.fwmanager.App.desktop",
     ]
     for rel in expect:
         assert (staged / rel).is_file(), rel
@@ -58,6 +62,23 @@ def test_staged_install_places_every_file(staged):
         ROOT / "data/systemd/fwmanagerd.service"
     ).read_text()
     assert not list((staged / "usr/local/lib").rglob("__pycache__"))
+
+
+def test_installed_catalogue_is_a_valid_portuguese_translation(staged):
+    import gettext
+
+    stage(staged)
+    mo = staged / "usr/share/locale/pt_PT/LC_MESSAGES/fwmanager.mo"
+    tr = gettext.GNUTranslations(mo.open("rb"))
+    assert tr.gettext("Settings") == "Definições" and tr.charset() == "UTF-8"
+    assert not list(staged.rglob("*.po")) and not list(staged.rglob("*.pot"))
+
+
+def test_desktop_entry_is_well_formed(staged):
+    stage(staged)
+    text = (staged / "usr/share/applications/org.fwmanager.App.desktop").read_text()
+    assert text.startswith("[Desktop Entry]") and "Exec=fwmanager" in text
+    assert "Categories=" in text
 
 
 def test_installed_files_are_not_group_or_world_writable(staged):
@@ -153,6 +174,12 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
                 capture_output=True, text=True, timeout=30, env=env,
             )  # fmt: skip
             assert h.returncode == 0 and "usage" in h.stdout.lower(), h.stderr
+        # The installed catalogue is used: Portuguese help via /etc/fwmanager/config.toml.
+        pt = subprocess.run(
+            ["/usr/local/bin/fwmanager-cli", "--help"],
+            capture_output=True, text=True, timeout=30, env=env,
+        )  # fmt: skip
+        assert "Cliente do gestor de firewall" in pt.stdout, pt.stdout + pt.stderr
         # The installed copy can clean a ufw tree (relocated, so the real /etc/ufw is untouched).
         root = tmp_path / "ufwroot"
         (root / "etc/default").mkdir(parents=True)

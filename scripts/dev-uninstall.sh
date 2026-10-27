@@ -55,7 +55,8 @@ rm -f "$ROOT/usr/local/bin/fwmanagerd" "$ROOT/usr/local/bin/fwmanager-cli" \
 rm -rf "$LIB"
 rm -f "$ROOT/etc/dbus-1/system.d/org.fwmanager.Control.conf" \
       "$ROOT/etc/systemd/system/fwmanagerd.service" \
-      "$ROOT/etc/NetworkManager/dispatcher.d/90-fwmanager"
+      "$ROOT/etc/NetworkManager/dispatcher.d/90-fwmanager" \
+      "$ROOT/usr/share/applications/org.fwmanager.App.desktop"
 rm -rf "$ROOT/etc/fwmanager" "$ROOT/var/lib/fwmanager"
 for mo in "$ROOT"/usr/share/locale/*/LC_MESSAGES/fwmanager.mo; do
     [ -f "$mo" ] && rm -f "$mo"

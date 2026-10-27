@@ -2,10 +2,40 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: \n"
 
+msgid "A change is undone after 30 seconds unless you confirm it."
+msgstr ""
+
+msgid "A network you trust, such as your own Wi-Fi."
+msgstr ""
+
+msgid "A shared network at work or school."
+msgstr ""
+
+msgid "Active"
+msgstr ""
+
+msgid "Active profile"
+msgstr ""
+
 msgid "Active profile: {p}"
 msgstr ""
 
+msgid "Add"
+msgstr ""
+
+msgid "Add a network by name"
+msgstr ""
+
+msgid "Add your user to the fwmanager group, then log out and back in. No password is asked after that."
+msgstr ""
+
+msgid "Allowed networks (e.g. 192.168.1.0/24)"
+msgstr ""
+
 msgid "Allowed services are reachable from any network."
+msgstr ""
+
+msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr ""
 
 msgid "Another change is waiting for confirmation."
@@ -17,28 +47,121 @@ msgstr ""
 msgid "Another firewall manager (firewalld) is active. Disable it first, then try again."
 msgstr ""
 
+msgid "Another firewall manager is active"
+msgstr ""
+
+msgid "Answer ping"
+msgstr ""
+
+msgid "Anywhere"
+msgstr ""
+
+msgid "Applied {name}, waiting for confirmation"
+msgstr ""
+
 msgid "Applied."
+msgstr ""
+
+msgid "Apply"
+msgstr ""
+
+msgid "Apply anyway"
 msgstr ""
 
 msgid "BROKEN by this profile: {p}"
 msgstr ""
 
+msgid "Be visible on the local network (mDNS)"
+msgstr ""
+
+msgid "Blocked connection attempts"
+msgstr ""
+
+msgid "Broken"
+msgstr ""
+
+msgid "Cancel"
+msgstr ""
+
+msgid "Changed the settings"
+msgstr ""
+
+msgid "Changes apply right away. No password needed."
+msgstr ""
+
+msgid "Check that this profile will not break your connection"
+msgstr ""
+
+msgid "Checking…"
+msgstr ""
+
+msgid "Choose what each profile lets in. Select one to edit it."
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Command copied"
+msgstr ""
+
+msgid "Command to run"
+msgstr ""
+
+msgid "Confirm"
+msgstr ""
+
+msgid "Confirmed {name}"
+msgstr ""
+
 msgid "Confirmed."
+msgstr ""
+
+msgid "Connecting to the service…"
+msgstr ""
+
+msgid "Connection {id}"
 msgstr ""
 
 msgid "Connections could hang (destination unreachable)."
 msgstr ""
 
+msgid "Copy command"
+msgstr ""
+
 msgid "Could not save the settings."
+msgstr ""
+
+msgid "Current network"
+msgstr ""
+
+msgid "Custom"
 msgstr ""
 
 msgid "DNS resolver answers"
 msgstr ""
 
+msgid "Do not apply this profile as it is."
+msgstr ""
+
 msgid "Docker manages its own rules (they are left untouched)."
 msgstr ""
 
+msgid "Docker or virtual machines were found. They manage their own rules, which fwmanager leaves alone."
+msgstr ""
+
+msgid "Edit {name}"
+msgstr ""
+
+msgid "Edited {name}"
+msgstr ""
+
+msgid "Error"
+msgstr ""
+
 msgid "Error: {msg}"
+msgstr ""
+
+msgid "Everything else coming in from the network stays blocked."
 msgstr ""
 
 msgid "FTP"
@@ -47,7 +170,25 @@ msgstr ""
 msgid "File sharing (Samba)"
 msgstr ""
 
+msgid "Fine"
+msgstr ""
+
+msgid "Firewall"
+msgstr ""
+
 msgid "Firewall manager client"
+msgstr ""
+
+msgid "Forget this network"
+msgstr ""
+
+msgid "General"
+msgstr ""
+
+msgid "High"
+msgstr ""
+
+msgid "Home"
 msgstr ""
 
 msgid "IPv6 connections could hang (packet-too-big)."
@@ -95,7 +236,16 @@ msgstr ""
 msgid "Invalid traffic source."
 msgstr ""
 
+msgid "It should work, but read the notes below first."
+msgstr ""
+
 msgid "KDE Connect"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Lets others check that this computer is on."
 msgstr ""
 
 msgid "Live test (the profile is applied for a few seconds, then reverted):"
@@ -113,13 +263,58 @@ msgstr ""
 msgid "Local IPv6 connections"
 msgstr ""
 
+msgid "Local network only"
+msgstr ""
+
+msgid "Log"
+msgstr ""
+
+msgid "Low"
+msgstr ""
+
 msgid "MQTT"
+msgstr ""
+
+msgid "Medium"
 msgstr ""
 
 msgid "NFS"
 msgstr ""
 
+msgid "Networks"
+msgstr ""
+
+msgid "Networks you have not chosen a profile for use the Public profile."
+msgstr ""
+
+msgid "No blocked attempts found."
+msgstr ""
+
 msgid "No problems found in the rules."
+msgstr ""
+
+msgid "None"
+msgstr ""
+
+msgid "Not connected"
+msgstr ""
+
+msgid "Note"
+msgstr ""
+
+msgid "Nothing was found that could cut your connection."
+msgstr ""
+
+msgid "Nothing yet."
+msgstr ""
+
+msgid "Notifications"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
+msgid "Options"
 msgstr ""
 
 msgid "Policy check for {p}:"
@@ -134,10 +329,43 @@ msgstr ""
 msgid "Printer sharing (IPP)"
 msgstr ""
 
+msgid "Profile"
+msgstr ""
+
+msgid "Profile for {name}"
+msgstr ""
+
+msgid "Profile saved. Apply it again to use the changes."
+msgstr ""
+
+msgid "Profiles"
+msgstr ""
+
+msgid "Public"
+msgstr ""
+
 msgid "Reach the IPv4 gateway"
 msgstr ""
 
 msgid "Reach the IPv6 gateway"
+msgstr ""
+
+msgid "Record blocked attempts"
+msgstr ""
+
+msgid "Refresh"
+msgstr ""
+
+msgid "Refused a request from an account that is not allowed"
+msgstr ""
+
+msgid "Remember"
+msgstr ""
+
+msgid "Remembered networks"
+msgstr ""
+
+msgid "Remembered."
 msgstr ""
 
 msgid "Remote desktop (RDP)"
@@ -155,7 +383,13 @@ msgstr ""
 msgid "Replies to your own connections would be blocked."
 msgstr ""
 
+msgid "Restore the original settings"
+msgstr ""
+
 msgid "Result: {v}"
+msgstr ""
+
+msgid "Router mode"
 msgstr ""
 
 msgid "Router mode may interfere with Docker, VMs and containers."
@@ -176,16 +410,70 @@ msgstr ""
 msgid "SSH"
 msgstr ""
 
+msgid "Safe to use"
+msgstr ""
+
+msgid "Safe, with warnings"
+msgstr ""
+
+msgid "Save"
+msgstr ""
+
+msgid "Service started"
+msgstr ""
+
+msgid "Services that others may reach"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Shown in the Log page. Higher levels record more."
+msgstr ""
+
 msgid "Some diagnostics would fail (time exceeded)."
 msgstr ""
 
 msgid "Some fwmanager rules have an unexpected shape."
 msgstr ""
 
+msgid "Something went wrong: {why}"
+msgstr ""
+
+msgid "Specific networks"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Switch profile"
+msgstr ""
+
 msgid "Syncthing"
 msgstr ""
 
+msgid "Tell me when a change was undone automatically."
+msgstr ""
+
+msgid "Test"
+msgstr ""
+
+msgid "Test {name}"
+msgstr ""
+
+msgid "Testing…"
+msgstr ""
+
+msgid "The firewall service is not running"
+msgstr ""
+
 msgid "The fwmanager service is not running."
+msgstr ""
+
+msgid "The most recent ones, newest first. Turn logging on in Settings."
+msgstr ""
+
+msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
 msgstr ""
 
 msgid "The rules touch something fwmanager does not manage."
@@ -194,13 +482,31 @@ msgstr ""
 msgid "The saved firewall state was damaged; the safest profile was used."
 msgstr ""
 
+msgid "The saved settings were damaged, so the strictest profile was used."
+msgstr ""
+
+msgid "The strictest: cafés, airports, hotels."
+msgstr ""
+
 msgid "There is no change waiting for confirmation."
+msgstr ""
+
+msgid "This network"
 msgstr ""
 
 msgid "Too many saved networks."
 msgstr ""
 
+msgid "Try again"
+msgstr ""
+
 msgid "UNSAFE"
+msgstr ""
+
+msgid "Undid {name}"
+msgstr ""
+
+msgid "Undo"
 msgstr ""
 
 msgid "Unknown profile."
@@ -209,13 +515,49 @@ msgstr ""
 msgid "Unknown service."
 msgstr ""
 
+msgid "Use the same profile every time you connect here."
+msgstr ""
+
+msgid "Used to find printers and shared devices by name."
+msgstr ""
+
 msgid "WARNING: previous rules could not be confirmed as restored."
 msgstr ""
 
 msgid "Waiting for confirmation of {p} ({n}s left)"
 msgstr ""
 
+msgid "Waiting for your confirmation"
+msgstr ""
+
+msgid "Warning"
+msgstr ""
+
 msgid "Web server (HTTP/HTTPS)"
+msgstr ""
+
+msgid "What fwmanager did"
+msgstr ""
+
+msgid "What was checked"
+msgstr ""
+
+msgid "Who can connect"
+msgstr ""
+
+msgid "Wi-Fi name"
+msgstr ""
+
+msgid "Wi-Fi: {name}"
+msgstr ""
+
+msgid "Wired: {name}"
+msgstr ""
+
+msgid "Work"
+msgstr ""
+
+msgid "Would break something"
 msgstr ""
 
 msgid "You are not allowed to control the firewall."
@@ -225,6 +567,15 @@ msgid "Your SSH session and new SSH connections stay allowed."
 msgstr ""
 
 msgid "Your SSH session survives, but you could not open a new one."
+msgstr ""
+
+msgid "Your account is not allowed to use fwmanager"
+msgstr ""
+
+msgid "Your connection, before and after"
+msgstr ""
+
+msgid "Your own settings."
 msgstr ""
 
 msgid "apply a profile (auto-reverts unless confirmed)"
@@ -239,6 +590,21 @@ msgstr ""
 msgid "confirm the pending change"
 msgstr ""
 
+msgid "edited"
+msgstr ""
+
+msgid "fails"
+msgstr ""
+
+msgid "fwmanager"
+msgstr ""
+
+msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
+msgstr ""
+
+msgid "fwmanager needs its background service. Start it with this command:"
+msgstr ""
+
 msgid "libvirt manages its own rules (they are left untouched)."
 msgstr ""
 
@@ -248,7 +614,16 @@ msgstr ""
 msgid "manage the network to profile mapping"
 msgstr ""
 
+msgid "no"
+msgstr ""
+
 msgid "none"
+msgstr ""
+
+msgid "not applicable"
+msgstr ""
+
+msgid "nothing is open"
 msgstr ""
 
 msgid "only analyse the rules, change nothing"
@@ -261,6 +636,9 @@ msgid "revert the pending change"
 msgstr ""
 
 msgid "show the firewall state"
+msgstr ""
+
+msgid "ufw is not installed"
 msgstr ""
 
 msgid "ufw is not installed."
@@ -279,4 +657,28 @@ msgid "ufw rejected the change."
 msgstr ""
 
 msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr ""
+
+msgid "works"
+msgstr ""
+
+msgid "yes"
+msgstr ""
+
+msgid "{before} → {after}"
+msgstr ""
+
+msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
+msgstr ""
+
+msgid "{opened} · from: {source} · ping: {ping} · mDNS: {mdns}"
+msgstr ""
+
+msgid "{profile} was undone because it was not confirmed in time."
+msgstr ""
+
+msgid "{profile} will be undone in {n} s unless you confirm."
+msgstr ""
+
+msgid "{src} tried to reach {target}"
 msgstr ""

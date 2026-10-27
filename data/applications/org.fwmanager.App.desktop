@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Application
+Name=fwmanager
+GenericName=Firewall
+GenericName[pt]=Firewall
+GenericName[pt_PT]=Firewall
+Comment=A friendly interface for the ufw firewall
+Comment[pt]=Uma interface amigável para a firewall ufw
+Comment[pt_PT]=Uma interface amigável para a firewall ufw
+Exec=fwmanager
+Icon=security-high
+Terminal=false
+Categories=System;Security;Settings;GTK;
+Keywords=firewall;ufw;network;security;rede;segurança;
+StartupNotify=true

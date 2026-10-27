@@ -9,10 +9,12 @@ import os
 import sys
 
 from fwmanager.client import Client
+from fwmanager.core.config import SYSTEM_CONFIG, resolve_language
 from fwmanager.core.services import load_catalog
 from fwmanager.errors import FwError
 from fwmanager.i18n import N_, _, set_language
 from fwmanager.messages import describe_error, describe_finding, describe_probe
+from fwmanager.ui.settings import settings_path
 
 EXIT_OK, EXIT_ERROR, EXIT_REVERTED = 0, 1, 2
 
@@ -185,7 +187,7 @@ def run(args: argparse.Namespace) -> int:
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
-    set_language(os.environ.get("LANG"))
+    set_language(resolve_language(settings_path(), SYSTEM_CONFIG))
     args = _parser().parse_args(argv)
     try:
         return run(args)

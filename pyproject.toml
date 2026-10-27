@@ -28,6 +28,7 @@ fwmanager = ["data/*.toml"]
 pythonpath = ["src"]
 testpaths = ["tests"]
 markers = [
+    "ui: GTK windows, run against a virtual X server (Xvfb)",
     "integration: needs root and a real nft binary (runs inside a private network namespace)",
 ]
 

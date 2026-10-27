@@ -2,281 +2,683 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: pt_PT\n"
 
+msgid "A change is undone after 30 seconds unless you confirm it."
+msgstr "Uma alteração é desfeita ao fim de 30 segundos se não a confirmar."
+
+msgid "A network you trust, such as your own Wi-Fi."
+msgstr "Uma rede em que confia, como o seu próprio Wi-Fi."
+
+msgid "A shared network at work or school."
+msgstr "Uma rede partilhada no trabalho ou na escola."
+
+msgid "Active"
+msgstr "Ativo"
+
+msgid "Active profile"
+msgstr "Perfil ativo"
+
 msgid "Active profile: {p}"
-msgstr ""
+msgstr "Perfil ativo: {p}"
+
+msgid "Add"
+msgstr "Adicionar"
+
+msgid "Add a network by name"
+msgstr "Adicionar uma rede pelo nome"
+
+msgid "Add your user to the fwmanager group, then log out and back in. No password is asked after that."
+msgstr "Adicione o seu utilizador ao grupo fwmanager e depois termine a sessão e volte a iniciá-la. Depois disso, não é pedida nenhuma palavra-passe."
+
+msgid "Allowed networks (e.g. 192.168.1.0/24)"
+msgstr "Redes permitidas (por exemplo, 192.168.1.0/24)"
 
 msgid "Allowed services are reachable from any network."
-msgstr ""
+msgstr "Os serviços permitidos estão acessíveis a partir de qualquer rede."
+
+msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
+msgstr "Filtra também o tráfego que passa por este computador. Pode interferir com o Docker e as máquinas virtuais."
 
 msgid "Another change is waiting for confirmation."
-msgstr ""
+msgstr "Outra alteração está à espera de confirmação."
 
 msgid "Another firewall manager (firewalld) is active."
-msgstr ""
+msgstr "Outro gestor de firewall (firewalld) está ativo."
 
 msgid "Another firewall manager (firewalld) is active. Disable it first, then try again."
-msgstr ""
+msgstr "Outro gestor de firewall (firewalld) está ativo. Desative-o primeiro e tente de novo."
+
+msgid "Another firewall manager is active"
+msgstr "Está ativo outro gestor de firewall"
+
+msgid "Answer ping"
+msgstr "Responder a ping"
+
+msgid "Anywhere"
+msgstr "De qualquer lado"
+
+msgid "Applied {name}, waiting for confirmation"
+msgstr "Aplicou {name}; à espera de confirmação"
 
 msgid "Applied."
-msgstr ""
+msgstr "Aplicado."
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Apply anyway"
+msgstr "Aplicar mesmo assim"
 
 msgid "BROKEN by this profile: {p}"
-msgstr ""
+msgstr "PARTIDO por este perfil: {p}"
+
+msgid "Be visible on the local network (mDNS)"
+msgstr "Ser visível na rede local (mDNS)"
+
+msgid "Blocked connection attempts"
+msgstr "Tentativas de ligação bloqueadas"
+
+msgid "Broken"
+msgstr "Partido"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Changed the settings"
+msgstr "Alterou as definições"
+
+msgid "Changes apply right away. No password needed."
+msgstr "As alterações aplicam-se de imediato. Não é preciso palavra-passe."
+
+msgid "Check that this profile will not break your connection"
+msgstr "Verificar que este perfil não vai cortar a sua ligação"
+
+msgid "Checking…"
+msgstr "A verificar…"
+
+msgid "Choose what each profile lets in. Select one to edit it."
+msgstr "Escolha o que cada perfil deixa entrar. Selecione um para o editar."
+
+msgid "Close"
+msgstr "Fechar"
+
+msgid "Command copied"
+msgstr "Comando copiado"
+
+msgid "Command to run"
+msgstr "Comando a executar"
+
+msgid "Confirm"
+msgstr "Confirmar"
+
+msgid "Confirmed {name}"
+msgstr "Confirmou {name}"
 
 msgid "Confirmed."
-msgstr ""
+msgstr "Confirmado."
+
+msgid "Connecting to the service…"
+msgstr "A ligar ao serviço…"
+
+msgid "Connection {id}"
+msgstr "Ligação {id}"
 
 msgid "Connections could hang (destination unreachable)."
-msgstr ""
+msgstr "As ligações podem ficar penduradas (destino inalcançável)."
+
+msgid "Copy command"
+msgstr "Copiar comando"
 
 msgid "Could not save the settings."
-msgstr ""
+msgstr "Não foi possível guardar as definições."
+
+msgid "Current network"
+msgstr "Rede atual"
+
+msgid "Custom"
+msgstr "Personalizado"
 
 msgid "DNS resolver answers"
-msgstr ""
+msgstr "O servidor DNS responde"
+
+msgid "Do not apply this profile as it is."
+msgstr "Não aplique este perfil tal como está."
 
 msgid "Docker manages its own rules (they are left untouched)."
-msgstr ""
+msgstr "O Docker gere as suas próprias regras (ficam intocadas)."
+
+msgid "Docker or virtual machines were found. They manage their own rules, which fwmanager leaves alone."
+msgstr "Foram encontrados Docker ou máquinas virtuais. Gerem as suas próprias regras, que o fwmanager não toca."
+
+msgid "Edit {name}"
+msgstr "Editar {name}"
+
+msgid "Edited {name}"
+msgstr "Editou {name}"
+
+msgid "Error"
+msgstr "Erro"
 
 msgid "Error: {msg}"
-msgstr ""
+msgstr "Erro: {msg}"
+
+msgid "Everything else coming in from the network stays blocked."
+msgstr "Tudo o resto que chega da rede continua bloqueado."
 
 msgid "FTP"
-msgstr ""
+msgstr "FTP"
 
 msgid "File sharing (Samba)"
-msgstr ""
+msgstr "Partilha de ficheiros (Samba)"
+
+msgid "Fine"
+msgstr "Bem"
+
+msgid "Firewall"
+msgstr "Firewall"
 
 msgid "Firewall manager client"
-msgstr ""
+msgstr "Cliente do gestor de firewall"
+
+msgid "Forget this network"
+msgstr "Esquecer esta rede"
+
+msgid "General"
+msgstr "Geral"
+
+msgid "High"
+msgstr "Alto"
+
+msgid "Home"
+msgstr "Casa"
 
 msgid "IPv6 connections could hang (packet-too-big)."
-msgstr ""
+msgstr "As ligações IPv6 podem ficar penduradas (pacote demasiado grande)."
 
 msgid "IPv6 is not enabled in ufw, so it is not filtered."
-msgstr ""
+msgstr "O IPv6 não está ativo no ufw, por isso não é filtrado."
 
 msgid "IPv6 would stop working (neighbour discovery)."
-msgstr ""
+msgstr "O IPv6 deixaria de funcionar (descoberta de vizinhos)."
 
 msgid "IPv6 would stop working (router advertisements)."
-msgstr ""
+msgstr "O IPv6 deixaria de funcionar (anúncios do router)."
 
 msgid "Internal error."
-msgstr ""
+msgstr "Erro interno."
 
 msgid "Invalid input."
-msgstr ""
+msgstr "Entrada inválida."
 
 msgid "Invalid network (name or UUID)."
-msgstr ""
+msgstr "Rede inválida (nome ou UUID)."
 
 msgid "Invalid network address (CIDR)."
-msgstr ""
+msgstr "Endereço de rede inválido (CIDR)."
 
 msgid "Invalid option."
-msgstr ""
+msgstr "Opção inválida."
 
 msgid "Invalid packets would not be dropped."
-msgstr ""
+msgstr "Os pacotes inválidos não seriam descartados."
 
 msgid "Invalid port."
-msgstr ""
+msgstr "Porto inválido."
 
 msgid "Invalid profile."
-msgstr ""
+msgstr "Perfil inválido."
 
 msgid "Invalid protocol."
-msgstr ""
+msgstr "Protocolo inválido."
 
 msgid "Invalid service."
-msgstr ""
+msgstr "Serviço inválido."
 
 msgid "Invalid traffic source."
-msgstr ""
+msgstr "Origem de tráfego inválida."
+
+msgid "It should work, but read the notes below first."
+msgstr "Deve funcionar, mas leia primeiro as notas abaixo."
 
 msgid "KDE Connect"
-msgstr ""
+msgstr "KDE Connect"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Lets others check that this computer is on."
+msgstr "Permite que outros verifiquem que este computador está ligado."
 
 msgid "Live test (the profile is applied for a few seconds, then reverted):"
-msgstr ""
+msgstr "Teste real (o perfil é aplicado durante alguns segundos e depois revertido):"
 
 msgid "Live test skipped: fix the errors above first."
-msgstr ""
+msgstr "Teste real ignorado: corrija primeiro os erros acima."
 
 msgid "Local (loopback) traffic would be blocked."
-msgstr ""
+msgstr "O tráfego local (loopback) seria bloqueado."
 
 msgid "Local IPv4 connections"
-msgstr ""
+msgstr "Ligações locais IPv4"
 
 msgid "Local IPv6 connections"
-msgstr ""
+msgstr "Ligações locais IPv6"
+
+msgid "Local network only"
+msgstr "Só a rede local"
+
+msgid "Log"
+msgstr "Registo"
+
+msgid "Low"
+msgstr "Baixo"
 
 msgid "MQTT"
-msgstr ""
+msgstr "MQTT"
+
+msgid "Medium"
+msgstr "Médio"
 
 msgid "NFS"
-msgstr ""
+msgstr "NFS"
+
+msgid "Networks"
+msgstr "Redes"
+
+msgid "Networks you have not chosen a profile for use the Public profile."
+msgstr "As redes para as quais não escolheu um perfil usam o perfil Público."
+
+msgid "No blocked attempts found."
+msgstr "Não foram encontradas tentativas bloqueadas."
 
 msgid "No problems found in the rules."
-msgstr ""
+msgstr "Não foram encontrados problemas nas regras."
+
+msgid "None"
+msgstr "Nenhum"
+
+msgid "Not connected"
+msgstr "Sem ligação"
+
+msgid "Note"
+msgstr "Nota"
+
+msgid "Nothing was found that could cut your connection."
+msgstr "Não foi encontrado nada que possa cortar a sua ligação."
+
+msgid "Nothing yet."
+msgstr "Ainda nada."
+
+msgid "Notifications"
+msgstr "Notificações"
+
+msgid "Off"
+msgstr "Desligado"
+
+msgid "Options"
+msgstr "Opções"
 
 msgid "Policy check for {p}:"
-msgstr ""
+msgstr "Verificação da política de {p}:"
 
 msgid "Press Enter to confirm, r to revert ({n}s left)... "
-msgstr ""
+msgstr "Prima Enter para confirmar, r para reverter (faltam {n} s)... "
 
 msgid "Previous rules restored."
-msgstr ""
+msgstr "Regras anteriores repostas."
 
 msgid "Printer sharing (IPP)"
-msgstr ""
+msgstr "Partilha de impressoras (IPP)"
+
+msgid "Profile"
+msgstr "Perfil"
+
+msgid "Profile for {name}"
+msgstr "Perfil para {name}"
+
+msgid "Profile saved. Apply it again to use the changes."
+msgstr "Perfil guardado. Aplique-o de novo para usar as alterações."
+
+msgid "Profiles"
+msgstr "Perfis"
+
+msgid "Public"
+msgstr "Público"
 
 msgid "Reach the IPv4 gateway"
-msgstr ""
+msgstr "Alcançar o gateway IPv4"
 
 msgid "Reach the IPv6 gateway"
-msgstr ""
+msgstr "Alcançar o gateway IPv6"
+
+msgid "Record blocked attempts"
+msgstr "Registar tentativas bloqueadas"
+
+msgid "Refresh"
+msgstr "Atualizar"
+
+msgid "Refused a request from an account that is not allowed"
+msgstr "Recusou um pedido de uma conta sem permissão"
+
+msgid "Remember"
+msgstr "Memorizar"
+
+msgid "Remembered networks"
+msgstr "Redes memorizadas"
+
+msgid "Remembered."
+msgstr "Memorizado."
 
 msgid "Remote desktop (RDP)"
-msgstr ""
+msgstr "Ambiente de trabalho remoto (RDP)"
 
 msgid "Remote desktop (VNC)"
-msgstr ""
+msgstr "Ambiente de trabalho remoto (VNC)"
 
 msgid "Renewing the IPv4 address (DHCP) would fail."
-msgstr ""
+msgstr "A renovação do endereço IPv4 (DHCP) falharia."
 
 msgid "Renewing the IPv6 address (DHCPv6) would fail."
-msgstr ""
+msgstr "A renovação do endereço IPv6 (DHCPv6) falharia."
 
 msgid "Replies to your own connections would be blocked."
-msgstr ""
+msgstr "As respostas às suas próprias ligações seriam bloqueadas."
+
+msgid "Restore the original settings"
+msgstr "Repor as definições originais"
 
 msgid "Result: {v}"
-msgstr ""
+msgstr "Resultado: {v}"
+
+msgid "Router mode"
+msgstr "Modo router"
 
 msgid "Router mode may interfere with Docker, VMs and containers."
-msgstr ""
+msgstr "O modo router pode interferir com o Docker, as máquinas virtuais e os contentores."
 
 msgid "Rules that will be added."
-msgstr ""
+msgstr "Regras que vão ser adicionadas."
 
 msgid "Rules that will be removed."
-msgstr ""
+msgstr "Regras que vão ser removidas."
 
 msgid "SAFE"
-msgstr ""
+msgstr "SEGURO"
 
 msgid "SAFE WITH WARNINGS"
-msgstr ""
+msgstr "SEGURO COM AVISOS"
 
 msgid "SSH"
-msgstr ""
+msgstr "SSH"
+
+msgid "Safe to use"
+msgstr "Seguro de usar"
+
+msgid "Safe, with warnings"
+msgstr "Seguro, com avisos"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Service started"
+msgstr "Serviço iniciado"
+
+msgid "Services that others may reach"
+msgstr "Serviços a que outros podem aceder"
+
+msgid "Settings"
+msgstr "Definições"
+
+msgid "Shown in the Log page. Higher levels record more."
+msgstr "Aparece na página Registo. Níveis mais altos registam mais."
 
 msgid "Some diagnostics would fail (time exceeded)."
-msgstr ""
+msgstr "Alguns diagnósticos falhariam (tempo excedido)."
 
 msgid "Some fwmanager rules have an unexpected shape."
-msgstr ""
+msgstr "Algumas regras do fwmanager têm um formato inesperado."
+
+msgid "Something went wrong: {why}"
+msgstr "Algo correu mal: {why}"
+
+msgid "Specific networks"
+msgstr "Redes específicas"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Switch profile"
+msgstr "Mudar de perfil"
 
 msgid "Syncthing"
-msgstr ""
+msgstr "Syncthing"
+
+msgid "Tell me when a change was undone automatically."
+msgstr "Avisar-me quando uma alteração for desfeita automaticamente."
+
+msgid "Test"
+msgstr "Testar"
+
+msgid "Test {name}"
+msgstr "Testar {name}"
+
+msgid "Testing…"
+msgstr "A testar…"
+
+msgid "The firewall service is not running"
+msgstr "O serviço da firewall não está a funcionar"
 
 msgid "The fwmanager service is not running."
-msgstr ""
+msgstr "O serviço do fwmanager não está a funcionar."
+
+msgid "The most recent ones, newest first. Turn logging on in Settings."
+msgstr "As mais recentes, primeiro as mais novas. Ative o registo nas Definições."
+
+msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
+msgstr "O perfil é aplicado durante alguns segundos enquanto a sua ligação é medida e depois tudo volta ao que era."
 
 msgid "The rules touch something fwmanager does not manage."
-msgstr ""
+msgstr "As regras tocam em algo que o fwmanager não gere."
 
 msgid "The saved firewall state was damaged; the safest profile was used."
-msgstr ""
+msgstr "O estado guardado da firewall estava danificado; foi usado o perfil mais seguro."
+
+msgid "The saved settings were damaged, so the strictest profile was used."
+msgstr "As definições guardadas estavam danificadas, por isso foi usado o perfil mais restritivo."
+
+msgid "The strictest: cafés, airports, hotels."
+msgstr "O mais restritivo: cafés, aeroportos, hotéis."
 
 msgid "There is no change waiting for confirmation."
-msgstr ""
+msgstr "Não há nenhuma alteração à espera de confirmação."
+
+msgid "This network"
+msgstr "Esta rede"
 
 msgid "Too many saved networks."
-msgstr ""
+msgstr "Demasiadas redes guardadas."
+
+msgid "Try again"
+msgstr "Tentar de novo"
 
 msgid "UNSAFE"
-msgstr ""
+msgstr "INSEGURO"
+
+msgid "Undid {name}"
+msgstr "Desfez {name}"
+
+msgid "Undo"
+msgstr "Desfazer"
 
 msgid "Unknown profile."
-msgstr ""
+msgstr "Perfil desconhecido."
 
 msgid "Unknown service."
-msgstr ""
+msgstr "Serviço desconhecido."
+
+msgid "Use the same profile every time you connect here."
+msgstr "Usar o mesmo perfil sempre que se liga aqui."
+
+msgid "Used to find printers and shared devices by name."
+msgstr "Serve para encontrar impressoras e dispositivos partilhados pelo nome."
 
 msgid "WARNING: previous rules could not be confirmed as restored."
-msgstr ""
+msgstr "AVISO: não foi possível confirmar que as regras anteriores foram repostas."
 
 msgid "Waiting for confirmation of {p} ({n}s left)"
-msgstr ""
+msgstr "À espera de confirmação de {p} (faltam {n} s)"
+
+msgid "Waiting for your confirmation"
+msgstr "À espera da sua confirmação"
+
+msgid "Warning"
+msgstr "Aviso"
 
 msgid "Web server (HTTP/HTTPS)"
-msgstr ""
+msgstr "Servidor web (HTTP/HTTPS)"
+
+msgid "What fwmanager did"
+msgstr "O que o fwmanager fez"
+
+msgid "What was checked"
+msgstr "O que foi verificado"
+
+msgid "Who can connect"
+msgstr "Quem se pode ligar"
+
+msgid "Wi-Fi name"
+msgstr "Nome do Wi-Fi"
+
+msgid "Wi-Fi: {name}"
+msgstr "Wi-Fi: {name}"
+
+msgid "Wired: {name}"
+msgstr "Por cabo: {name}"
+
+msgid "Work"
+msgstr "Trabalho"
+
+msgid "Would break something"
+msgstr "Iria partir alguma coisa"
 
 msgid "You are not allowed to control the firewall."
-msgstr ""
+msgstr "Não tem permissão para controlar a firewall."
 
 msgid "Your SSH session and new SSH connections stay allowed."
-msgstr ""
+msgstr "A sua sessão SSH e as novas ligações SSH continuam permitidas."
 
 msgid "Your SSH session survives, but you could not open a new one."
-msgstr ""
+msgstr "A sua sessão SSH sobrevive, mas não conseguiria abrir uma nova."
+
+msgid "Your account is not allowed to use fwmanager"
+msgstr "A sua conta não tem permissão para usar o fwmanager"
+
+msgid "Your connection, before and after"
+msgstr "A sua ligação, antes e depois"
+
+msgid "Your own settings."
+msgstr "As suas próprias definições."
 
 msgid "apply a profile (auto-reverts unless confirmed)"
-msgstr ""
+msgstr "aplicar um perfil (reverte sozinho se não for confirmado)"
 
 msgid "check that a profile will not break the machine"
-msgstr ""
+msgstr "verificar que um perfil não vai partir o computador"
 
 msgid "confirm immediately, no countdown"
-msgstr ""
+msgstr "confirmar de imediato, sem contagem decrescente"
 
 msgid "confirm the pending change"
-msgstr ""
+msgstr "confirmar a alteração pendente"
+
+msgid "edited"
+msgstr "editado"
+
+msgid "fails"
+msgstr "falha"
+
+msgid "fwmanager"
+msgstr "fwmanager"
+
+msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
+msgstr "O fwmanager é uma cara amigável para o ufw, por isso o ufw tem de estar instalado primeiro:"
+
+msgid "fwmanager needs its background service. Start it with this command:"
+msgstr "O fwmanager precisa do seu serviço em segundo plano. Inicie-o com este comando:"
 
 msgid "libvirt manages its own rules (they are left untouched)."
-msgstr ""
+msgstr "O libvirt gere as suas próprias regras (ficam intocadas)."
 
 msgid "list available profiles"
-msgstr ""
+msgstr "listar os perfis disponíveis"
 
 msgid "manage the network to profile mapping"
-msgstr ""
+msgstr "gerir a associação de redes a perfis"
+
+msgid "no"
+msgstr "não"
 
 msgid "none"
-msgstr ""
+msgstr "nenhum"
+
+msgid "not applicable"
+msgstr "não aplicável"
+
+msgid "nothing is open"
+msgstr "nada está aberto"
 
 msgid "only analyse the rules, change nothing"
-msgstr ""
+msgstr "só analisar as regras, sem alterar nada"
 
 msgid "profile name"
-msgstr ""
+msgstr "nome do perfil"
 
 msgid "revert the pending change"
-msgstr ""
+msgstr "reverter a alteração pendente"
 
 msgid "show the firewall state"
-msgstr ""
+msgstr "mostrar o estado da firewall"
+
+msgid "ufw is not installed"
+msgstr "O ufw não está instalado"
 
 msgid "ufw is not installed."
-msgstr ""
+msgstr "O ufw não está instalado."
 
 msgid "ufw is not installed. Install it first (for example: sudo apt install ufw)."
-msgstr ""
+msgstr "O ufw não está instalado. Instale-o primeiro (por exemplo: sudo apt install ufw)."
 
 msgid "ufw is off and will be turned on."
-msgstr ""
+msgstr "O ufw está desligado e vai ser ligado."
 
 msgid "ufw refused one of the rules."
-msgstr ""
+msgstr "O ufw recusou uma das regras."
 
 msgid "ufw rejected the change."
-msgstr ""
+msgstr "O ufw rejeitou a alteração."
 
 msgid "ufw's configuration was edited in a way fwmanager cannot work with."
-msgstr ""
+msgstr "A configuração do ufw foi editada de uma forma com que o fwmanager não consegue trabalhar."
+
+msgid "works"
+msgstr "funciona"
+
+msgid "yes"
+msgstr "sim"
+
+msgid "{before} → {after}"
+msgstr "{before} → {after}"
+
+msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
+msgstr "{names} está a gerir a firewall. Desligue-o primeiro e depois volte a abrir o fwmanager:"
+
+msgid "{opened} · from: {source} · ping: {ping} · mDNS: {mdns}"
+msgstr "{opened} · origem: {source} · ping: {ping} · mDNS: {mdns}"
+
+msgid "{profile} was undone because it was not confirmed in time."
+msgstr "{profile} foi desfeito porque não foi confirmado a tempo."
+
+msgid "{profile} will be undone in {n} s unless you confirm."
+msgstr "{profile} será desfeito dentro de {n} s se não confirmar."
+
+msgid "{src} tried to reach {target}"
+msgstr "{src} tentou aceder a {target}"

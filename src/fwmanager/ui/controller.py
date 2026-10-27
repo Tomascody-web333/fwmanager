@@ -51,7 +51,7 @@ class Controller:
         self.signal_listeners: list[Callable[[str, tuple], None]] = []
         self._connect()
 
-    # -- connection ---------------------------------------------------------------------
+    # -- connection ---
 
     def _connect(self) -> None:
         try:
@@ -65,7 +65,7 @@ class Controller:
             fn(name, args)
         self.refresh()
 
-    # -- status polling -----------------------------------------------------------------
+    # -- status polling ---
 
     def refresh(self, done: Done | None = None) -> None:
         if self._client is None:
@@ -115,7 +115,7 @@ class Controller:
             GLib.source_remove(self._timer)
             self._timer = 0
 
-    # -- operations -----------------------------------------------------------------------
+    # -- operations ---
 
     def _op(self, fn: Callable[[Client], object], done: Done | None) -> None:
         def finished(result, error) -> None:
