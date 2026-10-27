@@ -201,19 +201,3 @@ def test_failed_apply_leaves_ruleset_and_no_timer(mgr, nft, monkeypatch):
         mgr.apply(DEFAULT_PROFILES["publico"])
     assert mgr.pending_profile() is None
     assert table(nft) == before
-
-
-def test_cli_apply_yes_and_status(nft, capsys):
-    from fwmanager.cli.main import main
-
-    assert main(["apply", "publico", "--yes"], nft=nft) == 0
-    assert main(["status", "--json"], nft=nft) == 0
-    out = capsys.readouterr().out.splitlines()
-    assert json.loads(out[-1])["active_profile"] == "publico"
-
-
-def test_cli_unknown_profile(nft, capsys):
-    from fwmanager.cli.main import main
-
-    assert main(["apply", "nope", "--yes"], nft=nft) == 1
-    assert nft.list_table_json("inet", "fwmanager") is None

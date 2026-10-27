@@ -1,6 +1,8 @@
 import os
 import shutil
 import subprocess
+import tempfile
+from pathlib import Path
 
 import pytest
 
@@ -37,3 +39,42 @@ def nft(netns_prefix):
     n.run(["flush", "ruleset"])
     yield n
     n.run(["flush", "ruleset"])
+
+
+@pytest.fixture(scope="session")
+def private_bus():
+    """A throw-away dbus-daemon (never the system bus) that lets any local user connect."""
+    if not shutil.which("dbus-daemon"):
+        pytest.skip("dbus-daemon not available")
+    # Not under pytest's tmp dir: that one is 0700 and "nobody" must reach the socket.
+    d = Path(tempfile.mkdtemp(prefix="fwm-bus-"))
+    d.chmod(0o755)
+    sock = d / "bus.sock"
+    conf = d / "bus.conf"
+    conf.write_text(
+        f"""<busconfig>
+  <type>custom</type>
+  <listen>unix:path={sock}</listen>
+  <auth>EXTERNAL</auth>
+  <policy context="default">
+    <allow user="*"/>
+    <allow own="*"/>
+    <allow send_destination="*"/>
+    <allow receive_sender="*"/>
+    <allow send_type="method_call"/>
+    <allow send_type="method_return"/>
+    <allow send_type="error"/>
+    <allow send_type="signal"/>
+  </policy>
+</busconfig>"""
+    )
+    proc = subprocess.Popen(["dbus-daemon", f"--config-file={conf}", "--nofork"])
+    for _ in range(100):
+        if sock.exists():
+            break
+        subprocess.run(["sleep", "0.05"])
+    sock.chmod(0o777)
+    yield f"unix:path={sock}"
+    proc.terminate()
+    proc.wait()
+    shutil.rmtree(d, ignore_errors=True)
