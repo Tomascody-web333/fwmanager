@@ -113,23 +113,29 @@ class HomePage(Adw.PreferencesPage):
             test.connect("clicked", lambda _b, n=name: self._on_test(n))
             in_use = Gtk.Label(label=_("In use"), valign=Gtk.Align.CENTER)
             in_use.add_css_class("dim-label")
+            applying = Gtk.Box(spacing=6, valign=Gtk.Align.CENTER, visible=False)
+            applying.append(Gtk.Spinner(spinning=True))
+            applying.append(Gtk.Label(label=_("Applying…")))
             apply_btn = button(_("Use"), suggested=True)
             apply_btn.set_tooltip_text(_("Switch to this profile now"))
             apply_btn.connect("clicked", lambda _b, n=name: self._c.apply(n, self._after))
-            for widget in (edit, test, in_use, apply_btn):
+            for widget in (edit, test, in_use, applying, apply_btn):
                 row.add_suffix(widget)
             row.apply_btn, row.test_btn, row.edit_btn = apply_btn, test, edit
-            row.check, row.in_use = check, in_use
+            row.check, row.in_use, row.applying = check, in_use, applying
             self.switch_group.add(row)
             self._profile_rows.append(row)
         self._sync_buttons()
 
     def _sync_buttons(self) -> None:
-        busy = bool(self._pending)
+        applying = self._c.applying
+        busy = bool(self._pending or applying)
         active = (self._c.snapshot.status or {}).get("active_profile", "")
         for row in self._profile_rows:
-            current = row.name_ == active
-            row.apply_btn.set_visible(not current)  # nothing to switch to: it is already in use
+            current = row.name_ == active and not applying
+            row.applying.set_visible(row.name_ == applying)
+            # nothing to switch to while it is already in use, or while it is being applied
+            row.apply_btn.set_visible(not current and row.name_ != applying)
             row.in_use.set_visible(current)
             row.apply_btn.set_sensitive(not busy)
             row.test_btn.set_sensitive(not busy)
@@ -164,12 +170,7 @@ class HomePage(Adw.PreferencesPage):
         self._sync_buttons()
 
     def set_current_network(self, net) -> None:
-        if net is None:
-            self.network_row.set_subtitle(_("Not connected"))
-        elif net.is_wifi:
-            self.network_row.set_subtitle(_("Wi-Fi: {name}").format(name=net.ssid or net.name))
-        else:
-            self.network_row.set_subtitle(_("Wired: {name}").format(name=net.name))
+        self.network_row.set_subtitle(state.network_text(net))
 
     # -- editing ---
 

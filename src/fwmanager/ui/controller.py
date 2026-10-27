@@ -46,6 +46,7 @@ class Controller:
         self._busy = False
         self._ticks = 0
         self._timer = 0
+        self.applying = ""  # the profile being applied right now (ufw can take a few seconds)
         self.snapshot = Snapshot(state.DAEMON_DOWN)
         self.listeners: list[Callable[[Snapshot], None]] = []
         self.signal_listeners: list[Callable[[str, tuple], None]] = []
@@ -141,7 +142,16 @@ class Controller:
         return callback
 
     def apply(self, name: str, done: Done | None = None) -> None:
-        self._op(lambda c: c.apply_profile(name), self._then_refresh(done))
+        self.applying = name
+        self._publish(self.snapshot)  # pages show "Applying…" at once
+
+        def finished(result, error) -> None:
+            self.applying = ""
+            self._publish(self.snapshot)
+            if done:
+                done(result, error)
+
+        self._op(lambda c: c.apply_profile(name), self._then_refresh(finished))
 
     def confirm(self, done: Done | None = None) -> None:
         self._op(lambda c: c.confirm(), self._then_refresh(done))

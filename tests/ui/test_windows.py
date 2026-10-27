@@ -384,3 +384,71 @@ def test_language_and_notification_switches_call_back(env):
     env.win.settings.language.set_selected(0)  # Português
     env.win.settings.notifications.set_active(False)
     assert env.changes["lang"] == ["pt"] and env.changes["notifications"] == [False]
+
+
+# -- slow applies ---
+
+
+def test_applying_shows_progress_until_the_service_answers(gtk):
+    """ufw can take seconds: the row says so, and nothing else can be started meanwhile."""
+    from gi.repository import Adw
+
+    from fwmanager.ui import settings as us
+    from fwmanager.ui.window import MainWindow
+
+    jobs = []
+
+    def later(fn, done):
+        jobs.append((fn, done))
+
+    def finish_all():
+        while jobs:
+            fn, done = jobs.pop(0)
+            try:
+                result, error = fn(), None
+            except FwError as exc:
+                result, error = None, exc
+            done(result, error)
+        pump(0.1)
+
+    daemon = FakeDaemon()
+    controller = Controller(lambda: FakeClient(daemon), run=later, user="ana")
+    app = Adw.Application(application_id="org.fwmanager.TestSlow")
+    app.register()
+    win = MainWindow(app, controller, us.UserSettings(setup_stage="done"), print, print)
+    win.present()
+    try:
+        finish_all()
+        finish_all()  # the pages load after the first status
+        rows = {r.name_: r for r in win.home._profile_rows}
+        rows["casa"].apply_btn.emit("clicked")
+        pump(0.1)
+        assert rows["casa"].applying.get_visible() and not rows["casa"].apply_btn.get_visible()
+        assert "Applying…" in texts(rows["casa"])
+        assert not rows["trabalho"].apply_btn.get_sensitive()  # one change at a time
+        assert not rows["trabalho"].test_btn.get_sensitive()
+        finish_all()
+        finish_all()
+        assert not rows["casa"].applying.get_visible()
+        assert win.home.pending_group.get_visible()  # now it waits for confirmation
+    finally:
+        controller.stop_polling()
+        win.destroy()
+
+
+def test_an_open_wifi_is_flagged_on_the_overview_and_networks_pages(env):
+    from fwmanager.ui.netinfo import CurrentNetwork
+
+    net = CurrentNetwork("Café", "Café", "u-1", "802-11-wireless", open=True)
+    env.win.home.set_current_network(net)
+    assert "Wi-Fi: Café (no password)" in texts(env.win.home)
+    page = env.win.networks
+    page._current_loaded(net, None)
+    assert page.current_row.get_subtitle() == "No password: anyone nearby can join"
+    page.current_row.set_selected(0)  # Home
+    assert page.open_warning.get_visible() and "no password" in page.open_warning.get_title()
+    page.current_row.set_selected(2)  # Public: nothing to warn about
+    assert not page.open_warning.get_visible()
+    page._current_loaded(CurrentNetwork("Casa", "Casa", "u-2", "802-11-wireless"), None)
+    page.current_row.set_selected(0)
+    assert not page.open_warning.get_visible()  # it has a password
