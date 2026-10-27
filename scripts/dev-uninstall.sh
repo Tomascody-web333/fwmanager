@@ -1,6 +1,7 @@
 #!/bin/sh
-# Removes everything dev-install.sh put in place, including fwmanager's changes to ufw,
-# so the machine is left with working networking. Run with sudo.
+# Remove tudo o que o dev-install.sh instalou, incluindo as alterações ao ufw, para a máquina
+# ficar com a rede a funcionar / Removes everything dev-install.sh put in place, including
+# fwmanager's changes to ufw, so the machine is left with working networking. Run with sudo.
 #
 #   sudo scripts/dev-uninstall.sh [--no-systemd]
 #
@@ -12,20 +13,30 @@ ROOT=""
 USE_SYSTEMD=1
 STAGED=0
 
-die() { echo "dev-uninstall: $*" >&2; exit 1; }
-need_value() { [ $# -ge 2 ] && [ "${2#-}" = "$2" ] || die "$1 needs a value"; }
+# say "English" "Português"  (the language of the system picks the line)
+say() {
+    case "${LC_ALL:-${LANG:-}}" in
+        pt*) printf '%s\n' "$2" ;;
+        *)   printf '%s\n' "$1" ;;
+    esac
+}
+die() { say "dev-uninstall: $1" "dev-uninstall: $2" >&2; exit 1; }
+need_value() {
+    [ $# -ge 2 ] && [ "${2#-}" = "$2" ] \
+        || die "$1 needs a value" "$1 precisa de um valor"
+}
 
 while [ $# -gt 0 ]; do
     case "$1" in
         --root)       need_value "$@"; ROOT=${2%/}; STAGED=1; shift 2 ;;
         --no-systemd) USE_SYSTEMD=0; shift ;;
-        -h|--help)    sed -n '2,7p' "$0"; exit 0 ;;
-        *)            die "unknown argument: $1" ;;
+        -h|--help)    sed -n '2,8p' "$0"; exit 0 ;;
+        *)            die "unknown argument: $1" "argumento desconhecido: $1" ;;
     esac
 done
 
 if [ "$STAGED" -eq 0 ]; then
-    [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)"
+    [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)" "tem de correr como root (use sudo)"
 else
     USE_SYSTEMD=0
 fi
@@ -46,13 +57,16 @@ fi
 if [ "$STAGED" -eq 0 ]; then
     if [ -x /usr/local/bin/fwmanagerd ] && command -v ufw >/dev/null 2>&1; then
         /usr/local/bin/fwmanagerd --cleanup \
-            || echo "Warning: could not clean ufw; check 'ufw status' and /etc/ufw/before.rules."
+            || say "Warning: could not clean ufw; check 'ufw status' and /etc/ufw/before.rules." \
+                   "Aviso: não foi possível limpar o ufw; verifique 'ufw status' e /etc/ufw/before.rules."
     fi
 fi
 
 rm -f "$ROOT/usr/local/bin/fwmanagerd" "$ROOT/usr/local/bin/fwmanager-cli" \
       "$ROOT/usr/local/bin/fwmanager"
-rm -rf "$LIB"
+rm -rf "$LIB" "$ROOT/usr/local/libexec/fwmanager"
+rmdir "$ROOT/usr/local/libexec" 2>/dev/null || true
+rm -f "$ROOT/usr/share/polkit-1/actions/org.fwmanager.setup.policy"
 rm -f "$ROOT/etc/dbus-1/system.d/org.fwmanager.Control.conf" \
       "$ROOT/etc/systemd/system/fwmanagerd.service" \
       "$ROOT/etc/NetworkManager/dispatcher.d/90-fwmanager" \
@@ -67,11 +81,13 @@ if [ "$STAGED" -eq 0 ] && [ "$ROOT_ADDED" -eq 1 ] && [ "$CREATED_GROUP" -eq 0 ];
 fi
 
 if [ "$STAGED" -eq 0 ] && [ "$CREATED_GROUP" -eq 1 ]; then
-    groupdel "$GROUP" 2>/dev/null || echo "Could not remove group $GROUP (still in use?)."
+    groupdel "$GROUP" 2>/dev/null \
+        || say "Could not remove group $GROUP (still in use?)." \
+               "Não foi possível remover o grupo $GROUP (ainda em uso?)."
 fi
 
 if [ "$USE_SYSTEMD" -eq 1 ]; then
     systemctl daemon-reload
     systemctl reset-failed fwmanagerd.service 2>/dev/null || true
 fi
-echo "fwmanager removed."
+say "fwmanager removed." "fwmanager removido."

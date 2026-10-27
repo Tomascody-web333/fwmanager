@@ -19,9 +19,12 @@ INSTALL = ROOT / "scripts" / "dev-install.sh"
 UNINSTALL = ROOT / "scripts" / "dev-uninstall.sh"
 
 
-def sh(*args, prefix=(), **kw):
+def sh(*args, prefix=(), lang="C", **kw):
+    env = {**os.environ, "LANG": lang}
+    env.pop("LC_ALL", None)
+    env.pop("SSH_CONNECTION", None)
     return subprocess.run(
-        [*prefix, "sh", *map(str, args)], capture_output=True, text=True, timeout=60, **kw
+        [*prefix, "sh", *map(str, args)], capture_output=True, text=True, timeout=60, env=env, **kw
     )
 
 
@@ -50,12 +53,15 @@ def test_staged_install_places_every_file(staged):
         "usr/share/locale/pt_PT/LC_MESSAGES/fwmanager.mo",
         "usr/share/locale/en/LC_MESSAGES/fwmanager.mo",
         "usr/share/applications/org.fwmanager.App.desktop",
+        "usr/local/libexec/fwmanager/fwmanager-setup",
+        "usr/share/polkit-1/actions/org.fwmanager.setup.policy",
     ]
     for rel in expect:
         assert (staged / rel).is_file(), rel
     assert (staged / "etc/fwmanager/config.toml").read_text() == 'lang = "pt"\n'
-    for exe in ("fwmanagerd", "fwmanager-cli"):
+    for exe in ("fwmanagerd", "fwmanager-cli", "fwmanager"):
         assert os.access(staged / "usr/local/bin" / exe, os.X_OK)
+    assert os.access(staged / "usr/local/libexec/fwmanager/fwmanager-setup", os.X_OK)
     shim = staged / "etc/NetworkManager/dispatcher.d/90-fwmanager"
     assert os.access(shim, os.X_OK)  # NetworkManager only runs executable scripts
     assert (staged / "etc/systemd/system/fwmanagerd.service").read_text() == (
@@ -98,6 +104,52 @@ def test_no_config_without_lang(staged):
     assert not (staged / "etc/fwmanager").exists()
 
 
+def test_user_is_optional_because_setup_happens_in_the_window(staged):
+    r = sh(INSTALL, "--root", staged)
+    assert r.returncode == 0, r.stderr
+    assert "setup continues in its window" in r.stdout
+
+
+def test_messages_follow_the_system_language(staged):
+    pt = sh(INSTALL, "--root", staged, lang="pt_PT.UTF-8")
+    assert "a configuração continua na janela" in pt.stdout
+    bad = sh(INSTALL, "--root", staged, "--bogus", lang="pt_PT.UTF-8")
+    assert "argumento desconhecido" in bad.stderr
+    out = sh(UNINSTALL, "--root", staged, lang="pt_PT.UTF-8")
+    assert "fwmanager removido" in out.stdout
+    en = sh(UNINSTALL, "--root", staged, lang="en_GB.UTF-8")
+    assert "fwmanager removed" in en.stdout
+
+
+def test_polkit_policy_matches_the_installed_helper(staged):
+    import xml.etree.ElementTree as ET
+
+    stage(staged)
+    policy = staged / "usr/share/polkit-1/actions/org.fwmanager.setup.policy"
+    root = ET.parse(policy).getroot()
+    action = root.find("action")
+    assert action is not None and action.get("id") == "org.fwmanager.setup"
+    paths = [
+        a.text
+        for a in action.iter("annotate")
+        if a.get("key") == "org.freedesktop.policykit.exec.path"
+    ]
+    assert paths == ["/usr/local/libexec/fwmanager/fwmanager-setup"]
+    if shutil.which("xmllint"):
+        dtd = Path("/usr/share/polkit-1/policyconfig-1.dtd")
+        if dtd.exists():
+            r = subprocess.run(
+                ["xmllint", "--noout", "--dtdvalid", str(dtd), str(policy)],
+                capture_output=True, text=True,
+            )  # fmt: skip
+            assert r.returncode == 0, r.stderr
+
+
+def test_installer_guards_against_ssh_lockout():
+    text = INSTALL.read_text()
+    assert "SSH_CONNECTION" in text and "--allow-ssh-lockout" in text
+
+
 def test_reinstall_is_idempotent(staged):
     assert stage(staged, "--lang", "en").returncode == 0
     assert stage(staged, "--lang", "pt").returncode == 0
@@ -108,6 +160,7 @@ def test_staged_uninstall_leaves_nothing(staged):
     stage(staged, "--lang", "en")
     r = sh(UNINSTALL, "--root", staged)
     assert r.returncode == 0, r.stderr
+    assert not (staged / "usr/local/libexec/fwmanager").exists()
     leftovers = [p for p in staged.rglob("*") if p.is_file()]
     assert leftovers == []
 
@@ -115,7 +168,6 @@ def test_staged_uninstall_leaves_nothing(staged):
 @pytest.mark.parametrize(
     "args,msg",
     [
-        ([], "--user NAME is required"),
         (["--user", "root"], "refusing to use root"),
         (["--user", 'a"b'], "invalid user name"),
         (["--user", "a b"], "invalid user name"),
@@ -206,6 +258,8 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
             "/etc/dbus-1/system.d/org.fwmanager.Control.conf",
             "/etc/systemd/system/fwmanagerd.service",
             shim,
+            "/usr/local/libexec/fwmanager",
+            "/usr/share/polkit-1/actions/org.fwmanager.setup.policy",
         ):
             assert not os.path.exists(path), path
     finally:  # never leave the test machine half-installed

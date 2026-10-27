@@ -1,11 +1,13 @@
 #!/bin/sh
-# Development installer for fwmanager (meant for a VM or container, run with sudo).
-# Not a package: it copies files into place, creates the `fwmanager` group and starts the daemon.
-# Requires ufw (fwmanager drives it); it is not installed for you.
+# Instalador de desenvolvimento do fwmanager / Development installer for fwmanager.
+# Para uma VM ou um contentor, com sudo / For a VM or container, run with sudo.
 #
-#   sudo scripts/dev-install.sh --user NAME [--lang pt|en] [--no-systemd]
+#   sudo scripts/dev-install.sh [--user NOME|NAME] [--lang pt|en] [--no-systemd]
 #
-# --root DIR   (tests only) install into DIR and skip group/user/systemd steps.
+# Everything else (language, what is missing, the first profile) is set up in the window the
+# first time you open fwmanager. --user and --lang are optional shortcuts. Requires ufw.
+# --root DIR            (tests only) install into DIR and skip group/user/systemd steps.
+# --allow-ssh-lockout   start the service even over SSH (see the warning it prints).
 set -eu
 
 REPO=$(cd "$(dirname "$0")/.." && pwd)
@@ -15,9 +17,20 @@ USER_NAME=""
 LANG_CHOICE=""
 USE_SYSTEMD=1
 STAGED=0
+ALLOW_SSH=0
 
-die() { echo "dev-install: $*" >&2; exit 1; }
-need_value() { [ $# -ge 2 ] && [ "${2#-}" = "$2" ] || die "$1 needs a value"; }
+# say "English" "Português"  (the language of the system picks the line)
+say() {
+    case "${LC_ALL:-${LANG:-}}" in
+        pt*) printf '%s\n' "$2" ;;
+        *)   printf '%s\n' "$1" ;;
+    esac
+}
+die() { say "dev-install: $1" "dev-install: $2" >&2; exit 1; }
+need_value() {
+    [ $# -ge 2 ] && [ "${2#-}" = "$2" ] \
+        || die "$1 needs a value" "$1 precisa de um valor"
+}
 
 while [ $# -gt 0 ]; do
     case "$1" in
@@ -25,23 +38,36 @@ while [ $# -gt 0 ]; do
         --lang)       need_value "$@"; LANG_CHOICE=$2; shift 2 ;;
         --root)       need_value "$@"; ROOT=${2%/}; STAGED=1; shift 2 ;;
         --no-systemd) USE_SYSTEMD=0; shift ;;
-        -h|--help)    sed -n '2,8p' "$0"; exit 0 ;;
-        *)            die "unknown argument: $1" ;;
+        --allow-ssh-lockout) ALLOW_SSH=1; shift ;;
+        -h|--help)    sed -n '2,11p' "$0"; exit 0 ;;
+        *)            die "unknown argument: $1" "argumento desconhecido: $1" ;;
     esac
 done
 
-[ -n "$USER_NAME" ] || die "--user NAME is required (the account that will use the UI)"
-case "$USER_NAME" in
-    *[!a-z0-9_-]*|-*|"") die "invalid user name: $USER_NAME" ;;
+if [ -n "$USER_NAME" ]; then
+    case "$USER_NAME" in
+        *[!a-z0-9_-]*|-*) die "invalid user name: $USER_NAME" "nome de utilizador inválido: $USER_NAME" ;;
+    esac
+    [ "$USER_NAME" != root ] \
+        || die "refusing to use root: the UI must run as a normal user" \
+               "recusado: a interface tem de correr como utilizador normal, não root"
+fi
+case "$LANG_CHOICE" in
+    ""|pt|en) ;;
+    *) die "--lang must be pt or en" "--lang tem de ser pt ou en" ;;
 esac
-[ "$USER_NAME" != root ] || die "refusing to use root: the UI must run as a normal user"
-case "$LANG_CHOICE" in ""|pt|en) ;; *) die "--lang must be pt or en" ;; esac
 
 if [ "$STAGED" -eq 0 ]; then
-    [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)"
-    id "$USER_NAME" >/dev/null 2>&1 || die "user does not exist: $USER_NAME"
-    [ "$(id -u "$USER_NAME")" -ne 0 ] || die "refusing to use a uid 0 account"
-    command -v ufw >/dev/null 2>&1 || die "ufw not found (install it first: apt install ufw)"
+    [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)" "tem de correr como root (use sudo)"
+    if [ -n "$USER_NAME" ]; then
+        id "$USER_NAME" >/dev/null 2>&1 \
+            || die "user does not exist: $USER_NAME" "o utilizador não existe: $USER_NAME"
+        [ "$(id -u "$USER_NAME")" -ne 0 ] \
+            || die "refusing to use a uid 0 account" "recusado: conta com uid 0"
+    fi
+    command -v ufw >/dev/null 2>&1 \
+        || die "ufw not found (install it first: apt install ufw)" \
+               "ufw não encontrado (instale-o primeiro: apt install ufw)"
 else
     USE_SYSTEMD=0
 fi
@@ -56,34 +82,39 @@ if [ -z "$PYTHON" ]; then
         fi
     done
 fi
-[ -n "$PYTHON" ] || die "no Python >= 3.11 with PyGObject found (install python3-gi)"
+[ -n "$PYTHON" ] \
+    || die "no Python >= 3.11 with PyGObject found (install python3-gi)" \
+           "nenhum Python >= 3.11 com PyGObject encontrado (instale python3-gi)"
 
 LIB="$ROOT/usr/local/lib/fwmanager"
 BIN="$ROOT/usr/local/bin"
+LIBEXEC="$ROOT/usr/local/libexec/fwmanager"
 
-echo "Installing files..."
-install -d -m 755 "$LIB" "$BIN" "$ROOT/etc/dbus-1/system.d" "$ROOT/etc/systemd/system"
+say "Installing files..." "A instalar os ficheiros..."
+install -d -m 755 "$LIB" "$BIN" "$LIBEXEC" "$ROOT/etc/dbus-1/system.d" "$ROOT/etc/systemd/system" \
+    "$ROOT/usr/share/polkit-1/actions"
 rm -rf "$LIB/fwmanager"
 cp -R "$REPO/src/fwmanager" "$LIB/fwmanager"
 find "$LIB/fwmanager" -name __pycache__ -type d -prune -exec rm -rf {} +
 chmod -R go-w,a+rX "$LIB"
 
-write_wrapper() {  # name module
-    cat > "$BIN/$1" <<WRAP
+write_wrapper() {  # directory name module
+    cat > "$1/$2" <<WRAP
 #!/bin/sh
 # Generated by dev-install.sh
-exec $PYTHON -E -c 'import sys; sys.path.insert(0, "/usr/local/lib/fwmanager"); from $2 import main; sys.exit(main())' "\$@"
+exec $PYTHON -E -c 'import sys; sys.path.insert(0, "/usr/local/lib/fwmanager"); from $3 import main; sys.exit(main())' "\$@"
 WRAP
-    chmod 755 "$BIN/$1"
+    chmod 755 "$1/$2"
 }
-write_wrapper fwmanagerd fwmanager.daemon.main
-write_wrapper fwmanager-cli fwmanager.cli.main
-if [ -f "$REPO/src/fwmanager/ui/main.py" ]; then
-    write_wrapper fwmanager fwmanager.ui.main
-fi
+write_wrapper "$BIN" fwmanagerd fwmanager.daemon.main
+write_wrapper "$BIN" fwmanager-cli fwmanager.cli.main
+write_wrapper "$BIN" fwmanager fwmanager.ui.main
+# The one program that asks for administrator rights (through polkit), for first-run setup.
+write_wrapper "$LIBEXEC" fwmanager-setup fwmanager.setup_helper
 
 install -m 644 "$REPO/data/dbus/org.fwmanager.Control.conf" "$ROOT/etc/dbus-1/system.d/"
 install -m 644 "$REPO/data/systemd/fwmanagerd.service" "$ROOT/etc/systemd/system/"
+install -m 644 "$REPO/data/polkit/org.fwmanager.setup.policy" "$ROOT/usr/share/polkit-1/actions/"
 
 if [ -f "$REPO/data/networkmanager/90-fwmanager" ]; then
     install -d -m 755 "$ROOT/etc/NetworkManager/dispatcher.d"
@@ -117,31 +148,48 @@ fi
 
 if [ "$STAGED" -eq 0 ]; then
     if getent group "$GROUP" >/dev/null; then
-        echo "Group $GROUP already exists."
+        say "Group $GROUP already exists." "O grupo $GROUP já existe."
     else
         groupadd --system "$GROUP"
         touch "$LIB/.created-group"  # lets dev-uninstall remove only what we created
-        echo "Created group $GROUP."
+        say "Created group $GROUP." "Grupo $GROUP criado."
     fi
-    if id -nG "$USER_NAME" | tr ' ' '\n' | grep -qx "$GROUP"; then
-        echo "$USER_NAME is already in $GROUP."
-    else
-        usermod -aG "$GROUP" "$USER_NAME"
-        echo "Added $USER_NAME to $GROUP (log out and back in for it to apply)."
+    if [ -n "$USER_NAME" ]; then
+        if id -nG "$USER_NAME" | tr ' ' '\n' | grep -qx "$GROUP"; then
+            say "$USER_NAME is already in $GROUP." "$USER_NAME já está no grupo $GROUP."
+        else
+            usermod -aG "$GROUP" "$USER_NAME"
+            say "Added $USER_NAME to $GROUP (log out and back in for it to apply)." \
+                "$USER_NAME adicionado ao grupo $GROUP (termine a sessão e volte a entrar para valer)."
+        fi
     fi
     # The NetworkManager dispatcher runs as root and talks to the daemon like any other client.
     if ! id -nG root | tr ' ' '\n' | grep -qx "$GROUP"; then
         usermod -aG "$GROUP" root
         touch "$LIB/.root-in-group"
-        echo "Added root to $GROUP (needed by the NetworkManager dispatcher)."
+        say "Added root to $GROUP (needed by the NetworkManager dispatcher)." \
+            "root adicionado ao grupo $GROUP (necessário para o dispatcher do NetworkManager)."
     fi
+fi
+
+# Starting the service applies the strictest profile at once. Over SSH that would shut the door
+# behind you, so the service is installed but left stopped unless you insist.
+if [ "$USE_SYSTEMD" -eq 1 ] && [ -n "${SSH_CONNECTION:-}" ] && [ "$ALLOW_SSH" -eq 0 ]; then
+    USE_SYSTEMD=0
+    say "WARNING: you are connected over SSH. Starting fwmanager now would block new SSH connections." \
+        "AVISO: está ligado por SSH. Arrancar o fwmanager agora bloquearia novas ligações SSH."
+    say "The service was installed but NOT started. Start it from the machine itself with:  sudo systemctl enable --now fwmanagerd" \
+        "O serviço ficou instalado mas NÃO arrancou. Arranque-o na própria máquina com:  sudo systemctl enable --now fwmanagerd"
+    say "(or run again with --allow-ssh-lockout if you know what you are doing)" \
+        "(ou volte a correr com --allow-ssh-lockout se souber o que está a fazer)"
 fi
 
 if [ "$USE_SYSTEMD" -eq 1 ]; then
     systemctl daemon-reload
     systemctl enable --now fwmanagerd.service
-    echo "fwmanagerd is running."
+    say "fwmanagerd is running." "O fwmanagerd está a funcionar."
 else
-    echo "Skipped systemd. Start the daemon yourself or run: systemctl enable --now fwmanagerd"
+    say "Skipped starting the service." "O serviço não foi arrancado."
 fi
-echo "Done."
+say "Done. Open fwmanager (from the menu or by typing: fwmanager): the setup continues in its window." \
+    "Concluído. Abra o fwmanager (no menu ou escrevendo: fwmanager): a configuração continua na janela."
