@@ -24,6 +24,13 @@ def describe(code: str) -> str:
         "no_pending": _("There is no change waiting for confirmation."),
         "access_denied": _("You are not allowed to control the firewall."),
         "daemon_unavailable": _("The fwmanager service is not running."),
+        "invalid_network": _("Invalid network (name or UUID)."),
+        "too_many_networks": _("Too many saved networks."),
+        "firewall_conflict": _(
+            "Another firewall (ufw or firewalld) is active. Disable it first, then try again."
+        ),
+        "state_corrupt": _("The saved firewall state was damaged; the safest profile was used."),
+        "store_error": _("Could not save the settings."),
         "internal_error": _("Internal error."),
     }
     return table.get(code, table["internal_error"])

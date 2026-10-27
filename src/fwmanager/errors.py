@@ -30,6 +30,14 @@ class PendingError(FwError):
     code = "apply_pending"
 
 
+class StoreError(FwError):
+    code = "store_error"
+
+
+class StoreCorrupt(StoreError):
+    code = "state_corrupt"
+
+
 class AccessDenied(FwError):
     code = "access_denied"
 
