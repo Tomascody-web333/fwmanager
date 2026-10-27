@@ -111,6 +111,7 @@ def test_no_method_accepts_rule_text(daemon):
     methods = {m.name for m in interface_info().methods}
     assert methods == {
         "ApplyProfile", "Confirm", "Rollback", "GetStatus", "ListProfiles",
+        "CheckProfile",
         "ListNetworks", "SetNetworkProfile", "RemoveNetwork", "GetNetworkProfile",
     }  # fmt: skip
 

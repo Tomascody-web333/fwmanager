@@ -59,6 +59,7 @@ def test_interface_is_fixed_command_set():
         "Rollback",
         "GetStatus",
         "ListProfiles",
+        "CheckProfile",
         "ListNetworks",
         "SetNetworkProfile",
         "RemoveNetwork",

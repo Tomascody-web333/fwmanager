@@ -68,9 +68,20 @@ def wait_until(cond, seconds=5):
     return False
 
 
+def _zero_counters(node):
+    """Packet/byte counters change with traffic; rules are what we compare."""
+    if isinstance(node, dict):
+        if set(node) == {"packets", "bytes"}:
+            return {"packets": 0, "bytes": 0}
+        return {k: _zero_counters(v) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_zero_counters(v) for v in node]
+    return node
+
+
 def snapshot_of(nft):
-    """Handle-free listing of the fwmanager table (None if absent), for before/after comparison."""
-    return snap.normalize(nft.list_table_json("inet", "fwmanager"))
+    """Handle- and counter-free listing of the fwmanager table (None if absent)."""
+    return _zero_counters(snap.normalize(nft.list_table_json("inet", "fwmanager")))
 
 
 def table_exists(nft):

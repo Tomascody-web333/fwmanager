@@ -33,3 +33,20 @@ Real install tests change the machine, so they are opt-in:
 
 At boot the daemon re-applies the last confirmed profile (no timer). With no saved state it
 applies `publico`. If ufw or firewalld is active it applies nothing and the UI warns.
+
+## Testing a policy before you trust it
+
+```sh
+fwmanager-cli test-policy casa --static   # analyse only, changes nothing
+fwmanager-cli test-policy casa            # analyse + live test (applied for seconds, then reverted)
+```
+
+Exit code: `0` safe, `2` safe with warnings, `3` unsafe (would break something), `1` could not run.
+
+- **Static** (daemon, read-only): `nft -c` dry run, plus checks that the rules still carry what a
+  normal machine needs (replies, loopback, DHCP/DHCPv6, IPv6 neighbour discovery and PMTU,
+  open output, untouched forwarding) and touch nothing but `inet fwmanager`. It also warns if
+  your current SSH session could not reconnect under the profile.
+- **Live** (client): measures gateway (IPv4/IPv6), DNS and loopback before and after applying the
+  profile, then always rolls back. Anything that worked before and fails after is reported as
+  broken. If the test is killed midway, the daemon reverts by itself after the timeout.
