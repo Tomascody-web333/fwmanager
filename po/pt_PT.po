@@ -936,7 +936,7 @@ msgid "{profile} was undone because it was not confirmed in time."
 msgstr "{profile} foi desfeito porque não foi confirmado a tempo."
 
 msgid "{profile} will be undone in {n} s unless you confirm."
-msgstr "{profile} será desfeito dentro de {n} s se não confirmar."
+msgstr "A mudança para {profile} será desfeita dentro de {n} s se não confirmar."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tentou aceder a {target}"
