@@ -16,6 +16,7 @@ dev = ["pytest", "ruff"]
 
 [project.scripts]
 fwmanager-cli = "fwmanager.cli.main:main"
+fwmanagerd = "fwmanager.daemon.main:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
