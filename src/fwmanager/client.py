@@ -67,6 +67,18 @@ class Client:
     def list_profiles(self) -> list[str]:
         return self._call("ListProfiles", reply="(as)")[0]
 
+    def list_networks(self) -> list[tuple[str, str, str]]:
+        return self._call("ListNetworks", reply="(a(sss))")[0]
+
+    def set_network_profile(self, ssid: str, uuid: str, profile: str) -> None:
+        self._call("SetNetworkProfile", GLib.Variant("(sss)", (ssid, uuid, profile)))
+
+    def remove_network(self, ssid: str, uuid: str) -> None:
+        self._call("RemoveNetwork", GLib.Variant("(ss)", (ssid, uuid)))
+
+    def get_network_profile(self, ssid: str, uuid: str) -> str:
+        return self._call("GetNetworkProfile", GLib.Variant("(ss)", (ssid, uuid)), "(s)")[0]
+
     def subscribe(self, callback: Callable[[str, tuple], None]) -> int:
         """Call ``callback(signal_name, args)`` for Applied/Confirmed/Reverted signals."""
 

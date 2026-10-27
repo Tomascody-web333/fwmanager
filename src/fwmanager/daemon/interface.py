@@ -22,6 +22,23 @@ INTROSPECTION_XML = f"""
     <method name="ListProfiles">
       <arg type="as" name="profiles" direction="out"/>
     </method>
+    <method name="ListNetworks">
+      <arg type="a(sss)" name="networks" direction="out"/>
+    </method>
+    <method name="SetNetworkProfile">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+      <arg type="s" name="profile" direction="in"/>
+    </method>
+    <method name="RemoveNetwork">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+    </method>
+    <method name="GetNetworkProfile">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+      <arg type="s" name="profile" direction="out"/>
+    </method>
     <signal name="Applied">
       <arg type="s" name="profile"/>
       <arg type="u" name="timeout"/>

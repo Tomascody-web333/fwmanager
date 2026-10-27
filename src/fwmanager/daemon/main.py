@@ -4,19 +4,25 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import signal
 import sys
+from pathlib import Path
 
 from gi.repository import Gio, GLib
 
+from fwmanager.core.conflicts import Conflicts, SystemdUnits
+from fwmanager.core.conflicts import detect as detect_conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.nft import Nft
 from fwmanager.core.profiles import DEFAULT_PROFILES
 from fwmanager.core.scheduler import GLibScheduler
 from fwmanager.core.services import load_catalog
+from fwmanager.core.store import Store
 from fwmanager.daemon import auth
 from fwmanager.daemon.interface import BUS_NAME
 from fwmanager.daemon.service import ControlService
+from fwmanager.daemon.startup import FAILED, startup_apply
 
 log = logging.getLogger("fwmanager")
 
@@ -33,6 +39,11 @@ def main(argv: list[str] | None = None) -> int:
         metavar="SECONDS",
         help="seconds to confirm a change before it is reverted",
     )
+    ap.add_argument(
+        "--state-dir",
+        default=os.environ.get("STATE_DIRECTORY", "/var/lib/fwmanager").split(":")[0],
+        help="directory for state.json and networks.json",
+    )
     args = ap.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s", stream=sys.stderr)
@@ -48,12 +59,27 @@ def main(argv: list[str] | None = None) -> int:
     else:
         conn = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
 
-    manager = FirewallManager(Nft(), load_catalog(), GLibScheduler())
+    nft = Nft()
+    manager = FirewallManager(nft, load_catalog(), GLibScheduler())
+    store = Store(Path(args.state_dir))
+    units = SystemdUnits(conn)
+
+    def detect() -> Conflicts:
+        return detect_conflicts(units.is_active, nft)
+
+    try:
+        outcome = startup_apply(manager, store, DEFAULT_PROFILES, detect)
+    except Exception:  # the daemon must still come up so the UI can explain the problem
+        log.exception("startup apply failed")
+        outcome = FAILED
     service = ControlService(
         manager,
         DEFAULT_PROFILES,
         lambda uid: auth.is_member(uid, args.group),
         args.confirm_timeout,
+        store=store,
+        detect_conflicts=detect,
+        startup_outcome=outcome,
     )
     service.register(conn)
 

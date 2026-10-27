@@ -10,11 +10,13 @@ from collections.abc import Callable
 
 from gi.repository import Gio, GLib
 
+from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.profiles import Profile
+from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
-from fwmanager.errors import AccessDenied, FwError, ValidationError, dbus_error_name
+from fwmanager.errors import AccessDenied, FwError, StoreError, ValidationError, dbus_error_name
 
 log = logging.getLogger("fwmanager")
 
@@ -26,7 +28,13 @@ class ControlService:
         profiles: dict[str, Profile],
         authorize: Callable[[int], bool],
         confirm_timeout: int = CONFIRM_TIMEOUT,
+        store: Store | None = None,
+        detect_conflicts: Callable[[], Conflicts] = Conflicts,
+        startup_outcome: str = "ok",
     ) -> None:
+        self._store = store
+        self._detect = detect_conflicts
+        self._startup = startup_outcome
         self._timeout = confirm_timeout
         self._mgr = manager
         self._profiles = profiles
@@ -78,6 +86,8 @@ class ControlService:
         """Run one command; returns the reply variant (or None for no output)."""
         if method == "ApplyProfile":
             name = validate_name(args[0], "profile")
+            if self._detect().blocking:
+                raise FwError("another firewall is active", code="firewall_conflict")
             profile = self._profiles.get(name)
             if profile is None:
                 raise ValidationError("unknown profile", code="unknown_profile")
@@ -87,6 +97,7 @@ class ControlService:
         if method == "Confirm":
             name = self._mgr.pending_profile()
             self._mgr.confirm()
+            self._persist_confirmed(name)
             self._emit("Confirmed", "(s)", (name,))
             return None
         if method == "Rollback":
@@ -94,6 +105,7 @@ class ControlService:
             return None
         if method == "GetStatus":
             st = self._mgr.status()
+            conflicts = self._detect()
             return GLib.Variant(
                 "(a{sv})",
                 (
@@ -102,12 +114,59 @@ class ControlService:
                         "active_profile": GLib.Variant("s", st["active_profile"] or ""),
                         "pending_profile": GLib.Variant("s", st["pending_profile"] or ""),
                         "seconds_left": GLib.Variant("u", st["seconds_left"]),
+                        "blocking_conflicts": GLib.Variant("as", list(conflicts.blocking)),
+                        "warnings": GLib.Variant("as", list(conflicts.warnings)),
+                        "startup": GLib.Variant("s", self._startup),
                     },
                 ),
             )
         if method == "ListProfiles":
             return GLib.Variant("(as)", (sorted(self._profiles),))
+        if method == "ListNetworks":
+            nets = self._load_networks()
+            return GLib.Variant("(a(sss))", ([(n.ssid, n.uuid, n.profile) for n in nets],))
+        if method == "SetNetworkProfile":
+            ssid, uuid, profile = args
+            if profile not in self._profiles:
+                validate_name(profile, "profile")
+                raise ValidationError("unknown profile", code="unknown_profile")
+            new = Network(ssid, uuid, profile)  # validates
+            nets = [n for n in self._load_networks() if not n.same_network(ssid, uuid)]
+            if len(nets) >= MAX_NETWORKS:
+                raise ValidationError("too many networks", code="too_many_networks")
+            self._save_networks([*nets, new])
+            return None
+        if method == "RemoveNetwork":
+            ssid, uuid = args
+            Network(ssid, uuid, next(iter(self._profiles)))  # validates ssid/uuid only
+            nets = self._load_networks()
+            self._save_networks([n for n in nets if not n.same_network(ssid, uuid)])
+            return None
+        if method == "GetNetworkProfile":
+            ssid, uuid = args
+            Network(ssid, uuid, next(iter(self._profiles)))
+            return GLib.Variant("(s)", (find_profile(self._load_networks(), ssid, uuid) or "",))
         raise ValidationError("unknown method", code="invalid_input")
+
+    def _require_store(self) -> Store:
+        if self._store is None:
+            raise StoreError("persistence is not configured")
+        return self._store
+
+    def _load_networks(self) -> list[Network]:
+        return self._require_store().load_networks()
+
+    def _save_networks(self, nets: list[Network]) -> None:
+        self._require_store().save_networks(nets)
+
+    def _persist_confirmed(self, name: str | None) -> None:
+        """Remember the confirmed profile; a disk problem must not undo the confirmation."""
+        if self._store is None or name is None:
+            return
+        try:
+            self._store.save_state(name)
+        except FwError:
+            log.exception("could not save the confirmed profile")
 
     def shutdown(self) -> None:
         """Never leave an unconfirmable change behind."""
