@@ -122,6 +122,22 @@ class Store:
         except OSError:
             pass
 
+    # -- did fwmanager turn ufw on? (so uninstall can turn it off again) ----------
+
+    _UFW_MARKER = "ufw-enabled-by-fwmanager"
+
+    def mark_ufw_enabled_by_us(self) -> None:
+        self._write(self._UFW_MARKER, {"enabled": True})
+
+    def ufw_enabled_by_us(self) -> bool:
+        try:
+            return (self._dir / self._UFW_MARKER).exists()
+        except OSError:
+            return False
+
+    def clear_ufw_marker(self) -> None:
+        (self._dir / self._UFW_MARKER).unlink(missing_ok=True)
+
     # -- network -> profile mapping ---------------------------------------------
 
     def load_networks(self) -> list[Network]:

@@ -10,7 +10,6 @@ import sys
 
 from fwmanager.client import Client
 from fwmanager.core.profiles import DEFAULT_PROFILES
-from fwmanager.core.rules import RenderOptions, render
 from fwmanager.core.services import load_catalog
 from fwmanager.errors import FwError, ValidationError
 from fwmanager.i18n import N_, _, set_language
@@ -27,9 +26,6 @@ def _parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("apply", help=_("apply a profile (auto-reverts unless confirmed)"))
     sp.add_argument("profile", help=_("profile name"))
     sp.add_argument("--yes", action="store_true", help=_("confirm immediately, no countdown"))
-
-    sp = sub.add_parser("render", help=_("print the rules for a profile without applying"))
-    sp.add_argument("profile", help=_("profile name"))
 
     sp = sub.add_parser("status", help=_("show the firewall state"))
     sp.add_argument("--json", action="store_true")
@@ -152,13 +148,6 @@ def _test_policy(client: Client, name: str, static_only: bool) -> int:
 
 
 def run(args: argparse.Namespace) -> int:
-    if args.cmd == "render":
-        profile = DEFAULT_PROFILES.get(args.profile)
-        if profile is None:
-            raise ValidationError("unknown profile", code="unknown_profile")
-        print(render(profile, load_catalog(), RenderOptions()), end="")
-        return EXIT_OK
-
     if args.cmd == "dispatch":
         from fwmanager.cli import dispatch
 

@@ -21,9 +21,6 @@ class PortRange:
     last: int
     proto: str
 
-    def nft(self) -> str:
-        return str(self.first) if self.first == self.last else f"{self.first}-{self.last}"
-
 
 @dataclass(frozen=True)
 class Service:

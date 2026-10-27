@@ -10,11 +10,11 @@ from collections.abc import Callable
 
 from gi.repository import Gio, GLib
 
+from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.policy_check import check_profile
 from fwmanager.core.profiles import Profile
-from fwmanager.core.rules import RenderOptions
 from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
@@ -112,7 +112,8 @@ class ControlService:
                 "(a{sv})",
                 (
                     {
-                        "table_present": GLib.Variant("b", st["table_present"]),
+                        "ufw_installed": GLib.Variant("b", st["ufw_installed"]),
+                        "firewall_active": GLib.Variant("b", st["firewall_active"]),
                         "active_profile": GLib.Variant("s", st["active_profile"] or ""),
                         "pending_profile": GLib.Variant("s", st["pending_profile"] or ""),
                         "seconds_left": GLib.Variant("u", st["seconds_left"]),
@@ -130,7 +131,7 @@ class ControlService:
             if profile is None:
                 raise ValidationError("unknown profile", code="unknown_profile")
             report = check_profile(
-                profile, self._mgr.catalog, RenderOptions(), self._mgr.nft, self._detect()
+                profile, self._mgr.backend, Options(), self._detect()
             )  # read-only: nothing is applied
             return GLib.Variant(
                 "(a(sss))", ([(f.severity, f.code, f.detail) for f in report.findings],)

@@ -21,6 +21,7 @@ FIRST_BOOT = "first_boot"
 CONFLICT = "firewall_conflict"
 STATE_CORRUPT = "state_corrupt"
 FAILED = "apply_failed"
+UFW_MISSING = "ufw_missing"
 
 
 def startup_apply(
@@ -31,10 +32,13 @@ def startup_apply(
 ) -> str:
     """Apply the saved profile without a confirmation timer (nobody is there to confirm).
 
-    - ufw/firewalld active: apply nothing.
+    - ufw missing, or firewalld active: apply nothing.
     - no saved state: apply ``publico`` (first boot).
     - damaged or unknown state: apply ``publico`` and log the error.
     """
+    if not manager.backend.ufw.installed():
+        log.error("ufw is not installed; not applying anything")
+        return UFW_MISSING
     conflicts = detect()
     if conflicts.blocking:
         log.error("another firewall is active (%s); not applying anything", conflicts.blocking)

@@ -1,9 +1,9 @@
 """Static policy check: will this profile keep a normal machine working?
 
-Nothing here changes the system. The generated script is parsed back and verified against
-the invariants a client machine needs (replies, loopback, IPv6 neighbour discovery, DHCP,
-unrestricted output), the nft parser/kernel is asked to dry-run it (``nft -c``), and the
-environment is inspected for known problems (other firewalls, SSH reconnect).
+Nothing here changes the system. It reads ufw's real configuration and the plan the backend
+would carry out, and checks that the essentials a client machine needs survive: replies,
+loopback, DHCP, IPv6 neighbour discovery, ICMP errors, open output. ``ufw --dry-run`` validates
+every rule we would add, and the environment is inspected for known problems.
 """
 
 from __future__ import annotations
@@ -12,26 +12,18 @@ import ipaddress
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
 
+from fwmanager.core import ufw_files
+from fwmanager.core.backend import Options, UfwBackend
 from fwmanager.core.conflicts import Conflicts
-from fwmanager.core.nft import Nft
 from fwmanager.core.profiles import Profile
-from fwmanager.core.rules import FAMILY, LAN_V4, LAN_V6, TABLE, RenderOptions, render
 from fwmanager.core.services import Service
+from fwmanager.core.ufw_rules import LAN_V4, LAN_V6, Rule
 from fwmanager.errors import FwError
 
 ERROR, WARNING, INFO = "error", "warning", "info"
-
-# Verbs that must never appear in a generated policy: it is a pure filter.
-FORBIDDEN_VERBS = ("flush", "reject", "masquerade", "dnat", "snat", "redirect", "tproxy", "queue",
-                   "jump", "goto")  # fmt: skip
-ALLOWED_TOP_LEVEL = (
-    f"add table {FAMILY} {TABLE}",
-    f"delete table {FAMILY} {TABLE}",
-    f"table {FAMILY} {TABLE} {{",
-)
-CHAIN_RE = re.compile(r"^chain (\w+) \{(?: comment \"[^\"]*\";)?$")
-HOOK_RE = re.compile(r"^type filter hook (\w+) priority filter; policy (\w+);$")
+MAX_LISTED = 12  # rules named in a finding before it says "and N more"
 
 
 @dataclass(frozen=True)
@@ -56,102 +48,91 @@ class Report:
         return "warnings" if WARNING in severities else "safe"
 
 
-def _parse_chains(script: str) -> dict[str, dict]:
-    chains: dict[str, dict] = {}
-    current = None
-    for raw in script.splitlines():
-        line = raw.strip()
-        if m := CHAIN_RE.match(line):
-            current = chains.setdefault(m.group(1), {"hook": None, "policy": None, "rules": []})
-        elif current is not None and (h := HOOK_RE.match(line)):
-            current["hook"], current["policy"] = h.group(1), h.group(2)
-        elif line == "}":
-            current = None
-        elif current is not None and line:
-            current["rules"].append(line)
-    return chains
+def _live_lines(text: str) -> list[str]:
+    """Rule lines with our own managed block removed (it is judged separately)."""
+    return [
+        ln.strip()
+        for ln in ufw_files.strip_block(text).splitlines()
+        if ln.strip() and not ln.lstrip().startswith("#")
+    ]
 
 
-def _has(rules: list[str], *needles: str, verdict: str = "accept") -> bool:
-    return any(all(n in r for n in needles) and r.endswith(verdict) for r in rules)
+def _has(lines: list[str], *needles: str, verdict: str = "ACCEPT") -> bool:
+    return any(all(n in ln for n in needles) and ln.endswith(f"-j {verdict}") for ln in lines)
 
 
-def analyze_script(script: str, expect_router: bool = False) -> Report:
-    """Check a generated script against the must-have invariants."""
+V4_ESSENTIALS = [
+    ("missing_loopback", ("-i lo",), "ACCEPT"),
+    ("missing_established", ("--ctstate RELATED,ESTABLISHED",), "ACCEPT"),
+    ("missing_invalid_drop", ("--ctstate INVALID",), "DROP"),
+    ("missing_dhcp4", ("--sport 67", "--dport 68"), "ACCEPT"),
+    ("missing_destination_unreachable", ("--icmp-type destination-unreachable",), "ACCEPT"),
+    ("missing_time_exceeded", ("--icmp-type time-exceeded",), "ACCEPT"),
+]
+V6_ESSENTIALS = [
+    ("missing_loopback", ("-i lo",), "ACCEPT"),
+    ("missing_established", ("--ctstate RELATED,ESTABLISHED",), "ACCEPT"),
+    ("missing_invalid_drop", ("--ctstate INVALID",), "DROP"),
+    ("missing_dhcp6", ("--sport 547", "--dport 546"), "ACCEPT"),
+    ("missing_nd_neighbor_solicit", ("neighbor-solicitation", "--hl-eq 255"), "ACCEPT"),
+    ("missing_nd_neighbor_advert", ("neighbor-advertisement", "--hl-eq 255"), "ACCEPT"),
+    ("missing_nd_router_advert", ("router-advertisement", "--hl-eq 255"), "ACCEPT"),
+    ("missing_packet_too_big", ("--icmpv6-type packet-too-big",), "ACCEPT"),
+    ("missing_destination_unreachable", ("--icmpv6-type destination-unreachable",), "ACCEPT"),
+    ("missing_time_exceeded", ("--icmpv6-type time-exceeded",), "ACCEPT"),
+]
+
+BLOCK_LINE_RE = re.compile(
+    r"^-A ufw6?-before-input "
+    r"(-p icmp --icmp-type echo-request"
+    r"|-p icmpv6 --icmpv6-type echo-request"
+    r"|-p udp -d (224\.0\.0\.251|ff02::fb) --dport 5353) -j DROP$"
+)
+
+
+def analyze_config(config_dir: Path, ipv6: bool) -> Report:
+    """Check ufw's own before-rules (plus our block) against the must-have list."""
     report = Report()
-    lines = [ln.strip() for ln in script.splitlines() if ln.strip()]
-
-    # 1. Only our own table may be touched, and only with filter statements.
-    for ln in lines:
-        top_level = not ln.startswith(("chain", "type", "comment", "}", "ct ", "iif", "ip", "icmp",
-                                       "udp", "tcp", "limit", "counter"))  # fmt: skip
-        if top_level and ln not in ALLOWED_TOP_LEVEL:
-            report.add(ERROR, "foreign_statement", f"unexpected top-level statement: {ln[:60]}")
-        words = re.findall(r"[a-z0-9]+", ln.lower())
-        for verb in FORBIDDEN_VERBS:
-            if verb in words:
-                report.add(ERROR, "forbidden_verb", f"statement uses '{verb}'")
-    if not all(s in lines for s in ALLOWED_TOP_LEVEL):
-        report.add(ERROR, "not_atomic", "the add/delete/recreate sequence is incomplete")
-
-    chains = _parse_chains(script)
-    inp, fwd, out = chains.get("input"), chains.get("forward"), chains.get("output")
-
-    # 2. Output must stay open; forward must not break Docker/VMs unless router mode is on.
-    if out is None or out["hook"] != "output":
-        report.add(ERROR, "no_output_chain", "output chain missing")
-    elif out["policy"] != "accept" or any(r.endswith(("drop", "reject")) for r in out["rules"]):
-        report.add(ERROR, "output_blocked", "outgoing traffic would be blocked")
-    if fwd is not None:
-        if fwd["policy"] == "drop" and not expect_router:
-            report.add(ERROR, "forward_blocked", "forwarding is dropped outside router mode")
-        elif fwd["policy"] == "drop":
-            report.add(INFO, "router_mode", "router mode: Docker/VM/containers may be affected")
-
-    # 3. The input chain must carry every mandatory exception.
-    if inp is None or inp["hook"] != "input":
-        report.add(ERROR, "no_input_chain", "input chain missing")
-        return report
-    if inp["policy"] != "drop":
-        report.add(WARNING, "input_not_dropping", "input policy is not drop: no protection")
-    rules = inp["rules"]
-    required = [
-        ("missing_established", "replies to your own traffic (established/related) not allowed",
-         _has(rules, "ct state established,related")),
-        ("missing_invalid_drop", "invalid packets are not dropped",
-         _has(rules, "ct state invalid", verdict="drop")),
-        ("missing_loopback", "loopback traffic not allowed", _has(rules, 'iif "lo"')),
-        ("missing_dhcp4", "DHCPv4 replies not allowed (renewing the lease would fail)",
-         _has(rules, "udp sport 67", "udp dport 68")),
-        ("missing_dhcp6", "DHCPv6 replies not allowed",
-         _has(rules, "udp sport 547", "udp dport 546")),
-    ]  # fmt: skip
-    for name in ("nd-neighbor-solicit", "nd-neighbor-advert", "nd-router-advert"):
-        required.append((
-            f"missing_{name.replace('-', '_')}",
-            f"IPv6 {name} not allowed (IPv6 would stop working)",
-            _has(rules, "ip6 hoplimit 255", "icmpv6 type", name),
-        ))  # fmt: skip
-    for name in ("packet-too-big", "destination-unreachable", "time-exceeded", "parameter-problem"):
-        required.append((
-            f"missing_{name.replace('-', '_')}",
-            f"ICMPv6 {name} not allowed (IPv6 connections would hang)",
-            _has(rules, "icmpv6 type", name),
-        ))  # fmt: skip
-    for code, detail, ok in required:
-        if not ok:
-            report.add(ERROR, code, detail)
+    files = [("before.rules", ufw_files.ANCHOR_V4, V4_ESSENTIALS)]
+    if ipv6:
+        files.append(("before6.rules", ufw_files.ANCHOR_V6, V6_ESSENTIALS))
+    seen: set[str] = set()
+    for name, anchor, essentials in files:
+        try:
+            text = (config_dir / name).read_text()
+        except OSError:
+            report.add(ERROR, "ufw_unsupported", f"cannot read {name}")
+            continue
+        lines = _live_lines(text)
+        if anchor not in lines:
+            report.add(ERROR, "ufw_unsupported", f"{name} was edited: the safe anchor is missing")
+        for code, needles, verdict in essentials:
+            if not _has(lines, *needles, verdict=verdict) and code not in seen:
+                seen.add(code)
+                report.add(ERROR, code, f"{name} lacks the rule for {code[8:]}")
+        # Our own block may only drop ping and mDNS; anything else is not ours.
+        match = ufw_files.BLOCK_RE.search(text)
+        if match:
+            body = match.group(0).splitlines()[1:-1]
+            for ln in body:
+                if ln and not ln.startswith("#") and not BLOCK_LINE_RE.match(ln):
+                    report.add(
+                        ERROR, "foreign_statement", f"unexpected line in managed block: {ln[:60]}"
+                    )
     return report
 
 
-def _nft_dry_run(script: str, nft: Nft, report: Report) -> None:
-    try:
-        nft.run(["-c", "-f", "-"], stdin=script)
-    except FwError as exc:
-        report.add(ERROR, "nft_rejects_rules", f"nft refused the rules: {exc.message[:120]}")
+def _describe(rule: Rule) -> str:
+    return f"{rule.proto} {','.join(rule.ports)} from {rule.source}"
 
 
-def exposure_findings(profile: Profile, catalog: dict[str, Service]) -> list[Finding]:
+def _listed(rules: list[Rule]) -> str:
+    names = [_describe(r) for r in rules[:MAX_LISTED]]
+    more = len(rules) - MAX_LISTED
+    return "; ".join(names) + (f" (and {more} more)" if more > 0 else "")
+
+
+def exposure_findings(profile: Profile) -> list[Finding]:
     out = []
     if profile.services and profile.source.kind == "any":
         detail = "services are reachable from any network, not only the local one"
@@ -197,27 +178,49 @@ def ssh_findings(
 
 def check_profile(
     profile: Profile,
-    catalog: dict[str, Service],
-    options: RenderOptions | None = None,
-    nft: Nft | None = None,
+    backend: UfwBackend,
+    options: Options | None = None,
     conflicts: Conflicts | None = None,
 ) -> Report:
-    options = options or RenderOptions()
+    options = options or Options()
     report = Report()
-    try:
-        script = render(profile, catalog, options)
-    except FwError as exc:
-        report.add(ERROR, exc.code, exc.message)
+    ufw = backend.ufw
+    if not ufw.installed():
+        report.add(ERROR, "ufw_missing", "ufw is not installed")
         return report
-    report.findings += analyze_script(script, expect_router=options.router_mode).findings
-    if nft is not None:
-        _nft_dry_run(script, nft, report)
-    report.findings += exposure_findings(profile, catalog)
     if conflicts is not None:
         if conflicts.blocking:
             names = ", ".join(conflicts.blocking)
-            report.add(ERROR, "firewall_conflict", f"another firewall is active: {names}")
+            report.add(ERROR, "firewall_conflict", f"another firewall manager is active: {names}")
         for name in conflicts.warnings:
             severity = WARNING if options.router_mode else INFO
             report.add(severity, f"{name}_present", f"{name} has its own rules (left untouched)")
+
+    try:
+        plan = backend.plan(profile)
+    except FwError as exc:
+        report.add(ERROR, exc.code, exc.message)
+        return report
+
+    ipv6 = ufw.ipv6_enabled()
+    report.findings += analyze_config(ufw.config_dir, ipv6).findings
+    for rule in plan.add:  # ufw's own parser validates each rule we would create
+        try:
+            ufw.run(["--dry-run", *rule.add_argv(profile.name)])
+        except FwError as exc:
+            report.add(ERROR, "ufw_rejects_rules", f"ufw refused a rule: {exc.message[:100]}")
+            break
+    if plan.add:
+        report.add(INFO, "will_add", _listed(plan.add))
+    if plan.remove:
+        report.add(INFO, "will_remove", _listed(plan.remove))
+    if not ufw.is_active():
+        report.add(INFO, "ufw_will_be_enabled", "ufw is off and will be turned on")
+    if not ipv6:
+        report.add(WARNING, "ipv6_not_filtered", "IPv6 is not enabled in ufw: it is not filtered")
+    if backend.listing().unparsed_managed:
+        report.add(WARNING, "unparsed_rules", "some fwmanager rules have an unexpected shape")
+    if options.router_mode:
+        report.add(INFO, "router_mode", "router mode: Docker/VM/containers may be affected")
+    report.findings += exposure_findings(profile)
     return report

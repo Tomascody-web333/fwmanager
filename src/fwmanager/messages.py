@@ -18,8 +18,11 @@ def describe(code: str) -> str:
         "invalid_option": _("Invalid option."),
         "unknown_service": _("Unknown service."),
         "unknown_profile": _("Unknown profile."),
-        "nft_failed": _("The firewall rejected the rules."),
-        "nft_unavailable": _("The nft program could not be run."),
+        "ufw_failed": _("ufw rejected the change."),
+        "ufw_missing": _(
+            "ufw is not installed. Install it first (for example: sudo apt install ufw)."
+        ),
+        "ufw_unsupported": _("ufw's configuration was edited in a way fwmanager cannot work with."),
         "apply_pending": _("Another change is waiting for confirmation."),
         "no_pending": _("There is no change waiting for confirmation."),
         "access_denied": _("You are not allowed to control the firewall."),
@@ -27,7 +30,7 @@ def describe(code: str) -> str:
         "invalid_network": _("Invalid network (name or UUID)."),
         "too_many_networks": _("Too many saved networks."),
         "firewall_conflict": _(
-            "Another firewall (ufw or firewalld) is active. Disable it first, then try again."
+            "Another firewall manager (firewalld) is active. Disable it first, then try again."
         ),
         "state_corrupt": _("The saved firewall state was damaged; the safest profile was used."),
         "store_error": _("Could not save the settings."),
@@ -37,15 +40,16 @@ def describe(code: str) -> str:
 
 
 FINDINGS = {
-    "foreign_statement": N_("The rules touch something other than the fwmanager table."),
-    "forbidden_verb": N_("The rules use a statement that is not allowed."),
-    "not_atomic": N_("The rules would not be applied atomically."),
-    "no_output_chain": N_("The outgoing-traffic chain is missing."),
-    "output_blocked": N_("Outgoing traffic would be blocked."),
-    "forward_blocked": N_("Forwarding would break Docker and virtual machines."),
+    "foreign_statement": N_("The rules touch something fwmanager does not manage."),
+    "ufw_unsupported": N_("ufw's configuration was edited in a way fwmanager cannot work with."),
+    "ufw_missing": N_("ufw is not installed."),
+    "ufw_rejects_rules": N_("ufw refused one of the rules."),
+    "ufw_will_be_enabled": N_("ufw is off and will be turned on."),
+    "ipv6_not_filtered": N_("IPv6 is not enabled in ufw, so it is not filtered."),
+    "unparsed_rules": N_("Some fwmanager rules have an unexpected shape."),
+    "will_add": N_("Rules that will be added."),
+    "will_remove": N_("Rules that will be removed."),
     "router_mode": N_("Router mode may interfere with Docker, VMs and containers."),
-    "no_input_chain": N_("The incoming-traffic chain is missing."),
-    "input_not_dropping": N_("Incoming traffic is not blocked by default."),
     "missing_established": N_("Replies to your own connections would be blocked."),
     "missing_invalid_drop": N_("Invalid packets would not be dropped."),
     "missing_loopback": N_("Local (loopback) traffic would be blocked."),
@@ -55,14 +59,12 @@ FINDINGS = {
     "missing_nd_neighbor_advert": N_("IPv6 would stop working (neighbour discovery)."),
     "missing_nd_router_advert": N_("IPv6 would stop working (router advertisements)."),
     "missing_packet_too_big": N_("IPv6 connections could hang (packet-too-big)."),
-    "missing_destination_unreachable": N_("IPv6 connections could hang (unreachable)."),
-    "missing_time_exceeded": N_("Some IPv6 diagnostics would fail."),
-    "missing_parameter_problem": N_("Some IPv6 errors would go unnoticed."),
-    "nft_rejects_rules": N_("The firewall engine rejected these rules."),
+    "missing_destination_unreachable": N_("Connections could hang (destination unreachable)."),
+    "missing_time_exceeded": N_("Some diagnostics would fail (time exceeded)."),
     "exposed_to_any": N_("Allowed services are reachable from any network."),
     "ssh_ok": N_("Your SSH session and new SSH connections stay allowed."),
     "ssh_reconnect_blocked": N_("Your SSH session survives, but you could not open a new one."),
-    "firewall_conflict": N_("Another firewall (ufw or firewalld) is active."),
+    "firewall_conflict": N_("Another firewall manager (firewalld) is active."),
     "docker_present": N_("Docker manages its own rules (they are left untouched)."),
     "libvirt_present": N_("libvirt manages its own rules (they are left untouched)."),
 }

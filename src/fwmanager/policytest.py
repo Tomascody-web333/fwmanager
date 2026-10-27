@@ -165,7 +165,7 @@ def run_live_test(client, name: str, probes: Callable[[], list[Probe]] = run_pro
         raise FwError("another change is waiting for confirmation", code="apply_pending")
 
     result = LiveResult(before=probes())
-    original = (status["active_profile"], status["table_present"])
+    original = (status["active_profile"], status["firewall_active"])
     client.apply_profile(name)  # starts the daemon's own safety timer
     try:
         result.after = probes()
@@ -174,7 +174,7 @@ def run_live_test(client, name: str, probes: Callable[[], list[Probe]] = run_pro
             client.rollback()
         finally:
             now = client.status()
-            result.restored = (now["active_profile"], now["table_present"]) == original and not (
+            result.restored = (now["active_profile"], now["firewall_active"]) == original and not (
                 now["pending_profile"]
             )
     return result

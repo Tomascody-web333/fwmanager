@@ -11,14 +11,15 @@ from pathlib import Path
 
 from gi.repository import Gio, GLib
 
+from fwmanager.core.backend import UfwBackend
 from fwmanager.core.conflicts import Conflicts, SystemdUnits
 from fwmanager.core.conflicts import detect as detect_conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
-from fwmanager.core.nft import Nft
 from fwmanager.core.profiles import DEFAULT_PROFILES
 from fwmanager.core.scheduler import GLibScheduler
 from fwmanager.core.services import load_catalog
 from fwmanager.core.store import Store
+from fwmanager.core.ufw_runner import Ufw
 from fwmanager.daemon import auth
 from fwmanager.daemon.interface import BUS_NAME
 from fwmanager.daemon.service import ControlService
@@ -39,6 +40,9 @@ def main(argv: list[str] | None = None) -> int:
         metavar="SECONDS",
         help="seconds to confirm a change before it is reverted",
     )
+    ap.add_argument("--ufw-rootdir", type=Path, help="relocated ufw tree (tests only)")
+    ap.add_argument("--cleanup", action="store_true", help="remove fwmanager's ufw changes, exit")
+    ap.add_argument("--ufw-binary", default="ufw", help="ufw executable (tests only)")
     ap.add_argument(
         "--state-dir",
         default=os.environ.get("STATE_DIRECTORY", "/var/lib/fwmanager").split(":")[0],
@@ -47,6 +51,13 @@ def main(argv: list[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s", stream=sys.stderr)
+
+    if args.cleanup:
+        from fwmanager.daemon.cleanup import cleanup
+
+        backend = UfwBackend(Ufw(args.ufw_binary, rootdir=args.ufw_rootdir), load_catalog())
+        print(cleanup(backend, Store(Path(args.state_dir))))
+        return 0
 
     if args.bus_address:
         conn = Gio.DBusConnection.new_for_address_sync(
@@ -59,13 +70,13 @@ def main(argv: list[str] | None = None) -> int:
     else:
         conn = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
 
-    nft = Nft()
-    manager = FirewallManager(nft, load_catalog(), GLibScheduler())
+    backend = UfwBackend(Ufw(args.ufw_binary, rootdir=args.ufw_rootdir), load_catalog())
     store = Store(Path(args.state_dir))
+    manager = FirewallManager(backend, GLibScheduler(), on_ufw_enabled=store.mark_ufw_enabled_by_us)
     units = SystemdUnits(conn)
 
     def detect() -> Conflicts:
-        return detect_conflicts(units.is_active, nft)
+        return detect_conflicts(units.is_active)
 
     try:
         outcome = startup_apply(manager, store, DEFAULT_PROFILES, detect)

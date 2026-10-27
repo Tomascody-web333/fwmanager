@@ -1,4 +1,4 @@
-"""Strict validators. Nothing from a client reaches nftables without passing here."""
+"""Strict validators. Nothing from a client reaches ufw without passing here."""
 
 from __future__ import annotations
 

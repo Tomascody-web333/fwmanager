@@ -49,7 +49,8 @@ class Client:
                 code = "access_denied"
             else:
                 code = "daemon_unavailable"
-            raise FwError(Gio.DBusError.strip_remote_error(exc) or exc.message, code=code) from exc
+            Gio.DBusError.strip_remote_error(exc)  # edits exc.message in place, returns a bool
+            raise FwError(exc.message, code=code) from exc
         return result.unpack() if result is not None else None
 
     def apply_profile(self, name: str) -> None:
