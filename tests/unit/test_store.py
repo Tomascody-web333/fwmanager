@@ -143,7 +143,7 @@ def test_same_ssid_different_uuid_does_not_match():
     assert find_profile(nets, "Cafe", other) is None  # a different connection
 
 
-# -- edited profiles and options ---------------------------------------------
+# -- edited profiles and options ---
 
 
 def test_profiles_roundtrip(store):
@@ -199,7 +199,7 @@ def test_corrupt_options(store):
         store.load_options()
 
 
-# -- plain-language rules -------------------------------------------------------
+# -- plain-language rules ---
 
 
 def test_rules_roundtrip_keeps_lists(store):

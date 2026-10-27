@@ -37,7 +37,11 @@ def env(gtk, daemon, tmp_path):
     app.register()
     changes = {"lang": [], "notifications": []}
     win = MainWindow(
-        app, controller, us.UserSettings(), changes["lang"].append, changes["notifications"].append
+        app,
+        controller,
+        us.UserSettings(setup_stage="done"),
+        changes["lang"].append,
+        changes["notifications"].append,
     )
     win.present()
     pump(0.3)
@@ -140,7 +144,7 @@ def test_narrow_window_moves_the_switcher_to_the_bottom(env):
     assert env.win.bottom_bar.get_reveal() and not env.win.switcher.get_visible()
 
 
-# -- the test-policy dialog ---------------------------------------------------------------------
+# -- the test-policy dialog ---
 
 
 def outcome(verdict, findings=(), live=None):
@@ -225,7 +229,7 @@ def test_test_button_opens_the_dialog(env, monkeypatch):
     assert ("check_profile", ("trabalho",)) in env.daemon.calls
 
 
-# -- profile editor --------------------------------------------------------------------------------
+# -- profile editor ---
 
 
 def editor(env, name="trabalho"):
@@ -284,7 +288,7 @@ def test_profiles_page_marks_edited_profiles(env):
     assert "edited" in texts(env.win.profiles)
 
 
-# -- networks, log, settings -----------------------------------------------------------------------
+# -- networks, log, settings ---
 
 
 def test_networks_page_lists_and_changes_remembered_networks(env):

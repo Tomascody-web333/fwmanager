@@ -94,7 +94,7 @@ def test_loopback_probe_unavailable_is_not_applicable(monkeypatch):
     assert pt.probe_loopback(socket.AF_INET6, "::1", "loopback_v6").ok is None
 
 
-# -- live test orchestration -------------------------------------------------
+# -- live test orchestration ---
 
 
 class FakeClient:

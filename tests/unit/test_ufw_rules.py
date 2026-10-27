@@ -79,7 +79,7 @@ def test_profile_name_in_comment_is_validated():
         r.add_argv('x"; ufw disable')
 
 
-# -- parsing `ufw show added` ------------------------------------------------
+# -- parsing `ufw show added` ---
 
 LISTING = """Added user rules (see 'ufw status' for running firewall):
 ufw allow from 192.168.0.0/16 to any port 22,139 proto tcp comment 'fwmanager:casa'

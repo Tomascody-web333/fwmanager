@@ -105,7 +105,7 @@ def test_cleanup_command_line(backend, mgr, store, tmp_path, capsys):
     assert not backend.is_active()
 
 
-# -- the user's own ufw default policies ---------------------------------------------------
+# -- the user's own ufw default policies ---
 
 
 @pytest.fixture

@@ -24,7 +24,7 @@ def english():
     set_language(None)
 
 
-# -- the texts ---------------------------------------------------------------------------
+# -- the texts ---
 
 
 @pytest.mark.parametrize(
@@ -78,7 +78,7 @@ def test_preview_lines():
     ]
 
 
-# -- the page and the editor ---------------------------------------------------------------------
+# -- the page and the editor ---
 
 
 @pytest.fixture
@@ -92,7 +92,9 @@ def env(gtk, tmp_path):
     controller = Controller(lambda: FakeClient(daemon), run=run_sync, user="ana")
     app = Adw.Application(application_id="org.fwmanager.TestRules")
     app.register()
-    win = MainWindow(app, controller, us.UserSettings(), lambda c: None, lambda b: None)
+    win = MainWindow(
+        app, controller, us.UserSettings(setup_stage="done"), lambda c: None, lambda b: None
+    )
     win.present()
     pump(0.3)
 
@@ -265,7 +267,7 @@ def test_daemon_errors_while_saving_keep_the_dialog_open(env):
     assert d.saved == [] and d.save_btn.get_sensitive()
 
 
-# -- Portuguese: whole sentences, correct contractions -------------------------------------------
+# -- Portuguese: whole sentences, correct contractions ---
 
 
 @pytest.fixture

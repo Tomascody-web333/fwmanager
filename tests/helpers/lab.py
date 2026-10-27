@@ -90,7 +90,7 @@ class Lab:
             self._ip(prefix, "link", "set", dev, "up")
             self._ip(prefix, "link", "set", "lo", "up")
 
-    # -- things to do on the hosts ------------------------------------------------------------
+    # -- things to do on the hosts ---
 
     def listen_on_a(self, port):
         p = subprocess.Popen([*self.a, sys.executable, "-c", LISTENER, str(port)],

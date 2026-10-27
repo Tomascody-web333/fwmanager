@@ -16,7 +16,7 @@ def english():
     set_language(None)
 
 
-# -- user settings -----------------------------------------------------------------------
+# -- user settings ---
 
 
 def test_settings_defaults_when_missing(tmp_path):
@@ -57,7 +57,7 @@ def test_with_lang_rejects_unknown():
         us.UserSettings().with_lang("fr")
 
 
-# -- which screen -------------------------------------------------------------------------
+# -- which screen ---
 
 OKAY = {"ufw_installed": True, "blocking_conflicts": [], "firewall_active": True}
 
@@ -105,7 +105,7 @@ def test_problem_text_is_translated(tmp_path):
     assert state.problem_for(state.UFW_MISSING, None, "x").command == "sudo apt install ufw"
 
 
-# -- text helpers -----------------------------------------------------------------------
+# -- text helpers ---
 
 
 def test_profile_titles_and_unknown_names():
@@ -139,7 +139,7 @@ def test_countdown_text():
     assert state.countdown_text("casa", 12) == "Home will be undone in 12 s unless you confirm."
 
 
-# -- worker --------------------------------------------------------------------------------
+# -- worker ---
 
 
 def pump_until(cond, seconds=3):
@@ -167,7 +167,7 @@ def test_run_async_reports_errors_and_never_dies_silently():
     assert sorted(e.code for e in got) == ["internal_error", "no_pending"]
 
 
-# -- controller -------------------------------------------------------------------------------
+# -- controller ---
 
 
 class FakeClient:

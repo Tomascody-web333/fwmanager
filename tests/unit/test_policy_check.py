@@ -12,7 +12,7 @@ def codes(report, severity=None):
     return {f.code for f in report.findings if severity in (None, f.severity)}
 
 
-# -- ufw's own configuration must keep the essentials ---------------------------
+# -- ufw's own configuration must keep the essentials ---
 
 
 def test_pristine_ufw_config_has_everything_a_client_needs(ufw_root):
@@ -86,7 +86,7 @@ def test_a_block_cannot_hide_a_missing_essential(ufw_root):
     assert "missing_loopback" in codes(pc.analyze_config(d, ipv6=False), pc.ERROR)
 
 
-# -- exposure and SSH ----------------------------------------------------------
+# -- exposure and SSH ---
 
 
 def test_exposure_warning():

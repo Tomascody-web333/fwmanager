@@ -17,7 +17,7 @@ def compiled(*rules):
     return rb.compile_profiles(DEFAULT_PROFILES, list(rules))
 
 
-# -- the five templates ---------------------------------------------------------------------
+# -- the five templates ---
 
 
 def test_allow_only_in_adds_there_and_removes_elsewhere():
@@ -88,7 +88,7 @@ def test_compiled_profiles_stay_valid():
     assert translate(out["casa"], CAT)  # translates to ufw rules without error
 
 
-# -- validation ---------------------------------------------------------------------------------
+# -- validation ---
 
 
 @pytest.mark.parametrize(
@@ -148,7 +148,7 @@ def test_next_rule_id_fills_gaps():
     assert rb.next_rule_id([rb.Rule("r1", rb.HIDE), rb.Rule("r3", rb.HIDE)]) == "r2"
 
 
-# -- preview diff ------------------------------------------------------------------------------
+# -- preview diff ---
 
 
 def test_diff_lists_only_what_changes():

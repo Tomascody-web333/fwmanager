@@ -29,13 +29,13 @@ def make_app(gtk, localedir, tmp_path):
 
     apps = []
 
-    def make(user_lang=None, system_lang=None):
+    def make(user_lang=None, system_lang=None, stage="done"):
         daemon = FakeDaemon()
         settings = tmp_path / f"s{len(apps)}" / "settings.toml"
         system = tmp_path / f"c{len(apps)}.toml"
-        if user_lang:
-            settings.parent.mkdir(parents=True)
-            settings.write_text(f'lang = "{user_lang}"\n')
+        settings.parent.mkdir(parents=True, exist_ok=True)
+        lang_line = f'lang = "{user_lang}"\n' if user_lang else ""
+        settings.write_text(lang_line + f'setup_stage = "{stage}"\n')
         if system_lang:
             system.write_text(f'lang = "{system_lang}"\n')
         app = FwApplication(

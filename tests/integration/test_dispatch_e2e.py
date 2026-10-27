@@ -140,7 +140,7 @@ def test_real_icmp_echo_over_loopback(env, netns_prefix):
     assert r.stdout.split() == ["True", "False"], r.stderr
 
 
-# -- the NetworkManager shim script ------------------------------------------
+# -- the NetworkManager shim script ---
 
 
 @pytest.fixture

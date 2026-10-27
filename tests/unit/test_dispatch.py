@@ -10,7 +10,7 @@ GW4 = d.Gateway("192.168.1.1", 4)
 GW6 = d.Gateway("fe80::1", 6)
 
 
-# -- environment parsing -----------------------------------------------------
+# -- environment parsing ---
 
 
 def test_parse_context_valid():
@@ -42,7 +42,7 @@ def test_unusable_gateways_dropped(gw):
     assert d.parse_context("eth0", {"IP4_GATEWAY": gw}).gateways == ()
 
 
-# -- nmcli -------------------------------------------------------------------
+# -- nmcli ---
 
 
 def fake_run(stdout="", rc=0, exc=None):
@@ -70,7 +70,7 @@ def test_lookup_ssid(with_nmcli):
     assert d.lookup_ssid("", fake_run("Casa")) == ""
 
 
-# -- ICMP packet -------------------------------------------------------------
+# -- ICMP packet ---
 
 
 def test_checksum_and_packet():
@@ -80,7 +80,7 @@ def test_checksum_and_packet():
     assert d.checksum(b"\x01") == 0xFEFF  # odd length
 
 
-# -- decision flow -----------------------------------------------------------
+# -- decision flow ---
 
 
 class FakeClient:
