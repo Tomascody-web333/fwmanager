@@ -33,6 +33,8 @@ fi
 LIB="$ROOT/usr/local/lib/fwmanager"
 CREATED_GROUP=0
 [ -f "$LIB/.created-group" ] && CREATED_GROUP=1
+ROOT_ADDED=0
+[ -f "$LIB/.root-in-group" ] && ROOT_ADDED=1
 
 if [ "$USE_SYSTEMD" -eq 1 ]; then
     systemctl disable --now fwmanagerd.service 2>/dev/null || true
@@ -54,6 +56,10 @@ rm -rf "$ROOT/etc/fwmanager" "$ROOT/var/lib/fwmanager"
 for mo in "$ROOT"/usr/share/locale/*/LC_MESSAGES/fwmanager.mo; do
     [ -f "$mo" ] && rm -f "$mo"
 done
+
+if [ "$STAGED" -eq 0 ] && [ "$ROOT_ADDED" -eq 1 ] && [ "$CREATED_GROUP" -eq 0 ]; then
+    gpasswd -d root "$GROUP" >/dev/null 2>&1 || true
+fi
 
 if [ "$STAGED" -eq 0 ] && [ "$CREATED_GROUP" -eq 1 ]; then
     groupdel "$GROUP" 2>/dev/null || echo "Could not remove group $GROUP (still in use?)."

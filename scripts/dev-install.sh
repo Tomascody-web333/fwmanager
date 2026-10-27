@@ -116,6 +116,12 @@ if [ "$STAGED" -eq 0 ]; then
         usermod -aG "$GROUP" "$USER_NAME"
         echo "Added $USER_NAME to $GROUP (log out and back in for it to apply)."
     fi
+    # The NetworkManager dispatcher runs as root and talks to the daemon like any other client.
+    if ! id -nG root | tr ' ' '\n' | grep -qx "$GROUP"; then
+        usermod -aG "$GROUP" root
+        touch "$LIB/.root-in-group"
+        echo "Added root to $GROUP (needed by the NetworkManager dispatcher)."
+    fi
 fi
 
 if [ "$USE_SYSTEMD" -eq 1 ]; then
