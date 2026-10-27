@@ -38,13 +38,31 @@ Requirements: Python 3.11+, PyGObject, **ufw**, systemd and D-Bus. NetworkManage
 
 Run `fwmanager` as your normal user (it refuses to run as root). Pages: **Home** (state, quick
 profile switching, a "waiting for confirmation" card with a countdown), **Profiles** (edit what
-each profile opens), **Networks** (which profile for which Wi-Fi), **Log** (what the service did
+each profile opens), **Networks** (which profile for which Wi-Fi), **Rules** (plain-language sentences, below), **Log** (what the service did
 and recent blocked attempts) and **Settings**. Every profile has a **Test** button that runs the
-policy test below before you apply anything. Ctrl+1..5 jump between pages, and the page switcher
+policy test below before you apply anything. Ctrl+1..6 jump between pages, and the page switcher
 moves to the bottom on narrow windows.
 
 If the service is not running, your account is not in the `fwmanager` group, ufw is missing or
 firewalld is active, the window explains it in your language and shows the command that fixes it.
+
+## Plain-language rules
+
+Instead of ports and sources, the **Rules** page offers fixed sentences with blanks:
+
+- *Allow [service] only in [profiles]*
+- *Block everything coming in, except [services], in [profiles]*
+- *Only accept connections from the local network / [networks] in [profiles]*
+- *Hide this computer (no ping, no mDNS) in [profiles]*
+- *Close [service] in every profile*
+
+There is no free-text parsing: every blank is a list (services from the catalogue, profile names,
+a scope) or a validated network address. Before saving you see the finished sentence and a preview
+of what changes in each profile. Rules sit on top of the built-in profiles and your own edits,
+are applied in order (a later rule wins over an earlier one), and are compiled into ordinary
+profiles, so the safety checks, the 30 s confirmation and the policy test work on them unchanged.
+**Saving a rule never touches the firewall**; it takes effect when you apply the profile, which is
+also the moment to press **Test**. Rules are stored in `/var/lib/fwmanager/rules.json`.
 
 ## Languages
 

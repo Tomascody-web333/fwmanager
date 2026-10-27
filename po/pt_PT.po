@@ -11,6 +11,9 @@ msgstr "Uma rede em que confia, como o seu próprio Wi-Fi."
 msgid "A shared network at work or school."
 msgstr "Uma rede partilhada no trabalho ou na escola."
 
+msgid "Accept connections from"
+msgstr "Aceitar ligações de"
+
 msgid "Active"
 msgstr "Ativo"
 
@@ -26,8 +29,20 @@ msgstr "Adicionar"
 msgid "Add a network by name"
 msgstr "Adicionar uma rede pelo nome"
 
+msgid "Add a rule"
+msgstr "Adicionar uma regra"
+
 msgid "Add your user to the fwmanager group, then log out and back in. No password is asked after that."
 msgstr "Adicione o seu utilizador ao grupo fwmanager e depois termine a sessão e volte a iniciá-la. Depois disso, não é pedida nenhuma palavra-passe."
+
+msgid "Added a rule"
+msgstr "Adicionou uma regra"
+
+msgid "Allow a service only in some profiles"
+msgstr "Permitir um serviço apenas em alguns perfis"
+
+msgid "Allow {service} only in: {profiles}"
+msgstr "Permitir {service} apenas em: {profiles}"
 
 msgid "Allowed networks (e.g. 192.168.1.0/24)"
 msgstr "Redes permitidas (por exemplo, 192.168.1.0/24)"
@@ -74,6 +89,15 @@ msgstr "PARTIDO por este perfil: {p}"
 msgid "Be visible on the local network (mDNS)"
 msgstr "Ser visível na rede local (mDNS)"
 
+msgid "Block everything coming in, except some services"
+msgstr "Bloquear tudo o que entra, exceto alguns serviços"
+
+msgid "Block everything coming in, except {services}, in: {profiles}"
+msgstr "Bloquear tudo o que entra, exceto {services}, em: {profiles}"
+
+msgid "Block everything coming in, in: {profiles}"
+msgstr "Bloquear tudo o que entra, em: {profiles}"
+
 msgid "Blocked connection attempts"
 msgstr "Tentativas de ligação bloqueadas"
 
@@ -95,11 +119,20 @@ msgstr "Verificar que este perfil não vai cortar a sua ligação"
 msgid "Checking…"
 msgstr "A verificar…"
 
+msgid "Choose the details below."
+msgstr "Escolha os detalhes abaixo."
+
 msgid "Choose what each profile lets in. Select one to edit it."
 msgstr "Escolha o que cada perfil deixa entrar. Selecione um para o editar."
 
 msgid "Close"
 msgstr "Fechar"
+
+msgid "Close a service in every profile"
+msgstr "Fechar um serviço em todos os perfis"
+
+msgid "Close {service} in every profile"
+msgstr "Fechar {service} em todos os perfis"
 
 msgid "Command copied"
 msgstr "Comando copiado"
@@ -139,6 +172,9 @@ msgstr "Personalizado"
 
 msgid "DNS resolver answers"
 msgstr "O servidor DNS responde"
+
+msgid "Details"
+msgstr "Detalhes"
 
 msgid "Do not apply this profile as it is."
 msgstr "Não aplique este perfil tal como está."
@@ -184,6 +220,12 @@ msgstr "Esquecer esta rede"
 
 msgid "General"
 msgstr "Geral"
+
+msgid "Hide this computer (no ping, no mDNS)"
+msgstr "Esconder este computador (sem ping nem mDNS)"
+
+msgid "Hide this computer (no ping, no mDNS) in: {profiles}"
+msgstr "Esconder este computador (sem ping nem mDNS) em: {profiles}"
 
 msgid "High"
 msgstr "Alto"
@@ -284,6 +326,9 @@ msgstr "NFS"
 msgid "Networks"
 msgstr "Redes"
 
+msgid "Networks (e.g. 192.168.1.0/24)"
+msgstr "Redes (por exemplo, 192.168.1.0/24)"
+
 msgid "Networks you have not chosen a profile for use the Public profile."
 msgstr "As redes para as quais não escolheu um perfil usam o perfil Público."
 
@@ -293,6 +338,9 @@ msgstr "Não foram encontradas tentativas bloqueadas."
 msgid "No problems found in the rules."
 msgstr "Não foram encontrados problemas nas regras."
 
+msgid "No rules yet."
+msgstr "Ainda não há regras."
+
 msgid "None"
 msgstr "Nenhum"
 
@@ -301,6 +349,12 @@ msgstr "Sem ligação"
 
 msgid "Note"
 msgstr "Nota"
+
+msgid "Nothing changes: the profiles already work like this."
+msgstr "Nada muda: os perfis já funcionam assim."
+
+msgid "Nothing is changed on your computer until you apply a profile."
+msgstr "Nada é alterado no seu computador até aplicar um perfil."
 
 msgid "Nothing was found that could cut your connection."
 msgstr "Não foi encontrado nada que possa cortar a sua ligação."
@@ -314,6 +368,15 @@ msgstr "Notificações"
 msgid "Off"
 msgstr "Desligado"
 
+msgid "Only accept connections from some networks"
+msgstr "Aceitar ligações apenas de algumas redes"
+
+msgid "Only accept connections from the local network in: {profiles}"
+msgstr "Aceitar ligações apenas da rede local em: {profiles}"
+
+msgid "Only accept connections from {networks} in: {profiles}"
+msgstr "Aceitar ligações apenas de {networks} em: {profiles}"
+
 msgid "Options"
 msgstr "Opções"
 
@@ -322,6 +385,9 @@ msgstr "Verificação da política de {p}:"
 
 msgid "Press Enter to confirm, r to revert ({n}s left)... "
 msgstr "Prima Enter para confirmar, r para reverter (faltam {n} s)... "
+
+msgid "Press “Add a rule” to start from a ready-made sentence."
+msgstr "Prima «Adicionar uma regra» para começar a partir de uma frase já feita."
 
 msgid "Previous rules restored."
 msgstr "Regras anteriores repostas."
@@ -374,6 +440,12 @@ msgstr "Ambiente de trabalho remoto (RDP)"
 msgid "Remote desktop (VNC)"
 msgstr "Ambiente de trabalho remoto (VNC)"
 
+msgid "Remove this rule"
+msgstr "Remover esta regra"
+
+msgid "Removed a rule"
+msgstr "Removeu uma regra"
+
 msgid "Renewing the IPv4 address (DHCP) would fail."
 msgstr "A renovação do endereço IPv4 (DHCP) falharia."
 
@@ -394,6 +466,21 @@ msgstr "Modo router"
 
 msgid "Router mode may interfere with Docker, VMs and containers."
 msgstr "O modo router pode interferir com o Docker, as máquinas virtuais e os contentores."
+
+msgid "Rule removed."
+msgstr "Regra removida."
+
+msgid "Rule saved. Apply a profile to use it."
+msgstr "Regra guardada. Aplique um perfil para a usar."
+
+msgid "Rule type"
+msgstr "Tipo de regra"
+
+msgid "Rules"
+msgstr "Regras"
+
+msgid "Rules adjust what the profiles allow. Nothing changes on your computer until you apply a profile."
+msgstr "As regras ajustam o que os perfis permitem. Nada muda no seu computador até aplicar um perfil."
 
 msgid "Rules that will be added."
 msgstr "Regras que vão ser adicionadas."
@@ -418,6 +505,12 @@ msgstr "Seguro, com avisos"
 
 msgid "Save"
 msgstr "Guardar"
+
+msgid "Save rule"
+msgstr "Guardar regra"
+
+msgid "Service"
+msgstr "Serviço"
 
 msgid "Service started"
 msgstr "Serviço iniciado"
@@ -470,11 +563,17 @@ msgstr "O serviço da firewall não está a funcionar"
 msgid "The fwmanager service is not running."
 msgstr "O serviço do fwmanager não está a funcionar."
 
+msgid "The local network"
+msgstr "A rede local"
+
 msgid "The most recent ones, newest first. Turn logging on in Settings."
 msgstr "As mais recentes, primeiro as mais novas. Ative o registo nas Definições."
 
 msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
 msgstr "O perfil é aplicado durante alguns segundos enquanto a sua ligação é medida e depois tudo volta ao que era."
+
+msgid "The rule"
+msgstr "A regra"
 
 msgid "The rules touch something fwmanager does not manage."
 msgstr "As regras tocam em algo que o fwmanager não gere."
@@ -493,6 +592,9 @@ msgstr "Não há nenhuma alteração à espera de confirmação."
 
 msgid "This network"
 msgstr "Esta rede"
+
+msgid "This rule cannot be saved: check the details."
+msgstr "Esta regra não pode ser guardada: verifique os detalhes."
 
 msgid "Too many saved networks."
 msgstr "Demasiadas redes guardadas."
@@ -536,11 +638,17 @@ msgstr "Aviso"
 msgid "Web server (HTTP/HTTPS)"
 msgstr "Servidor web (HTTP/HTTPS)"
 
+msgid "What do you want to do?"
+msgstr "O que quer fazer?"
+
 msgid "What fwmanager did"
 msgstr "O que o fwmanager fez"
 
 msgid "What was checked"
 msgstr "O que foi verificado"
+
+msgid "What will happen"
+msgstr "O que vai acontecer"
 
 msgid "Who can connect"
 msgstr "Quem se pode ligar"
@@ -578,11 +686,20 @@ msgstr "A sua ligação, antes e depois"
 msgid "Your own settings."
 msgstr "As suas próprias definições."
 
+msgid "Your rules"
+msgstr "As suas regras"
+
+msgid "accepts connections from anywhere"
+msgstr "aceita ligações de qualquer lado"
+
 msgid "apply a profile (auto-reverts unless confirmed)"
 msgstr "aplicar um perfil (reverte sozinho se não for confirmado)"
 
 msgid "check that a profile will not break the machine"
 msgstr "verificar que um perfil não vai partir o computador"
+
+msgid "closes {services}"
+msgstr "fecha {services}"
 
 msgid "confirm immediately, no countdown"
 msgstr "confirmar de imediato, sem contagem decrescente"
@@ -626,8 +743,17 @@ msgstr "não aplicável"
 msgid "nothing is open"
 msgstr "nada está aberto"
 
+msgid "only accepts connections from the local network"
+msgstr "só aceita ligações da rede local"
+
+msgid "only accepts connections from {networks}"
+msgstr "só aceita ligações de {networks}"
+
 msgid "only analyse the rules, change nothing"
 msgstr "só analisar as regras, sem alterar nada"
+
+msgid "opens {services}"
+msgstr "abre {services}"
 
 msgid "profile name"
 msgstr "nome do perfil"
@@ -635,8 +761,23 @@ msgstr "nome do perfil"
 msgid "revert the pending change"
 msgstr "reverter a alteração pendente"
 
+msgid "rules apply"
+msgstr "com regras"
+
 msgid "show the firewall state"
 msgstr "mostrar o estado da firewall"
+
+msgid "starts answering ping"
+msgstr "passa a responder a ping"
+
+msgid "stops answering ping"
+msgstr "deixa de responder a ping"
+
+msgid "turns mDNS off"
+msgstr "desliga o mDNS"
+
+msgid "turns mDNS on"
+msgstr "liga o mDNS"
 
 msgid "ufw is not installed"
 msgstr "O ufw não está instalado"

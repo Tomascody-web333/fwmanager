@@ -37,9 +37,14 @@ def toast_error(widget: Gtk.Widget, error: FwError) -> None:
 
 
 def button(label: str, *, suggested: bool = False, flat: bool = False, icon: str | None = None):
-    btn = Gtk.Button(label=label, valign=Gtk.Align.CENTER)
-    if icon:
+    """A button: text, icon, or both side by side (never silently dropping the text)."""
+    btn = Gtk.Button(valign=Gtk.Align.CENTER)
+    if icon and label:
+        btn.set_child(Adw.ButtonContent(label=label, icon_name=icon))
+    elif icon:
         btn.set_icon_name(icon)
+    else:
+        btn.set_label(label)
     if suggested:
         btn.add_css_class("suggested-action")
     if flat:

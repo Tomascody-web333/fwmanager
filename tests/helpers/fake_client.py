@@ -1,5 +1,8 @@
 """An in-memory stand-in for the daemon client, with the same calls and the same shapes."""
 
+from fwmanager.core import rulebook
+from fwmanager.core.profiles import Profile, Source
+from fwmanager.core.services import load_builtin
 from fwmanager.errors import FwError
 
 SERVICES = [
@@ -38,6 +41,7 @@ class FakeDaemon:
         self.events = [(1_790_000_000, "startup", "ok"), (1_790_000_050, "confirmed", "casa")]
         self.blocked = [("2026-10-27T17:32:01", "wlan0", "203.0.113.9", "192.168.1.5", "TCP", "22")]
         self.findings = []
+        self.rules = []  # (id, template, params)
         self.calls = []
         self.error = None  # set to an FwError to make every call fail
         self.signal_cb = None
@@ -73,9 +77,24 @@ class FakeClient:
         self._call("list_profiles")
         return sorted(self.d.profiles)
 
+    def _objects(self):
+        return {
+            n: Profile(n, tuple(p["services"]), p["ping"], p["mdns"],
+                       Source(p["source_kind"], tuple(p["cidrs"])))
+            for n, p in self.d.profiles.items()
+        }  # fmt: skip
+
+    def _effective(self, extra=()):
+        rules = [rulebook.Rule(i, t, dict(p)) for i, t, p in self.d.rules] + list(extra)
+        return rulebook.compile_profiles(self._objects(), rules)
+
     def get_profile(self, name):
         self._call("get_profile", name)
-        return dict(self.d.profiles[name])
+        base, eff = dict(self.d.profiles[name]), self._effective()[name]
+        base.update(services=list(eff.services), ping=eff.ping, mdns=eff.mdns,
+                    source_kind=eff.source.kind, cidrs=list(eff.source.cidrs))  # fmt: skip
+        base["affected_by_rules"] = self._objects()[name] != eff
+        return base
 
     def list_services(self):
         self._call("list_services")
@@ -137,3 +156,39 @@ class FakeClient:
     def get_recent_blocked(self, limit=50):
         self._call("get_recent_blocked", limit)
         return list(self.d.blocked)
+
+    def list_rules(self):
+        self._call("list_rules")
+        return [(i, t, dict(p)) for i, t, p in self.d.rules]
+
+    def _validated(self, template, params):
+        return rulebook.validate_params(
+            template, params, load_builtin(), frozenset(self.d.profiles)
+        )
+
+    def preview_rule(self, template, params):
+        self._call("preview_rule", template, params)
+        clean = self._validated(template, params)
+        before = self._effective()
+        after = self._effective([rulebook.Rule("preview", template, clean)])
+
+        def tri(v):
+            return "" if v is None else ("on" if v else "off")
+
+        return [
+            (c.name, list(c.opened), list(c.closed), tri(c.ping), tri(c.mdns),
+             c.source.kind if c.source else "", list(c.source.cidrs) if c.source else [])
+            for c in rulebook.diff_profiles(before, after)
+        ]  # fmt: skip
+
+    def add_rule(self, template, params):
+        self._call("add_rule", template, params)
+        clean = self._validated(template, params)
+        rid = rulebook.next_rule_id([rulebook.Rule(i, t, {}) for i, t, _ in self.d.rules])
+        self.d.rules.append((rid, template, {k: v if isinstance(v, str) else list(v)
+                                             for k, v in clean.items()}))  # fmt: skip
+        return rid
+
+    def remove_rule(self, rule_id):
+        self._call("remove_rule", rule_id)
+        self.d.rules = [r for r in self.d.rules if r[0] != rule_id]

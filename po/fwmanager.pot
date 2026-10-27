@@ -11,6 +11,9 @@ msgstr ""
 msgid "A shared network at work or school."
 msgstr ""
 
+msgid "Accept connections from"
+msgstr ""
+
 msgid "Active"
 msgstr ""
 
@@ -26,7 +29,19 @@ msgstr ""
 msgid "Add a network by name"
 msgstr ""
 
+msgid "Add a rule"
+msgstr ""
+
 msgid "Add your user to the fwmanager group, then log out and back in. No password is asked after that."
+msgstr ""
+
+msgid "Added a rule"
+msgstr ""
+
+msgid "Allow a service only in some profiles"
+msgstr ""
+
+msgid "Allow {service} only in: {profiles}"
 msgstr ""
 
 msgid "Allowed networks (e.g. 192.168.1.0/24)"
@@ -74,6 +89,15 @@ msgstr ""
 msgid "Be visible on the local network (mDNS)"
 msgstr ""
 
+msgid "Block everything coming in, except some services"
+msgstr ""
+
+msgid "Block everything coming in, except {services}, in: {profiles}"
+msgstr ""
+
+msgid "Block everything coming in, in: {profiles}"
+msgstr ""
+
 msgid "Blocked connection attempts"
 msgstr ""
 
@@ -95,10 +119,19 @@ msgstr ""
 msgid "Checking…"
 msgstr ""
 
+msgid "Choose the details below."
+msgstr ""
+
 msgid "Choose what each profile lets in. Select one to edit it."
 msgstr ""
 
 msgid "Close"
+msgstr ""
+
+msgid "Close a service in every profile"
+msgstr ""
+
+msgid "Close {service} in every profile"
 msgstr ""
 
 msgid "Command copied"
@@ -138,6 +171,9 @@ msgid "Custom"
 msgstr ""
 
 msgid "DNS resolver answers"
+msgstr ""
+
+msgid "Details"
 msgstr ""
 
 msgid "Do not apply this profile as it is."
@@ -183,6 +219,12 @@ msgid "Forget this network"
 msgstr ""
 
 msgid "General"
+msgstr ""
+
+msgid "Hide this computer (no ping, no mDNS)"
+msgstr ""
+
+msgid "Hide this computer (no ping, no mDNS) in: {profiles}"
 msgstr ""
 
 msgid "High"
@@ -284,6 +326,9 @@ msgstr ""
 msgid "Networks"
 msgstr ""
 
+msgid "Networks (e.g. 192.168.1.0/24)"
+msgstr ""
+
 msgid "Networks you have not chosen a profile for use the Public profile."
 msgstr ""
 
@@ -293,6 +338,9 @@ msgstr ""
 msgid "No problems found in the rules."
 msgstr ""
 
+msgid "No rules yet."
+msgstr ""
+
 msgid "None"
 msgstr ""
 
@@ -300,6 +348,12 @@ msgid "Not connected"
 msgstr ""
 
 msgid "Note"
+msgstr ""
+
+msgid "Nothing changes: the profiles already work like this."
+msgstr ""
+
+msgid "Nothing is changed on your computer until you apply a profile."
 msgstr ""
 
 msgid "Nothing was found that could cut your connection."
@@ -314,6 +368,15 @@ msgstr ""
 msgid "Off"
 msgstr ""
 
+msgid "Only accept connections from some networks"
+msgstr ""
+
+msgid "Only accept connections from the local network in: {profiles}"
+msgstr ""
+
+msgid "Only accept connections from {networks} in: {profiles}"
+msgstr ""
+
 msgid "Options"
 msgstr ""
 
@@ -321,6 +384,9 @@ msgid "Policy check for {p}:"
 msgstr ""
 
 msgid "Press Enter to confirm, r to revert ({n}s left)... "
+msgstr ""
+
+msgid "Press “Add a rule” to start from a ready-made sentence."
 msgstr ""
 
 msgid "Previous rules restored."
@@ -374,6 +440,12 @@ msgstr ""
 msgid "Remote desktop (VNC)"
 msgstr ""
 
+msgid "Remove this rule"
+msgstr ""
+
+msgid "Removed a rule"
+msgstr ""
+
 msgid "Renewing the IPv4 address (DHCP) would fail."
 msgstr ""
 
@@ -393,6 +465,21 @@ msgid "Router mode"
 msgstr ""
 
 msgid "Router mode may interfere with Docker, VMs and containers."
+msgstr ""
+
+msgid "Rule removed."
+msgstr ""
+
+msgid "Rule saved. Apply a profile to use it."
+msgstr ""
+
+msgid "Rule type"
+msgstr ""
+
+msgid "Rules"
+msgstr ""
+
+msgid "Rules adjust what the profiles allow. Nothing changes on your computer until you apply a profile."
 msgstr ""
 
 msgid "Rules that will be added."
@@ -417,6 +504,12 @@ msgid "Safe, with warnings"
 msgstr ""
 
 msgid "Save"
+msgstr ""
+
+msgid "Save rule"
+msgstr ""
+
+msgid "Service"
 msgstr ""
 
 msgid "Service started"
@@ -470,10 +563,16 @@ msgstr ""
 msgid "The fwmanager service is not running."
 msgstr ""
 
+msgid "The local network"
+msgstr ""
+
 msgid "The most recent ones, newest first. Turn logging on in Settings."
 msgstr ""
 
 msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
+msgstr ""
+
+msgid "The rule"
 msgstr ""
 
 msgid "The rules touch something fwmanager does not manage."
@@ -492,6 +591,9 @@ msgid "There is no change waiting for confirmation."
 msgstr ""
 
 msgid "This network"
+msgstr ""
+
+msgid "This rule cannot be saved: check the details."
 msgstr ""
 
 msgid "Too many saved networks."
@@ -536,10 +638,16 @@ msgstr ""
 msgid "Web server (HTTP/HTTPS)"
 msgstr ""
 
+msgid "What do you want to do?"
+msgstr ""
+
 msgid "What fwmanager did"
 msgstr ""
 
 msgid "What was checked"
+msgstr ""
+
+msgid "What will happen"
 msgstr ""
 
 msgid "Who can connect"
@@ -578,10 +686,19 @@ msgstr ""
 msgid "Your own settings."
 msgstr ""
 
+msgid "Your rules"
+msgstr ""
+
+msgid "accepts connections from anywhere"
+msgstr ""
+
 msgid "apply a profile (auto-reverts unless confirmed)"
 msgstr ""
 
 msgid "check that a profile will not break the machine"
+msgstr ""
+
+msgid "closes {services}"
 msgstr ""
 
 msgid "confirm immediately, no countdown"
@@ -626,7 +743,16 @@ msgstr ""
 msgid "nothing is open"
 msgstr ""
 
+msgid "only accepts connections from the local network"
+msgstr ""
+
+msgid "only accepts connections from {networks}"
+msgstr ""
+
 msgid "only analyse the rules, change nothing"
+msgstr ""
+
+msgid "opens {services}"
 msgstr ""
 
 msgid "profile name"
@@ -635,7 +761,22 @@ msgstr ""
 msgid "revert the pending change"
 msgstr ""
 
+msgid "rules apply"
+msgstr ""
+
 msgid "show the firewall state"
+msgstr ""
+
+msgid "starts answering ping"
+msgstr ""
+
+msgid "stops answering ping"
+msgstr ""
+
+msgid "turns mDNS off"
+msgstr ""
+
+msgid "turns mDNS on"
 msgstr ""
 
 msgid "ufw is not installed"

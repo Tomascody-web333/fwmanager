@@ -16,6 +16,7 @@ from fwmanager.ui.pages.log import LogPage  # noqa: E402
 from fwmanager.ui.pages.networks import NetworksPage  # noqa: E402
 from fwmanager.ui.pages.problem import ProblemPage  # noqa: E402
 from fwmanager.ui.pages.profiles import ProfilesPage  # noqa: E402
+from fwmanager.ui.pages.rules import RulesPage  # noqa: E402
 from fwmanager.ui.pages.settings import SettingsPage  # noqa: E402
 
 
@@ -24,7 +25,7 @@ class MainWindow(Adw.ApplicationWindow):
         super().__init__(
             application=app,
             title="fwmanager",
-            default_width=780,
+            default_width=900,
             default_height=680,
             width_request=360,
             height_request=400,
@@ -37,12 +38,14 @@ class MainWindow(Adw.ApplicationWindow):
         self.home = HomePage(controller, self.open_policy_test)
         self.profiles = ProfilesPage(controller, self.home.load)
         self.networks = NetworksPage(controller)
+        self.rules = RulesPage(controller, self._refresh_profiles)
         self.log = LogPage(controller)
         self.settings = SettingsPage(controller, user_settings, on_language, on_notifications)
         self.pages = [
             ("home", self.home),
             ("profiles", self.profiles),
             ("networks", self.networks),
+            ("rules", self.rules),
             ("log", self.log),
             ("settings", self.settings),
         ]
@@ -78,7 +81,7 @@ class MainWindow(Adw.ApplicationWindow):
         self.set_content(self.toasts)
 
         # Narrow windows: the page switcher moves to the bottom.
-        bp = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 560sp"))
+        bp = Adw.Breakpoint.new(Adw.BreakpointCondition.parse("max-width: 780sp"))
         bp.add_setter(self.bottom_bar, "reveal", True)
         bp.add_setter(self.switcher, "visible", False)
         self.add_breakpoint(bp)
@@ -116,11 +119,17 @@ class MainWindow(Adw.ApplicationWindow):
             self._was_ok = True
             self.home.load()
             self.profiles.load()
+            self.rules.load()
             self.settings.load()
             self.networks.load()
             self.controller.current_network(self._network_loaded)
         self.home.on_snapshot(snap)
         self._update_banner(snap.status or {})
+
+    def _refresh_profiles(self) -> None:
+        """Rules change what profiles allow: redraw the pages that describe them."""
+        self.home.load()
+        self.profiles.load()
 
     def _network_loaded(self, net, _error) -> None:
         self.home.set_current_network(net)
@@ -143,6 +152,8 @@ class MainWindow(Adw.ApplicationWindow):
             self.log.load()
         elif name == "networks":
             self.networks.load()
+        elif name == "rules":
+            self.rules.load()
 
     def _on_close(self, *_args) -> bool:
         self.controller.listeners.remove(self.on_snapshot)

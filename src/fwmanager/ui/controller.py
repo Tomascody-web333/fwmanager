@@ -167,6 +167,18 @@ class Controller:
     def reset_profile(self, name: str, done: Done | None = None) -> None:
         self._op(lambda c: c.reset_profile(name), done)
 
+    def rules(self, done: Done) -> None:
+        self._op(lambda c: c.list_rules(), done)
+
+    def preview_rule(self, template: str, params: dict, done: Done) -> None:
+        self._op(lambda c: c.preview_rule(template, params), done)
+
+    def add_rule(self, template: str, params: dict, done: Done | None = None) -> None:
+        self._op(lambda c: c.add_rule(template, params), done)
+
+    def remove_rule(self, rule_id: str, done: Done | None = None) -> None:
+        self._op(lambda c: c.remove_rule(rule_id), done)
+
     def networks(self, done: Done) -> None:
         self._op(lambda c: c.list_networks(), done)
 

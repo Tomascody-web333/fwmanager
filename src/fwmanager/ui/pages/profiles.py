@@ -43,10 +43,14 @@ class ProfilesPage(Adw.PreferencesPage):
                 subtitle_lines=3,
                 activatable=True,
             )
-            if details["customized"]:
-                tag = Gtk.Label(label=_("edited"), valign=Gtk.Align.CENTER)
-                tag.add_css_class("dim-label")
-                row.add_suffix(tag)
+            for flag, text in (
+                (details["customized"], _("edited")),
+                (details.get("affected_by_rules"), _("rules apply")),
+            ):
+                if flag:
+                    tag = Gtk.Label(label=text, valign=Gtk.Align.CENTER)
+                    tag.add_css_class("dim-label")
+                    row.add_suffix(tag)
             row.add_suffix(Gtk.Image.new_from_icon_name("go-next-symbolic"))
             row.connect("activated", lambda _r, n=name: self._edit(n))
             self.group.add(row)

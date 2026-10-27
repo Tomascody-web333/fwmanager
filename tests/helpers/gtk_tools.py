@@ -6,7 +6,8 @@ def texts(widget):
     import gi
 
     gi.require_version("Gtk", "4.0")
-    from gi.repository import Gtk
+    gi.require_version("Adw", "1")
+    from gi.repository import Adw, Gtk
 
     found = []
 
@@ -16,6 +17,8 @@ def texts(widget):
         if isinstance(w, Gtk.Label) and w.get_visible():
             found.append(w.get_text())
         if isinstance(w, Gtk.Button) and w.get_label():
+            found.append(w.get_label())
+        if isinstance(w, Adw.ButtonContent) and w.get_label():
             found.append(w.get_label())
         for prop in ("title", "subtitle"):
             if w.find_property(prop) is not None and w.get_visible():

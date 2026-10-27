@@ -11,7 +11,7 @@ from gi.repository import Adw, Gtk  # noqa: E402
 from fwmanager.errors import FwError  # noqa: E402
 from fwmanager.i18n import N_, _  # noqa: E402
 from fwmanager.messages import describe_finding, describe_probe  # noqa: E402
-from fwmanager.ui import state  # noqa: E402
+from fwmanager.ui import rule_text, state  # noqa: E402
 from fwmanager.ui.common import (  # noqa: E402
     SEVERITY_ICON,
     button,
@@ -258,3 +258,184 @@ class PolicyTestDialog(Adw.Dialog):
             return  # an unsafe profile is never applied from here, whatever was clicked
         self.close()
         self._on_apply(self._profile)
+
+
+class RuleEditor(Adw.Dialog):
+    """Build a rule from a template: pick it, fill the blanks, read the sentence and the preview."""
+
+    def __init__(self, controller, profile_names: list[str], titles: dict[str, str], on_saved):
+        super().__init__(title=_("Add a rule"), content_width=520, content_height=820)
+        self._c, self._names, self._titles = controller, profile_names, titles
+        self._on_saved = on_saved
+        self._templates = list(rule_text.rb.TEMPLATE_ORDER)
+        self._service_ids = [
+            sid for sid, _t in sorted(titles.items(), key=lambda kv: _(kv[1]).lower())
+        ]
+        self._serial = 0  # answers to older previews are ignored
+        self._detail_rows: list = []
+        self._preview_rows: list = []
+        self.params: dict | None = None
+
+        page = Adw.PreferencesPage()
+        pick = Adw.PreferencesGroup(title=_("What do you want to do?"))
+        self.template = Adw.ComboRow(
+            title=_("Rule type"),
+            model=Gtk.StringList.new([rule_text.template_title(t) for t in self._templates]),
+        )
+        pick.add(self.template)
+        page.add(pick)
+
+        # The finished sentence and its preview come first, so they are on screen while the
+        # blanks below are filled in (they update live).
+        self.sentence_group = Adw.PreferencesGroup(title=_("The rule"))
+        self.sentence_row = Adw.ActionRow(title=_("Choose the details below."), title_lines=4)
+        self.sentence_group.add(self.sentence_row)
+        page.add(self.sentence_group)
+
+        self.preview = Adw.PreferencesGroup(
+            title=_("What will happen"),
+            description=_("Nothing is changed on your computer until you apply a profile."),
+        )
+        page.add(self.preview)
+
+        self.details = Adw.PreferencesGroup(title=_("Details"))
+        page.add(self.details)
+
+        header = Adw.HeaderBar(show_end_title_buttons=False, show_start_title_buttons=False)
+        cancel = button(_("Cancel"))
+        cancel.connect("clicked", lambda *_: self.close())
+        self.save_btn = button(_("Save rule"), suggested=True)
+        self.save_btn.set_sensitive(False)
+        self.save_btn.connect("clicked", self._save)
+        header.pack_start(cancel)
+        header.pack_end(self.save_btn)
+        view = Adw.ToolbarView()
+        view.add_top_bar(header)
+        view.set_content(page)
+        self.set_child(view)
+
+        self.template.connect("notify::selected", lambda *_: self._build_details())
+        self._build_details()
+
+    # -- the blanks, per template ---------------------------------------------------------------
+
+    @property
+    def current(self) -> str:
+        return self._templates[self.template.get_selected()]
+
+    def _build_details(self) -> None:
+        clear(self.details, self._detail_rows)
+        self.service_combo = self.service_switches = self.profile_switches = None
+        self.scope = self.cidrs = None
+        kind = self.current
+        rb = rule_text.rb
+        if kind in (rb.ALLOW_ONLY_IN, rb.CLOSE_SERVICE):
+            self.service_combo = Adw.ComboRow(
+                title=_("Service"),
+                model=Gtk.StringList.new([_(self._titles[s]) for s in self._service_ids]),
+            )
+            self._add(self.service_combo)
+        if kind == rb.BLOCK_ALL_EXCEPT:
+            self.service_switches = {}
+            for sid in self._service_ids:
+                row = Adw.SwitchRow(title=_(self._titles[sid]))
+                row.connect("notify::active", lambda *_: self._changed())
+                self.service_switches[sid] = row
+                self._add(row)
+        if kind == rb.RESTRICT_SOURCE:
+            self.scope = Adw.ComboRow(
+                title=_("Accept connections from"),
+                model=Gtk.StringList.new([_("The local network"), _("Specific networks")]),
+            )
+            self.cidrs = Adw.EntryRow(title=_("Networks (e.g. 192.168.1.0/24)"), visible=False)
+            self.cidrs.connect("changed", lambda *_: self._changed())
+            self.scope.connect("notify::selected", lambda *_: self._scope_changed())
+            self._add(self.scope)
+            self._add(self.cidrs)
+        if kind != rb.CLOSE_SERVICE:
+            self.profile_switches = {}
+            for name in self._names:
+                row = Adw.SwitchRow(title=state.profile_title(name), active=name == "casa")
+                row.connect("notify::active", lambda *_: self._changed())
+                self.profile_switches[name] = row
+                self._add(row)
+        if self.service_combo is not None:
+            self.service_combo.connect("notify::selected", lambda *_: self._changed())
+        self._changed()
+
+    def _add(self, row) -> None:
+        self.details.add(row)
+        self._detail_rows.append(row)
+
+    def _scope_changed(self) -> None:
+        self.cidrs.set_visible(self.scope.get_selected() == 1)
+        self._changed()
+
+    # -- reading the blanks, then the sentence and the preview -------------------------------------
+
+    def _collect(self) -> dict | None:
+        """The parameters as the daemon wants them, or ``None`` while something is missing."""
+        rb = rule_text.rb
+        params: dict = {}
+        if self.service_combo is not None:
+            params["service"] = self._service_ids[self.service_combo.get_selected()]
+        if self.service_switches is not None:
+            params["services"] = [s for s, r in self.service_switches.items() if r.get_active()]
+        if self.profile_switches is not None:
+            chosen = [n for n, r in self.profile_switches.items() if r.get_active()]
+            if not chosen:
+                return None
+            params["profiles"] = chosen
+        if self.scope is not None:
+            if self.scope.get_selected() == 0:
+                params["scope"] = "lan"
+            else:
+                cidrs = state.parse_cidrs(self.cidrs.get_text())
+                if not cidrs:
+                    return None
+                params["scope"], params["cidrs"] = "cidrs", cidrs
+        return params if self.current in rb.SCHEMAS else None
+
+    def _changed(self) -> None:
+        self.params = self._collect()
+        self.save_btn.set_sensitive(False)
+        if self.params is None:
+            self.sentence_row.set_title(_("Choose the details below."))
+            clear(self.preview, self._preview_rows)
+            return
+        self.sentence_row.set_title(rule_text.sentence(self.current, self.params, self._titles))
+        self._serial += 1
+        serial = self._serial
+        self._c.preview_rule(
+            self.current, self.params, lambda r, e, s=serial: self._previewed(s, r, e)
+        )
+
+    def _previewed(self, serial: int, changes, error: FwError | None) -> None:
+        if serial != self._serial:
+            return  # the blanks changed again meanwhile
+        clear(self.preview, self._preview_rows)
+        if error is not None:
+            row = Adw.ActionRow(title=_("This rule cannot be saved: check the details."))
+            row.add_prefix(Gtk.Image.new_from_icon_name("dialog-warning-symbolic"))
+            self.preview.add(row)
+            self._preview_rows.append(row)
+            return
+        for line in rule_text.preview_lines(changes, self._titles):
+            row = Adw.ActionRow(title=line, title_lines=4)
+            self.preview.add(row)
+            self._preview_rows.append(row)
+        self.save_btn.set_sensitive(True)
+
+    def _save(self, *_args) -> None:
+        if self.params is None:
+            return
+        self.save_btn.set_sensitive(False)
+        self._c.add_rule(self.current, self.params, self._saved)
+
+    def _saved(self, _result, error: FwError | None) -> None:
+        if error is not None:
+            self.save_btn.set_sensitive(True)
+            toast_error(self, error)
+            return
+        self.close()
+        self._on_saved()

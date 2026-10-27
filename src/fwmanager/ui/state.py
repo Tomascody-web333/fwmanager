@@ -145,6 +145,8 @@ def event_text(kind: str, detail: str) -> str:
         "reverted": _("Undid {name}").format(name=name),
         "profile_edited": _("Edited {name}").format(name=name),
         "options": _("Changed the settings"),
+        "rule_added": _("Added a rule"),
+        "rule_removed": _("Removed a rule"),
         "denied": _("Refused a request from an account that is not allowed"),
         "startup": _("Service started"),
     }
