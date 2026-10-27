@@ -232,6 +232,31 @@ class Store:
             OPTIONS_FILE, {"router_mode": options.router_mode, "log_level": options.log_level}
         )
 
+    # -- the user's own ufw default policies (restored on uninstall) -------------------
+
+    _DEFAULTS_FILE = "ufw-original-defaults.json"
+    _DIRECTIONS = ("incoming", "outgoing", "routed")
+    _WORDS = ("allow", "deny", "reject")
+
+    def save_original_defaults_once(self, defaults: dict[str, str]) -> None:
+        if (self._dir / self._DEFAULTS_FILE).exists():
+            return  # already remembered: later changes are ours, not the user's
+        clean = {d: v for d, v in defaults.items() if d in self._DIRECTIONS and v in self._WORDS}
+        self._write(self._DEFAULTS_FILE, {"defaults": clean})
+
+    def load_original_defaults(self) -> dict[str, str]:
+        try:
+            data = self._read(self._DEFAULTS_FILE)
+        except StoreCorrupt:
+            return {}
+        raw = (data or {}).get("defaults", {})
+        if not isinstance(raw, dict):
+            return {}
+        return {d: v for d, v in raw.items() if d in self._DIRECTIONS and v in self._WORDS}
+
+    def clear_original_defaults(self) -> None:
+        (self._dir / self._DEFAULTS_FILE).unlink(missing_ok=True)
+
     # -- network -> profile mapping ---------------------------------------------
 
     def load_networks(self) -> list[Network]:

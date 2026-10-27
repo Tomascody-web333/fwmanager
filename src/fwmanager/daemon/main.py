@@ -71,8 +71,12 @@ def main(argv: list[str] | None = None) -> int:
     else:
         conn = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
 
-    backend = UfwBackend(Ufw(args.ufw_binary, rootdir=args.ufw_rootdir), load_catalog())
     store = Store(Path(args.state_dir))
+    backend = UfwBackend(
+        Ufw(args.ufw_binary, rootdir=args.ufw_rootdir),
+        load_catalog(),
+        on_first_defaults_change=store.save_original_defaults_once,
+    )
     manager = FirewallManager(backend, GLibScheduler(), on_ufw_enabled=store.mark_ufw_enabled_by_us)
     units = SystemdUnits(conn)
 

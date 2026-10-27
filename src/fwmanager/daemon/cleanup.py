@@ -18,6 +18,12 @@ log = logging.getLogger("fwmanager")
 def cleanup(backend: UfwBackend, store: Store) -> str:
     """Returns what was done: ``"disabled"``, ``"cleaned"``."""
     backend.remove_everything()
+    original = store.load_original_defaults()
+    if original:
+        restored = backend.restore_defaults(original)
+        if restored:
+            log.info("restored the original ufw defaults: %s", ", ".join(restored))
+        store.clear_original_defaults()
     if store.ufw_enabled_by_us():
         if backend.is_active():
             backend.ufw.run(["--force", "disable"])

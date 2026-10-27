@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -42,7 +43,13 @@ Snapshot = ufw_files.FilesSnapshot
 
 
 class UfwBackend:
-    def __init__(self, ufw: Ufw, catalog: dict[str, Service]) -> None:
+    def __init__(
+        self,
+        ufw: Ufw,
+        catalog: dict[str, Service],
+        on_first_defaults_change: Callable[[dict[str, str]], None] | None = None,
+    ) -> None:
+        self._on_first_defaults_change = on_first_defaults_change
         self.ufw = ufw
         self.catalog = catalog
 
@@ -102,8 +109,15 @@ class UfwBackend:
         needs_reload = ufw_files.apply_block(
             self.ufw.config_dir, profile.name, profile.ping, profile.mdns, v6
         )
-        for direction, wanted in self._wanted_defaults(options).items():
-            if self._current_defaults().get(direction) != wanted:
+        current = self._current_defaults()
+        wanted_defaults = self._wanted_defaults(options)
+        if self._on_first_defaults_change and any(
+            current.get(d) != w for d, w in wanted_defaults.items()
+        ):
+            # The user's own policies, saved once so an uninstall can put them back.
+            self._on_first_defaults_change(dict(current))
+        for direction, wanted in wanted_defaults.items():
+            if current.get(direction) != wanted:
                 self.ufw.run(["default", wanted, direction])
         if options.log_level:
             self.ufw.run(["logging", options.log_level])
@@ -146,6 +160,22 @@ class UfwBackend:
             if cur.get(rule) not in (None, profile.name):
                 self.ufw.run(rule.delete_argv())
                 self.ufw.run(rule.add_argv(profile.name))
+
+    def restore_defaults(self, original: dict[str, str]) -> list[str]:
+        """Put back the user's own default policies, leaving alone anything they changed since.
+
+        Only a direction that still holds a value *we* set is touched (incoming deny, outgoing
+        allow, routed allow or deny). Returns the directions that were restored.
+        """
+        ours = {"incoming": {"deny"}, "outgoing": {"allow"}, "routed": {"allow", "deny"}}
+        current = self._current_defaults()
+        restored = []
+        for direction, value in original.items():
+            if direction in ours and value in ("allow", "deny", "reject"):
+                if current.get(direction) in ours[direction] and current[direction] != value:
+                    self.ufw.run(["default", value, direction])
+                    restored.append(direction)
+        return restored
 
     def remove_everything(self) -> None:
         """Uninstall helper: drop every rule we own and the managed block."""

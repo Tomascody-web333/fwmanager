@@ -103,3 +103,76 @@ def test_cleanup_command_line(backend, mgr, store, tmp_path, capsys):
     )
     assert code == 0 and capsys.readouterr().out.strip() == "disabled"
     assert not backend.is_active()
+
+
+# -- the user's own ufw default policies ---------------------------------------------------
+
+
+@pytest.fixture
+def tracked(backend, store):
+    """A backend wired like the daemon: it remembers the user's defaults before changing them."""
+    from fwmanager.core.backend import UfwBackend
+
+    return UfwBackend(
+        backend.ufw, backend.catalog, on_first_defaults_change=store.save_original_defaults_once
+    )
+
+
+def read_default(backend, key):
+    import re
+
+    text = backend.ufw.default_file.read_text()
+    return re.search(rf'^{key}="(\w+)"', text, re.M).group(1)
+
+
+def test_the_original_defaults_come_back_on_uninstall(tracked, store):
+    # ufw's own defaults: incoming DROP, forward DROP. fwmanager sets forward to ACCEPT.
+    assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "DROP"
+    tracked.apply(DEFAULT_PROFILES["casa"])
+    assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "ACCEPT"
+    assert store.load_original_defaults() == {
+        "incoming": "deny",
+        "outgoing": "allow",
+        "routed": "deny",
+    }
+    cleanup(tracked, store)
+    assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "DROP"  # back to how it was
+    assert read_default(tracked, "DEFAULT_INPUT_POLICY") == "DROP"
+    assert store.load_original_defaults() == {}  # the record is consumed
+
+
+def test_defaults_are_remembered_only_once(tracked, store):
+    from fwmanager.core.backend import Options
+
+    tracked.apply(DEFAULT_PROFILES["casa"])
+    first = store.load_original_defaults()
+    tracked.apply(DEFAULT_PROFILES["publico"], Options(router_mode=True))  # routed changes again
+    tracked.apply(DEFAULT_PROFILES["trabalho"])
+    assert store.load_original_defaults() == first  # still the user's, not ours
+
+
+def test_a_policy_the_user_changed_since_is_left_alone(tracked, store):
+    tracked.apply(DEFAULT_PROFILES["casa"])
+    tracked.ufw.run(["default", "reject", "incoming"])  # the user's own later choice
+    cleanup(tracked, store)
+    assert read_default(tracked, "DEFAULT_INPUT_POLICY") == "REJECT"
+    assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "DROP"  # ours: put back
+
+
+def test_nothing_is_recorded_when_nothing_changes(tracked, store):
+    from fwmanager.core.backend import Options
+
+    tracked.ufw.run(["default", "allow", "routed"])  # user already has what we would set
+    tracked.apply(DEFAULT_PROFILES["casa"], Options())
+    assert store.load_original_defaults() == {}
+    assert not (store._dir / "ufw-original-defaults.json").exists()
+
+
+def test_corrupt_defaults_record_is_ignored(store):
+    store._dir.mkdir()
+    (store._dir / "ufw-original-defaults.json").write_text("{broken")
+    assert store.load_original_defaults() == {}
+    (store._dir / "ufw-original-defaults.json").write_text(
+        '{"version": 1, "defaults": {"incoming": "evil", "routed": "allow", "x": "deny"}}'
+    )
+    assert store.load_original_defaults() == {"routed": "allow"}  # only valid entries survive
