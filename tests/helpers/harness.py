@@ -11,7 +11,6 @@ from pathlib import Path
 
 from fwmanager.client import Client
 from fwmanager.core import ufw_files
-from fwmanager.errors import FwError
 
 ROOT = Path(__file__).resolve().parents[2]
 START_TIMEOUT = 40  # first boot enables ufw, which takes a few seconds
@@ -55,6 +54,29 @@ def ufw_cmd(ufw_root: Path, prefix, *args):
     ).stdout
 
 
+def _name_has_owner(bus: str, name: str) -> bool:
+    """Ask the bus itself (always allowed) whether the daemon has taken its name."""
+    from gi.repository import Gio, GLib
+
+    try:
+        conn = Gio.DBusConnection.new_for_address_sync(
+            bus,
+            Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT
+            | Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION,
+            None,
+            None,
+        )
+        reply = conn.call_sync(
+            "org.freedesktop.DBus", "/org/freedesktop/DBus", "org.freedesktop.DBus",
+            "NameHasOwner", GLib.Variant("(s)", (name,)), GLib.VariantType("(b)"),
+            Gio.DBusCallFlags.NONE, 2000, None,
+        )  # fmt: skip
+        conn.close_sync(None)
+        return reply.unpack()[0]
+    except GLib.Error:
+        return False
+
+
 class Daemon:
     def __init__(self, prefix, bus, ufw_root, group="root", timeout=30, state_dir=None, extra=()):
         env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
@@ -88,13 +110,16 @@ class Daemon:
         while time.monotonic() < end:
             if self.proc.poll() is not None:
                 break
-            try:
+            if _name_has_owner(bus, "org.fwmanager.Control"):
+                # Ready. Whether *this* account may call it is the policy's business (it may
+                # not, in the D-Bus policy tests), so these two are best-effort.
                 self.client = Client(bus)
-                self.client.list_profiles()
-                self.initial = self.fp()
+                try:
+                    self.initial = self.fp()
+                except OSError:
+                    self.initial = None
                 return
-            except FwError:
-                time.sleep(0.1)
+            time.sleep(0.1)
         self.proc.kill()
         raise RuntimeError("daemon did not start: " + self.proc.stderr.read())
 
