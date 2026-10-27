@@ -1,13 +1,34 @@
 # fwmanager
 
-A beginner-friendly graphical manager for **ufw**, the Linux firewall. Pick a profile
-(`casa`, `trabalho`, `publico`), let the app switch profile by itself when you change Wi-Fi,
-and rely on a safety net that undoes any change that cuts your connection.
+**English** · [Português](README.pt.md)
+
+A beginner-friendly graphical interface for **ufw**. It is not a firewall of its own: it only
+makes ufw easier to use. Pick a profile (`casa`, `trabalho`, `publico`), let the app switch
+profile by itself when you change Wi-Fi, and rely on a safety net that undoes any change that
+cuts your connection.
 
 100% local: no accounts, no servers, no telemetry.
 
-> Status: work in progress. The core, the daemon, the NetworkManager hook, the command-line
-> client and the GTK4 interface are done; the plain-language rules come next.
+> Status: feature complete for the development install; packaging (apt) comes last. The parts
+> that need a real machine are listed in [docs/VALIDATION.md](docs/VALIDATION.md).
+
+## Quick start
+
+```sh
+sudo apt install ufw python3-gi gir1.2-gtk-4.0 gir1.2-adw-1   # Ubuntu 24.04 / Debian 13
+sudo scripts/dev-install.sh                                   # installs and stops there
+fwmanager                                                     # everything else is set up in the window
+```
+
+Installing only copies files. The first time you open **fwmanager** a short wizard checks the
+system (service running, your account allowed, ufw installed, no other firewall manager in the
+way) and fixes what is missing with **one** administrator password prompt (polkit). After that
+it never asks again, and you choose how this computer should behave on the current network.
+Nothing needs a terminal. If the password window is not available, the wizard shows the exact
+commands to run instead.
+
+The interface needs GTK 4 and libadwaita 1.5 or newer (Ubuntu 24.04, Fedora 40 or later);
+`fwmanager-cli` works on older systems.
 
 ## How it works
 
@@ -31,12 +52,14 @@ NetworkManager dispatcher (root)  ─┘            only fixed commands
   a small, clearly delimited block that fwmanager keeps in `/etc/ufw/before.rules` (and
   `before6.rules`). It is removed on uninstall.
 
-Requirements: Python 3.11+, PyGObject, **ufw**, systemd and D-Bus. NetworkManager is optional
-(needed only for automatic per-network profiles).
+Requirements: Python 3.11+, PyGObject, **ufw**, systemd, D-Bus, polkit (first-run setup) and, for
+the window, GTK 4 + libadwaita 1.5+. NetworkManager is optional (needed only for automatic
+per-network profiles).
 
 ## The interface
 
-Run `fwmanager` as your normal user (it refuses to run as root). Pages: **Home** (state, quick
+Run `fwmanager` as your normal user (it refuses to run as root). On the first run the setup
+wizard appears (see above); it can be skipped and is never shown again once finished. Pages: **Home** (state, quick
 profile switching, a "waiting for confirmation" card with a countdown), **Profiles** (edit what
 each profile opens), **Networks** (which profile for which Wi-Fi), **Rules** (plain-language sentences, below), **Log** (what the service did
 and recent blocked attempts) and **Settings**. Every profile has a **Test** button that runs the
@@ -44,7 +67,12 @@ policy test below before you apply anything. Ctrl+1..6 jump between pages, and t
 moves to the bottom on narrow windows.
 
 If the service is not running, your account is not in the `fwmanager` group, ufw is missing or
-firewalld is active, the window explains it in your language and shows the command that fixes it.
+firewalld is active, the window explains it in your language and offers a **Fix this** button
+(or the command to run, when a password window is not possible).
+
+Being added to the group only applies to new processes, so after the one-time setup fwmanager
+restarts itself under the new group (`sg fwmanager`). If that is not possible it asks you to log
+out and back in.
 
 ## Plain-language rules
 
@@ -79,22 +107,26 @@ new entries, and `python3 scripts/update-po.py --check` (also run by the tests) 
 ## Dev install (VM/container only)
 
 ```sh
-sudo apt install ufw                                       # fwmanager drives ufw; install it first
-sudo scripts/dev-install.sh --user YOURNAME --lang pt      # or --lang en
+sudo apt install ufw                       # fwmanager drives ufw; install it first
+sudo scripts/dev-install.sh                # --user NAME and --lang pt|en are optional shortcuts
 sudo scripts/dev-uninstall.sh
 ```
 
-`dev-install.sh` copies the files, creates the `fwmanager` group, adds your user (and root,
-for the NetworkManager hook) and runs `systemctl enable --now fwmanagerd`. Log out and back
-in so the group applies. `--no-systemd` skips the systemd step.
+`dev-install.sh` copies the files, the polkit policy and the setup helper
+(`/usr/local/libexec/fwmanager/fwmanager-setup`, the only program that asks for administrator
+rights), and adds root to the `fwmanager` group for the NetworkManager hook. Creating the group,
+adding your account and starting the service happen in the window, or right away if you pass
+`--user NAME`. `--no-systemd` skips the systemd step. Its messages follow the system language
+(Portuguese or English).
 
-`dev-uninstall.sh` removes the files, fwmanager's ufw rules and its block in `before.rules`,
-and switches ufw off again **only if fwmanager was the one that turned it on**, so the
-machine is never left filtering with nobody managing it. A ufw you enabled yourself stays on.
+`dev-uninstall.sh` removes the files, fwmanager's ufw rules and its block in `before.rules`, and
+switches ufw off again **only if fwmanager was the one that turned it on**, so the machine is
+never left filtering with nobody managing it. A ufw you enabled yourself stays on.
 
 > **Warning:** on first start with no saved state the daemon applies `publico` (nothing
-> incoming is allowed). If you install over SSH, confirm a profile that allows SSH first
-> (`fwmanager-cli apply casa`, then `confirm`), or you will not be able to reconnect.
+> incoming is allowed). If you install over SSH the installer therefore leaves the service
+> stopped (override with `--allow-ssh-lockout`); start it from the machine itself, or confirm a
+> profile that allows SSH first (`fwmanager-cli apply casa`, then `confirm`).
 
 At boot the daemon re-applies the last confirmed profile with no timer. If `firewalld` is
 active it applies nothing and the interface explains why.
@@ -132,6 +164,13 @@ namespace (`unshare -n`) with a private copy of `/etc/ufw` (`ufw --rootdir`). Th
 install/uninstall test changes the machine, so it is opt-in:
 `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
 
+## Documentation
+
+- [docs/VALIDATION.md](docs/VALIDATION.md): what the automated tests cover, and the checklist for
+  what only a real machine can prove (systemd, NetworkManager, IPv6, DHCP, desktop, polkit).
+- [docs/SECURITY.md](docs/SECURITY.md): the security model in one page.
+- Every document exists in English and Portuguese (`*.pt.md`).
+
 ## Known limits
 
 - ufw cannot apply a profile atomically: there is a split second between removing the old
@@ -139,5 +178,7 @@ install/uninstall test changes the machine, so it is opt-in:
   If a change fails halfway it is undone automatically.
 - IPv6 behaviour is covered by checks on ufw's configuration, but a real IPv6 test needs a
   host with IPv6 enabled.
+- Not yet exercised on a real machine: the systemd hardening, the NetworkManager hook, DHCP,
+  the polkit prompt and the desktop look (see [docs/VALIDATION.md](docs/VALIDATION.md)).
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.
