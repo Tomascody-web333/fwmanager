@@ -30,3 +30,8 @@ def set_language(lang: str | None, localedir: str | None = None) -> None:
 
 def _(message: str) -> str:
     return _translation.gettext(message)
+
+
+def N_(message: str) -> str:
+    """Mark a string for translation without translating it now (see ``messages``)."""
+    return message

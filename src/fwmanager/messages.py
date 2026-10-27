@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fwmanager.errors import FwError
-from fwmanager.i18n import _
+from fwmanager.i18n import N_, _
 
 
 def describe(code: str) -> str:
@@ -34,6 +34,54 @@ def describe(code: str) -> str:
         "internal_error": _("Internal error."),
     }
     return table.get(code, table["internal_error"])
+
+
+FINDINGS = {
+    "foreign_statement": N_("The rules touch something other than the fwmanager table."),
+    "forbidden_verb": N_("The rules use a statement that is not allowed."),
+    "not_atomic": N_("The rules would not be applied atomically."),
+    "no_output_chain": N_("The outgoing-traffic chain is missing."),
+    "output_blocked": N_("Outgoing traffic would be blocked."),
+    "forward_blocked": N_("Forwarding would break Docker and virtual machines."),
+    "router_mode": N_("Router mode may interfere with Docker, VMs and containers."),
+    "no_input_chain": N_("The incoming-traffic chain is missing."),
+    "input_not_dropping": N_("Incoming traffic is not blocked by default."),
+    "missing_established": N_("Replies to your own connections would be blocked."),
+    "missing_invalid_drop": N_("Invalid packets would not be dropped."),
+    "missing_loopback": N_("Local (loopback) traffic would be blocked."),
+    "missing_dhcp4": N_("Renewing the IPv4 address (DHCP) would fail."),
+    "missing_dhcp6": N_("Renewing the IPv6 address (DHCPv6) would fail."),
+    "missing_nd_neighbor_solicit": N_("IPv6 would stop working (neighbour discovery)."),
+    "missing_nd_neighbor_advert": N_("IPv6 would stop working (neighbour discovery)."),
+    "missing_nd_router_advert": N_("IPv6 would stop working (router advertisements)."),
+    "missing_packet_too_big": N_("IPv6 connections could hang (packet-too-big)."),
+    "missing_destination_unreachable": N_("IPv6 connections could hang (unreachable)."),
+    "missing_time_exceeded": N_("Some IPv6 diagnostics would fail."),
+    "missing_parameter_problem": N_("Some IPv6 errors would go unnoticed."),
+    "nft_rejects_rules": N_("The firewall engine rejected these rules."),
+    "exposed_to_any": N_("Allowed services are reachable from any network."),
+    "ssh_ok": N_("Your SSH session and new SSH connections stay allowed."),
+    "ssh_reconnect_blocked": N_("Your SSH session survives, but you could not open a new one."),
+    "firewall_conflict": N_("Another firewall (ufw or firewalld) is active."),
+    "docker_present": N_("Docker manages its own rules (they are left untouched)."),
+    "libvirt_present": N_("libvirt manages its own rules (they are left untouched)."),
+}
+PROBES = {
+    "gateway_v4": N_("Reach the IPv4 gateway"),
+    "gateway_v6": N_("Reach the IPv6 gateway"),
+    "dns": N_("DNS resolver answers"),
+    "loopback_v4": N_("Local IPv4 connections"),
+    "loopback_v6": N_("Local IPv6 connections"),
+}
+
+
+def describe_finding(code: str, fallback: str = "") -> str:
+    """Translated text for a policy-check finding code (English detail as fallback)."""
+    return _(FINDINGS[code]) if code in FINDINGS else fallback or code
+
+
+def describe_probe(name: str) -> str:
+    return _(PROBES[name]) if name in PROBES else name
 
 
 def describe_error(exc: FwError) -> str:
