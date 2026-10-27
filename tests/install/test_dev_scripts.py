@@ -45,12 +45,15 @@ def test_staged_install_places_every_file(staged):
         "etc/dbus-1/system.d/org.fwmanager.Control.conf",
         "etc/systemd/system/fwmanagerd.service",
         "etc/fwmanager/config.toml",
+        "etc/NetworkManager/dispatcher.d/90-fwmanager",
     ]
     for rel in expect:
         assert (staged / rel).is_file(), rel
     assert (staged / "etc/fwmanager/config.toml").read_text() == 'lang = "pt"\n'
     for exe in ("fwmanagerd", "fwmanager-cli"):
         assert os.access(staged / "usr/local/bin" / exe, os.X_OK)
+    shim = staged / "etc/NetworkManager/dispatcher.d/90-fwmanager"
+    assert os.access(shim, os.X_OK)  # NetworkManager only runs executable scripts
     assert (staged / "etc/systemd/system/fwmanagerd.service").read_text() == (
         ROOT / "data/systemd/fwmanagerd.service"
     ).read_text()
@@ -148,7 +151,10 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, nft):
     try:
         r = sh(INSTALL, "--user", user, "--lang", "pt", "--no-systemd")
         assert r.returncode == 0, r.stderr
-        assert any(g.gr_name == "fwmanager" and user in g.gr_mem for g in grp.getgrall())
+        members = next(g.gr_mem for g in grp.getgrall() if g.gr_name == "fwmanager")
+        assert user in members and "root" in members  # root: the NM dispatcher is a client too
+        shim = "/etc/NetworkManager/dispatcher.d/90-fwmanager"
+        assert os.access(shim, os.X_OK)
 
         # The installed wrappers must really run.
         for exe in ("fwmanager-cli", "fwmanagerd"):
@@ -182,6 +188,7 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, nft):
             "/etc/fwmanager",
             "/etc/dbus-1/system.d/org.fwmanager.Control.conf",
             "/etc/systemd/system/fwmanagerd.service",
+            shim,
         ):
             assert not os.path.exists(path), path
     finally:  # never leave the test machine half-installed

@@ -94,3 +94,24 @@ def busctl_as(uid, bus, method, *args):
         user=uid,
         timeout=15,
     )
+
+
+def bring_lo_up(prefix):
+    """Set the loopback of the (fresh) namespace UP; there is no `ip` tool in minimal images."""
+    script = (
+        "import fcntl, socket, struct\n"
+        "s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)\n"
+        "fcntl.ioctl(s, 0x8914, struct.pack('16sH14x', b'lo', 0x1 | 0x40))\n"
+    )
+    subprocess.run([*prefix, sys.executable, "-c", script], check=True, timeout=10)
+
+
+def run_cli_in_ns(prefix, bus, *args, env=None):
+    """Run fwmanager-cli inside the namespace, against the daemon on the private bus."""
+    return subprocess.run(
+        [*prefix, sys.executable, "-m", "fwmanager.cli.main", "--bus-address", bus, *args],
+        capture_output=True,
+        text=True,
+        timeout=60,
+        env={**os.environ, "PYTHONPATH": str(ROOT / "src"), **(env or {})},
+    )
