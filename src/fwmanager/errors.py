@@ -28,3 +28,26 @@ class NftError(FwError):
 
 class PendingError(FwError):
     code = "apply_pending"
+
+
+class AccessDenied(FwError):
+    code = "access_denied"
+
+
+DBUS_ERROR_PREFIX = "org.fwmanager.Error."
+
+
+def dbus_error_name(code: str) -> str:
+    """``invalid_profile`` -> ``org.fwmanager.Error.InvalidProfile``."""
+    return DBUS_ERROR_PREFIX + "".join(part.capitalize() for part in code.split("_"))
+
+
+def code_from_dbus_error(name: str) -> str:
+    """Inverse of :func:`dbus_error_name`; unknown names map to ``internal_error``."""
+    if not name.startswith(DBUS_ERROR_PREFIX):
+        return "internal_error"
+    camel = name[len(DBUS_ERROR_PREFIX) :]
+    out = ""
+    for ch in camel:
+        out += ("_" + ch.lower()) if ch.isupper() and out else ch.lower()
+    return out

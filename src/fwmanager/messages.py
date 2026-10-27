@@ -22,6 +22,8 @@ def describe(code: str) -> str:
         "nft_unavailable": _("The nft program could not be run."),
         "apply_pending": _("Another change is waiting for confirmation."),
         "no_pending": _("There is no change waiting for confirmation."),
+        "access_denied": _("You are not allowed to control the firewall."),
+        "daemon_unavailable": _("The fwmanager service is not running."),
         "internal_error": _("Internal error."),
     }
     return table.get(code, table["internal_error"])
