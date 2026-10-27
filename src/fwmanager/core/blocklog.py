@@ -1,7 +1,14 @@
-"""Recent blocked packets, read from ufw's log lines (``[UFW BLOCK] IN=... SRC=... DPT=...``)."""
+"""Recent blocked packets, read from ufw's log lines (``[UFW BLOCK] IN=... SRC=... DPT=...``).
+
+The kernel writes these lines, but any local user can write a look-alike to syslog (``logger``),
+and rsyslog files every line containing "[UFW " in /var/log/ufw.log. The kernel's own journal
+cannot be written by users, so it is read first; the file is only a fallback, read from its end
+so a huge log costs no more than a small one.
+"""
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from collections.abc import Callable
@@ -10,10 +17,13 @@ from pathlib import Path
 
 UFW_LOG = Path("/var/log/ufw.log")
 MAX_LINES = 4000
+MAX_TAIL_BYTES = 1024 * 1024
 JOURNALCTL = ("/usr/bin/journalctl", "/bin/journalctl")
 
 _FIELD = re.compile(r"\b(IN|SRC|DST|PROTO|DPT)=(\S*)")
 _TIME = re.compile(r"^(\d{4}-\d{2}-\d{2}T[\d:.+-]+|[A-Z][a-z]{2}\s+\d+\s+[\d:]{8})")
+# What the kernel's lines look like in syslog: "host kernel: [ 1234.5] [UFW BLOCK] ...".
+_FROM_KERNEL = re.compile(r"(^|\s)kernel: (\[\s*\d+\.\d+\]\s*)?\[UFW BLOCK\]")
 SAFE = re.compile(r"^[A-Za-z0-9_.:%/-]{0,64}$")
 
 
@@ -40,10 +50,12 @@ def parse_line(line: str) -> Blocked | None:
     return Blocked(when.group(1) if when else "", *values)
 
 
-def parse_lines(text: str, limit: int) -> list[Blocked]:
-    """Newest first."""
+def parse_lines(text: str, limit: int, kernel_only: bool = False) -> list[Blocked]:
+    """Newest first. ``kernel_only`` drops lines another program wrote (syslog files)."""
     out = []
     for line in reversed(text.splitlines()[-MAX_LINES:]):
+        if kernel_only and not _FROM_KERNEL.search(line):
+            continue
         item = parse_line(line)
         if item:
             out.append(item)
@@ -54,9 +66,32 @@ def parse_lines(text: str, limit: int) -> list[Blocked]:
 
 def _tail(path: Path) -> str | None:
     try:
-        return "\n".join(path.read_text(errors="replace").splitlines()[-MAX_LINES:])
+        with path.open("rb") as fh:
+            size = fh.seek(0, os.SEEK_END)
+            fh.seek(max(0, size - MAX_TAIL_BYTES))
+            data = fh.read(MAX_TAIL_BYTES)
     except OSError:
         return None
+    lines = data.decode(errors="replace").splitlines()
+    if size > MAX_TAIL_BYTES:
+        lines = lines[1:]  # the first one was cut in half
+    return "\n".join(lines[-MAX_LINES:])
+
+
+def _journal(run: Callable) -> str | None:
+    """Kernel messages only (``-k``): nobody but the kernel can write those."""
+    journalctl = next((p for p in JOURNALCTL if Path(p).exists()), None)
+    if journalctl is None:
+        return None
+    try:
+        proc = run(
+            [journalctl, "-k", "-n", str(MAX_LINES), "--no-pager", "-o", "short-iso",
+             "--grep", "UFW BLOCK"],
+            capture_output=True, text=True, timeout=10, check=False,
+        )  # fmt: skip
+    except (OSError, subprocess.TimeoutExpired):
+        return None
+    return proc.stdout if proc.returncode == 0 else None
 
 
 def read_recent(
@@ -64,20 +99,9 @@ def read_recent(
     log_path: Path = UFW_LOG,
     run: Callable = subprocess.run,
 ) -> list[Blocked]:
-    """Prefer /var/log/ufw.log; fall back to the kernel journal on journald-only systems."""
+    """Prefer the kernel journal; fall back to /var/log/ufw.log where there is none."""
     limit = max(1, min(int(limit), 500))
-    text = _tail(log_path)
-    if text is None:
-        journalctl = next((p for p in JOURNALCTL if Path(p).exists()), None)
-        if journalctl is None:
-            return []
-        try:
-            proc = run(
-                [journalctl, "-k", "-n", str(MAX_LINES), "--no-pager", "-o", "short-iso",
-                 "--grep", "UFW BLOCK"],
-                capture_output=True, text=True, timeout=10, check=False,
-            )  # fmt: skip
-        except (OSError, subprocess.TimeoutExpired):
-            return []
-        text = proc.stdout if proc.returncode == 0 else ""
-    return parse_lines(text, limit)
+    found = parse_lines(_journal(run) or "", limit, kernel_only=True)
+    if found:
+        return found
+    return parse_lines(_tail(log_path) or "", limit, kernel_only=True)
