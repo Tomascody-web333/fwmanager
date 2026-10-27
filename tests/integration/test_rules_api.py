@@ -212,3 +212,33 @@ def test_rule_events_and_outsiders(daemon):
     assert r.returncode != 0 and "not in the fwmanager group" in r.stderr
     r = busctl_as(65534, daemon.bus, "ListRules")
     assert r.returncode != 0
+
+
+def test_profiles_too_big_to_apply_quickly_are_refused(daemon):
+    import time
+
+    from fwmanager.core.ufw_rules import MAX_RULES_PER_PROFILE
+
+    c = daemon.client
+    services = [s for s, _ in c.list_services()]
+    many = [f"10.{i}.0.0/16" for i in range(64)]
+    for call in (
+        lambda: c.set_profile("personalizado", services, True, True, "cidrs", many),
+        lambda: c.add_rule(
+            rb.RESTRICT_SOURCE, {"scope": "cidrs", "cidrs": many, "profiles": ["casa"]}
+        ),
+        lambda: c.preview_rule(
+            rb.RESTRICT_SOURCE, {"scope": "cidrs", "cidrs": many, "profiles": ["casa"]}
+        ),
+    ):
+        with pytest.raises(FwError) as exc:
+            call()
+        assert exc.value.code == "profile_too_big"
+    assert c.list_rules() == [] and c.get_profile("personalizado")["cidrs"] == []
+    # The largest allowed profile applies well within the client's patience.
+    c.set_profile("personalizado", ["ssh"], True, True, "cidrs", many[:MAX_RULES_PER_PROFILE])
+    start = time.monotonic()
+    c.apply_profile("personalizado")
+    assert time.monotonic() - start < 20
+    c.rollback()
+    assert daemon.fp() == daemon.initial

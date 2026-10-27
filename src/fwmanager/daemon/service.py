@@ -19,6 +19,7 @@ from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.policy_check import check_profile
 from fwmanager.core.profiles import Profile, Source
 from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
+from fwmanager.core.ufw_rules import check_size
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
 from fwmanager.errors import AccessDenied, FwError, StoreError, ValidationError, dbus_error_name
@@ -228,7 +229,7 @@ class ControlService:
             )
         if method == "PreviewRule":
             rule = self._new_rule(*args, assign_id=False)
-            after = rulebook.compile_profiles(self._base, [*self._rules, rule])
+            after = self._compile_checked(self._base, [*self._rules, rule])
             return GLib.Variant(
                 "(a(sasassssas))",
                 ([self._change_tuple(c) for c in rulebook.diff_profiles(self._profiles, after)],),
@@ -237,6 +238,7 @@ class ControlService:
             rule = self._new_rule(*args)
             if len(self._rules) >= rulebook.MAX_RULES:
                 raise ValidationError("too many rules", code="too_many_rules")
+            self._compile_checked(self._base, [*self._rules, rule])
             self._require_store().save_rules([*self._rules, rule])  # persisted before it counts
             self._rules.append(rule)
             self._recompute()
@@ -308,6 +310,13 @@ class ControlService:
             src.kind if src else "", list(src.cidrs) if src else [],
         )  # fmt: skip
 
+    def _compile_checked(self, base: dict[str, Profile], rules) -> dict[str, Profile]:
+        """What would be applied, refused while any profile would be too slow to apply."""
+        compiled = rulebook.compile_profiles(base, rules)
+        for profile in compiled.values():
+            check_size(profile, self._mgr.catalog)
+        return compiled
+
     def _get_profile(self, name: str) -> Profile:
         name = validate_name(name, "profile")
         profile = self._profiles.get(name)
@@ -339,6 +348,7 @@ class ControlService:
         new = Profile(
             current.name, tuple(services), bool(ping), bool(mdns), Source(kind, tuple(cidrs))
         )
+        self._compile_checked({**self._base, new.name: new}, self._rules)
         self._base[new.name] = new
         try:
             self._save_profiles()

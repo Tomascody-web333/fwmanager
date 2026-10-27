@@ -20,6 +20,9 @@ COMMENT_PREFIX = "fwmanager:"
 LAN_V4 = ("10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "169.254.0.0/16")
 LAN_V6 = ("fc00::/7", "fe80::/10")
 MAX_MULTIPORT = 15  # iptables multiport limit; a range counts as two
+# Every ufw rule costs a separate ufw run (about 0.2 s), and the service answers nobody while it
+# applies. The built-in profiles need at most 18; 40 keeps any profile to a few seconds.
+MAX_RULES_PER_PROFILE = 40
 
 
 def _port_key(spec: str) -> tuple[int, int]:
@@ -41,7 +44,7 @@ class Rule:
         if not self.ports or len(self.ports) > MAX_MULTIPORT:
             raise ValidationError("invalid port list", code="invalid_port")
         for p in self.ports:
-            if not re.fullmatch(r"\d{1,5}(:\d{1,5})?", p):
+            if not re.fullmatch(r"[0-9]{1,5}(:[0-9]{1,5})?", p):
                 raise ValidationError("invalid port", code="invalid_port")
         # ufw stores ports sorted; keep the same canonical order so rules compare equal.
         object.__setattr__(self, "ports", tuple(sorted(self.ports, key=_port_key)))
@@ -102,6 +105,12 @@ def translate(profile: Profile, catalog: dict[str, Service], ipv6: bool = True) 
             for chunk in _chunks(ports[proto]):
                 rules.append(Rule(proto, source, chunk))
     return rules
+
+
+def check_size(profile: Profile, catalog: dict[str, Service]) -> None:
+    """Refuse a profile that would take ufw too long to apply (counted with IPv6 on)."""
+    if len(translate(profile, catalog, ipv6=True)) > MAX_RULES_PER_PROFILE:
+        raise ValidationError("profile needs too many ufw rules", code="profile_too_big")
 
 
 # -- reading `ufw show added` ---

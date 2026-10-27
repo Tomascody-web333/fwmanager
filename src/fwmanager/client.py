@@ -10,6 +10,8 @@ from fwmanager.daemon.interface import BUS_NAME, INTERFACE, OBJECT_PATH
 from fwmanager.errors import FwError, code_from_dbus_error
 
 CALL_TIMEOUT_MS = 20000
+# Applying or checking a profile runs ufw once per rule; on a slow machine that takes a while.
+FIREWALL_CALL_TIMEOUT_MS = 120000
 
 
 def _strip_remote_prefix(message: str, remote: str | None) -> str:
@@ -34,7 +36,13 @@ class Client:
         except GLib.Error as exc:
             raise FwError(exc.message, code="daemon_unavailable") from exc
 
-    def _call(self, method: str, args: GLib.Variant | None = None, reply: str | None = None):
+    def _call(
+        self,
+        method: str,
+        args: GLib.Variant | None = None,
+        reply: str | None = None,
+        timeout_ms: int = CALL_TIMEOUT_MS,
+    ):
         try:
             result = self._conn.call_sync(
                 BUS_NAME,
@@ -44,7 +52,7 @@ class Client:
                 args,
                 GLib.VariantType(reply) if reply else None,
                 Gio.DBusCallFlags.NONE,
-                CALL_TIMEOUT_MS,
+                timeout_ms,
                 None,
             )
         except GLib.Error as exc:
@@ -59,13 +67,15 @@ class Client:
         return result.unpack() if result is not None else None
 
     def apply_profile(self, name: str) -> None:
-        self._call("ApplyProfile", GLib.Variant("(s)", (name,)))
+        self._call(
+            "ApplyProfile", GLib.Variant("(s)", (name,)), timeout_ms=FIREWALL_CALL_TIMEOUT_MS
+        )
 
     def confirm(self) -> None:
         self._call("Confirm")
 
     def rollback(self) -> None:
-        self._call("Rollback")
+        self._call("Rollback", timeout_ms=FIREWALL_CALL_TIMEOUT_MS)
 
     def status(self) -> dict:
         return self._call("GetStatus", reply="(a{sv})")[0]
@@ -75,7 +85,8 @@ class Client:
 
     def check_profile(self, name: str) -> list[tuple[str, str, str]]:
         """Read-only policy check done by the daemon: (severity, code, detail) tuples."""
-        return self._call("CheckProfile", GLib.Variant("(s)", (name,)), "(a(sss))")[0]
+        args = GLib.Variant("(s)", (name,))
+        return self._call("CheckProfile", args, "(a(sss))", FIREWALL_CALL_TIMEOUT_MS)[0]
 
     def get_profile(self, name: str) -> dict:
         return self._call("GetProfile", GLib.Variant("(s)", (name,)), "(a{sv})")[0]

@@ -134,3 +134,20 @@ def test_port_order_is_canonical():
 )
 def test_short_form_garbage_rejected(line):
     assert ur.parse_rule_line(line) is None
+
+
+def test_a_profile_that_would_be_slow_to_apply_is_refused():
+    catalog = load_builtin()
+    biggest_default = Profile("casa", tuple(catalog), source=Source("lan"))
+    ur.check_size(biggest_default, catalog)  # every service, local network: fine
+    many = tuple(f"10.{i}.0.0/16" for i in range(64))
+    with pytest.raises(ValidationError) as exc:
+        ur.check_size(Profile("casa", ("ssh",), source=Source("cidrs", many)), catalog)
+    assert exc.value.code == "profile_too_big"
+    at_limit = Profile("casa", ("ssh",), source=Source("cidrs", many[: ur.MAX_RULES_PER_PROFILE]))
+    ur.check_size(at_limit, catalog)
+
+
+def test_ports_must_be_ascii_digits():
+    with pytest.raises(ValidationError):
+        ur.Rule("tcp", "any", ("٢٢",))

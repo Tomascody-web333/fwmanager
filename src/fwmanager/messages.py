@@ -29,6 +29,10 @@ def describe(code: str) -> str:
         "daemon_unavailable": _("The fwmanager service is not running."),
         "invalid_network": _("Invalid network (name or UUID)."),
         "too_many_networks": _("Too many saved networks."),
+        "profile_too_big": _(
+            "That would make the profile too large to apply quickly. "
+            "Use fewer networks or fewer services."
+        ),
         "firewall_conflict": _(
             "Another firewall manager (firewalld) is active. Disable it first, then try again."
         ),
