@@ -34,6 +34,20 @@ def _parser() -> argparse.ArgumentParser:
     sp = sub.add_parser("status", help=_("show the firewall state"))
     sp.add_argument("--json", action="store_true")
 
+    sp = sub.add_parser("dispatch", help=argparse.SUPPRESS)  # called by NetworkManager
+    sp.add_argument("iface")
+    sp.add_argument("action")
+
+    sp = sub.add_parser("networks", help=_("manage the network to profile mapping"))
+    nsub = sp.add_subparsers(dest="net_cmd", required=True)
+    nsub.add_parser("list")
+    for name in ("set", "remove"):
+        nsp = nsub.add_parser(name)
+        nsp.add_argument("--ssid", default="")
+        nsp.add_argument("--uuid", default="")
+        if name == "set":
+            nsp.add_argument("profile")
+
     sub.add_parser("confirm", help=_("confirm the pending change"))
     sub.add_parser("rollback", help=_("revert the pending change"))
     sub.add_parser("profiles", help=_("list available profiles"))
@@ -98,7 +112,21 @@ def run(args: argparse.Namespace) -> int:
         print(render(profile, load_catalog(), RenderOptions()), end="")
         return EXIT_OK
 
+    if args.cmd == "dispatch":
+        from fwmanager.cli import dispatch
+
+        return dispatch.run(args.iface, args.bus_address) if args.action == "up" else EXIT_OK
+
     client = Client(args.bus_address)
+    if args.cmd == "networks":
+        if args.net_cmd == "list":
+            for ssid, uuid, profile in client.list_networks():
+                print(f"{profile}\t{ssid}\t{uuid}")
+        elif args.net_cmd == "set":
+            client.set_network_profile(args.ssid, args.uuid, args.profile)
+        else:
+            client.remove_network(args.ssid, args.uuid)
+        return EXIT_OK
     if args.cmd == "apply":
         if args.yes:
             client.apply_profile(args.profile)

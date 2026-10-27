@@ -1,0 +1,11 @@
+#!/bin/sh
+# NetworkManager dispatcher: when a connection comes up, apply the firewall profile
+# mapped to that network. All logic lives in `fwmanager-cli dispatch`.
+IFACE="$1"
+ACTION="$2"
+
+[ "$ACTION" = "up" ] || exit 0
+[ "$IFACE" != "lo" ] || exit 0
+[ -x /usr/local/bin/fwmanager-cli ] || exit 0
+
+exec /usr/local/bin/fwmanager-cli dispatch "$IFACE" "$ACTION"
