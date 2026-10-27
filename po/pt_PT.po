@@ -5,6 +5,9 @@ msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit
 msgid "A change is undone after 30 seconds unless you confirm it."
 msgstr "Uma alteração é desfeita ao fim de 30 segundos se não a confirmar."
 
+msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
+msgstr "Uma cara amigável para a firewall ufw. A configuração demora cerca de um minuto e não precisa de terminal."
+
 msgid "A network you trust, such as your own Wi-Fi."
 msgstr "Uma rede em que confia, como o seu próprio Wi-Fi."
 
@@ -50,6 +53,9 @@ msgstr "Redes permitidas (por exemplo, 192.168.1.0/24)"
 msgid "Allowed services are reachable from any network."
 msgstr "Os serviços permitidos estão acessíveis a partir de qualquer rede."
 
+msgid "Allowed. fwmanager has to be restarted to notice it."
+msgstr "Permitido. É preciso reiniciar o fwmanager para o notar."
+
 msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr "Filtra também o tráfego que passa por este computador. Pode interferir com o Docker e as máquinas virtuais."
 
@@ -67,6 +73,9 @@ msgstr "Está ativo outro gestor de firewall"
 
 msgid "Answer ping"
 msgstr "Responder a ping"
+
+msgid "Anything that needs administrator rights is asked once, with the usual password window. After that, fwmanager never asks again."
+msgstr "O que precisar de direitos de administrador é pedido uma só vez, na janela de palavra-passe habitual. Depois disso, o fwmanager não volta a pedir."
 
 msgid "Anywhere"
 msgstr "De qualquer lado"
@@ -107,14 +116,23 @@ msgstr "Partido"
 msgid "Cancel"
 msgstr "Cancelar"
 
+msgid "Cancelled. Nothing was changed."
+msgstr "Cancelado. Nada foi alterado."
+
 msgid "Changed the settings"
 msgstr "Alterou as definições"
 
 msgid "Changes apply right away. No password needed."
 msgstr "As alterações aplicam-se de imediato. Não é preciso palavra-passe."
 
+msgid "Check again"
+msgstr "Verificar novamente"
+
 msgid "Check that this profile will not break your connection"
 msgstr "Verificar que este perfil não vai cortar a sua ligação"
+
+msgid "Checking your system"
+msgstr "A verificar o seu sistema"
 
 msgid "Checking…"
 msgstr "A verificar…"
@@ -158,6 +176,9 @@ msgstr "Ligação {id}"
 msgid "Connections could hang (destination unreachable)."
 msgstr "As ligações podem ficar penduradas (destino inalcançável)."
 
+msgid "Continue"
+msgstr "Continuar"
+
 msgid "Copy command"
 msgstr "Copiar comando"
 
@@ -173,6 +194,9 @@ msgstr "Personalizado"
 msgid "DNS resolver answers"
 msgstr "O servidor DNS responde"
 
+msgid "Decide later"
+msgstr "Decidir mais tarde"
+
 msgid "Details"
 msgstr "Detalhes"
 
@@ -184,6 +208,9 @@ msgstr "O Docker gere as suas próprias regras (ficam intocadas)."
 
 msgid "Docker or virtual machines were found. They manage their own rules, which fwmanager leaves alone."
 msgstr "Foram encontrados Docker ou máquinas virtuais. Gerem as suas próprias regras, que o fwmanager não toca."
+
+msgid "Done."
+msgstr "Concluído."
 
 msgid "Edit {name}"
 msgstr "Editar {name}"
@@ -215,11 +242,17 @@ msgstr "Firewall"
 msgid "Firewall manager client"
 msgstr "Cliente do gestor de firewall"
 
+msgid "Fix this"
+msgstr "Corrigir"
+
 msgid "Forget this network"
 msgstr "Esquecer esta rede"
 
 msgid "General"
 msgstr "Geral"
+
+msgid "Get started"
+msgstr "Começar"
 
 msgid "Hide this computer (no ping, no mDNS)"
 msgstr "Esconder este computador (sem ping nem mDNS)"
@@ -232,6 +265,9 @@ msgstr "Alto"
 
 msgid "Home"
 msgstr "Casa"
+
+msgid "How should this computer behave on this network?"
+msgstr "Como deve este computador comportar-se nesta rede?"
 
 msgid "IPv6 connections could hang (packet-too-big)."
 msgstr "As ligações IPv6 podem ficar penduradas (pacote demasiado grande)."
@@ -278,6 +314,9 @@ msgstr "Serviço inválido."
 msgid "Invalid traffic source."
 msgstr "Origem de tráfego inválida."
 
+msgid "Is your connection still working?"
+msgstr "A sua ligação continua a funcionar?"
+
 msgid "It should work, but read the notes below first."
 msgstr "Deve funcionar, mas leia primeiro as notas abaixo."
 
@@ -323,6 +362,9 @@ msgstr "Médio"
 msgid "NFS"
 msgstr "NFS"
 
+msgid "Needs attention"
+msgstr "Precisa de atenção"
+
 msgid "Networks"
 msgstr "Redes"
 
@@ -335,14 +377,23 @@ msgstr "As redes para as quais não escolheu um perfil usam o perfil Público."
 msgid "No blocked attempts found."
 msgstr "Não foram encontradas tentativas bloqueadas."
 
+msgid "No other firewall manager is in the way"
+msgstr "Nenhum outro gestor de firewall está a atrapalhar"
+
 msgid "No problems found in the rules."
 msgstr "Não foram encontrados problemas nas regras."
 
 msgid "No rules yet."
 msgstr "Ainda não há regras."
 
+msgid "No, undo it"
+msgstr "Não, desfazer"
+
 msgid "None"
 msgstr "Nenhum"
+
+msgid "Not authorised. Ask an administrator, or use the command below."
+msgstr "Sem autorização. Peça a um administrador ou use o comando abaixo."
 
 msgid "Not connected"
 msgstr "Sem ligação"
@@ -377,8 +428,14 @@ msgstr "Aceitar ligações apenas da rede local em: {profiles}"
 msgid "Only accept connections from {networks} in: {profiles}"
 msgstr "Aceitar ligações apenas de {networks} em: {profiles}"
 
+msgid "Open fwmanager"
+msgstr "Abrir o fwmanager"
+
 msgid "Options"
 msgstr "Opções"
+
+msgid "Please log out and back in, then open fwmanager again."
+msgstr "Termine a sessão e volte a entrar; depois abra o fwmanager novamente."
 
 msgid "Policy check for {p}:"
 msgstr "Verificação da política de {p}:"
@@ -416,6 +473,9 @@ msgstr "Alcançar o gateway IPv4"
 msgid "Reach the IPv6 gateway"
 msgstr "Alcançar o gateway IPv6"
 
+msgid "Ready"
+msgstr "Pronto"
+
 msgid "Record blocked attempts"
 msgstr "Registar tentativas bloqueadas"
 
@@ -427,6 +487,9 @@ msgstr "Recusou um pedido de uma conta sem permissão"
 
 msgid "Remember"
 msgstr "Memorizar"
+
+msgid "Remember this choice for this network"
+msgstr "Lembrar esta escolha para esta rede"
 
 msgid "Remembered networks"
 msgstr "Redes memorizadas"
@@ -454,6 +517,9 @@ msgstr "A renovação do endereço IPv6 (DHCPv6) falharia."
 
 msgid "Replies to your own connections would be blocked."
 msgstr "As respostas às suas próprias ligações seriam bloqueadas."
+
+msgid "Restart fwmanager"
+msgstr "Reiniciar o fwmanager"
 
 msgid "Restore the original settings"
 msgstr "Repor as definições originais"
@@ -487,6 +553,9 @@ msgstr "Regras que vão ser adicionadas."
 
 msgid "Rules that will be removed."
 msgstr "Regras que vão ser removidas."
+
+msgid "Run this in a terminal, then press “Check again”:"
+msgstr "Execute isto num terminal e carregue em “Verificar novamente”:"
 
 msgid "SAFE"
 msgstr "SEGURO"
@@ -524,6 +593,9 @@ msgstr "Definições"
 msgid "Shown in the Log page. Higher levels record more."
 msgstr "Aparece na página Registo. Níveis mais altos registam mais."
 
+msgid "Skip setup"
+msgstr "Saltar a configuração"
+
 msgid "Some diagnostics would fail (time exceeded)."
 msgstr "Alguns diagnósticos falhariam (tempo excedido)."
 
@@ -557,6 +629,9 @@ msgstr "Testar {name}"
 msgid "Testing…"
 msgstr "A testar…"
 
+msgid "The background service is running"
+msgstr "O serviço em segundo plano está a funcionar"
+
 msgid "The firewall service is not running"
 msgstr "O serviço da firewall não está a funcionar"
 
@@ -568,6 +643,9 @@ msgstr "A rede local"
 
 msgid "The most recent ones, newest first. Turn logging on in Settings."
 msgstr "As mais recentes, primeiro as mais novas. Ative o registo nas Definições."
+
+msgid "The password window is not available. Use the commands shown instead."
+msgstr "A janela de palavra-passe não está disponível. Use antes os comandos indicados."
 
 msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
 msgstr "O perfil é aplicado durante alguns segundos enquanto a sua ligação é medida e depois tudo volta ao que era."
@@ -584,11 +662,17 @@ msgstr "O estado guardado da firewall estava danificado; foi usado o perfil mais
 msgid "The saved settings were damaged, so the strictest profile was used."
 msgstr "As definições guardadas estavam danificadas, por isso foi usado o perfil mais restritivo."
 
+msgid "The setup step failed. Try the commands shown instead."
+msgstr "O passo de configuração falhou. Experimente antes os comandos indicados."
+
 msgid "The strictest: cafés, airports, hotels."
 msgstr "O mais restritivo: cafés, aeroportos, hotéis."
 
 msgid "There is no change waiting for confirmation."
 msgstr "Não há nenhuma alteração à espera de confirmação."
+
+msgid "This account may use fwmanager"
+msgstr "Esta conta pode usar o fwmanager"
 
 msgid "This network"
 msgstr "Esta rede"
@@ -611,6 +695,9 @@ msgstr "Desfez {name}"
 msgid "Undo"
 msgstr "Desfazer"
 
+msgid "Undone. Pick another profile, or test it first."
+msgstr "Desfeito. Escolha outro perfil ou teste-o primeiro."
+
 msgid "Unknown profile."
 msgstr "Perfil desconhecido."
 
@@ -629,6 +716,9 @@ msgstr "AVISO: não foi possível confirmar que as regras anteriores foram repos
 msgid "Waiting for confirmation of {p} ({n}s left)"
 msgstr "À espera de confirmação de {p} (faltam {n} s)"
 
+msgid "Waiting for the service"
+msgstr "A aguardar pelo serviço"
+
 msgid "Waiting for your confirmation"
 msgstr "À espera da sua confirmação"
 
@@ -637,6 +727,9 @@ msgstr "Aviso"
 
 msgid "Web server (HTTP/HTTPS)"
 msgstr "Servidor web (HTTP/HTTPS)"
+
+msgid "Welcome to fwmanager"
+msgstr "Bem-vindo ao fwmanager"
 
 msgid "What do you want to do?"
 msgstr "O que quer fazer?"
@@ -668,8 +761,17 @@ msgstr "Trabalho"
 msgid "Would break something"
 msgstr "Iria partir alguma coisa"
 
+msgid "Yes, keep it"
+msgstr "Sim, manter"
+
+msgid "You are all set"
+msgstr "Está tudo pronto"
+
 msgid "You are not allowed to control the firewall."
 msgstr "Não tem permissão para controlar a firewall."
+
+msgid "You can change this at any time, and fwmanager remembers it per network."
+msgstr "Pode alterar isto a qualquer momento, e o fwmanager lembra-se dele para cada rede."
 
 msgid "Your SSH session and new SSH connections stay allowed."
 msgstr "A sua sessão SSH e as novas ligações SSH continuam permitidas."
@@ -719,8 +821,20 @@ msgstr "fwmanager"
 msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
 msgstr "O fwmanager é uma cara amigável para o ufw, por isso o ufw tem de estar instalado primeiro:"
 
+msgid "fwmanager must not run as root: the service does that part."
+msgstr "O fwmanager não deve correr como root: essa parte é feita pelo serviço."
+
+msgid "fwmanager needs GTK 4 and libadwaita 1.5 or newer, and they were not found. On Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+msgstr "O fwmanager precisa do GTK 4 e do libadwaita 1.5 ou superior, e não foram encontrados. No Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+
 msgid "fwmanager needs its background service. Start it with this command:"
 msgstr "O fwmanager precisa do seu serviço em segundo plano. Inicie-o com este comando:"
+
+msgid "fwmanager needs libadwaita 1.5 or newer, but this system has {found}. Use Ubuntu 24.04, Fedora 40 or later. The command line (fwmanager-cli) works on older systems."
+msgstr "O fwmanager precisa do libadwaita 1.5 ou superior, mas este sistema tem {found}. Use o Ubuntu 24.04, o Fedora 40 ou posterior. A linha de comandos (fwmanager-cli) funciona em sistemas mais antigos."
+
+msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
+msgstr "O fwmanager muda de perfil sozinho quando muda de rede. Use Testar antes de aplicar algo novo e Regras para as suas definições."
 
 msgid "libvirt manages its own rules (they are left untouched)."
 msgstr "O libvirt gere as suas próprias regras (ficam intocadas)."
@@ -778,6 +892,9 @@ msgstr "desliga o mDNS"
 
 msgid "turns mDNS on"
 msgstr "liga o mDNS"
+
+msgid "ufw is installed"
+msgstr "O ufw está instalado"
 
 msgid "ufw is not installed"
 msgstr "O ufw não está instalado"

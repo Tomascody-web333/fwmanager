@@ -5,6 +5,9 @@ msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit
 msgid "A change is undone after 30 seconds unless you confirm it."
 msgstr ""
 
+msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
+msgstr ""
+
 msgid "A network you trust, such as your own Wi-Fi."
 msgstr ""
 
@@ -50,6 +53,9 @@ msgstr ""
 msgid "Allowed services are reachable from any network."
 msgstr ""
 
+msgid "Allowed. fwmanager has to be restarted to notice it."
+msgstr ""
+
 msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr ""
 
@@ -66,6 +72,9 @@ msgid "Another firewall manager is active"
 msgstr ""
 
 msgid "Answer ping"
+msgstr ""
+
+msgid "Anything that needs administrator rights is asked once, with the usual password window. After that, fwmanager never asks again."
 msgstr ""
 
 msgid "Anywhere"
@@ -107,13 +116,22 @@ msgstr ""
 msgid "Cancel"
 msgstr ""
 
+msgid "Cancelled. Nothing was changed."
+msgstr ""
+
 msgid "Changed the settings"
 msgstr ""
 
 msgid "Changes apply right away. No password needed."
 msgstr ""
 
+msgid "Check again"
+msgstr ""
+
 msgid "Check that this profile will not break your connection"
+msgstr ""
+
+msgid "Checking your system"
 msgstr ""
 
 msgid "Checking…"
@@ -158,6 +176,9 @@ msgstr ""
 msgid "Connections could hang (destination unreachable)."
 msgstr ""
 
+msgid "Continue"
+msgstr ""
+
 msgid "Copy command"
 msgstr ""
 
@@ -173,6 +194,9 @@ msgstr ""
 msgid "DNS resolver answers"
 msgstr ""
 
+msgid "Decide later"
+msgstr ""
+
 msgid "Details"
 msgstr ""
 
@@ -183,6 +207,9 @@ msgid "Docker manages its own rules (they are left untouched)."
 msgstr ""
 
 msgid "Docker or virtual machines were found. They manage their own rules, which fwmanager leaves alone."
+msgstr ""
+
+msgid "Done."
 msgstr ""
 
 msgid "Edit {name}"
@@ -215,10 +242,16 @@ msgstr ""
 msgid "Firewall manager client"
 msgstr ""
 
+msgid "Fix this"
+msgstr ""
+
 msgid "Forget this network"
 msgstr ""
 
 msgid "General"
+msgstr ""
+
+msgid "Get started"
 msgstr ""
 
 msgid "Hide this computer (no ping, no mDNS)"
@@ -231,6 +264,9 @@ msgid "High"
 msgstr ""
 
 msgid "Home"
+msgstr ""
+
+msgid "How should this computer behave on this network?"
 msgstr ""
 
 msgid "IPv6 connections could hang (packet-too-big)."
@@ -278,6 +314,9 @@ msgstr ""
 msgid "Invalid traffic source."
 msgstr ""
 
+msgid "Is your connection still working?"
+msgstr ""
+
 msgid "It should work, but read the notes below first."
 msgstr ""
 
@@ -323,6 +362,9 @@ msgstr ""
 msgid "NFS"
 msgstr ""
 
+msgid "Needs attention"
+msgstr ""
+
 msgid "Networks"
 msgstr ""
 
@@ -335,13 +377,22 @@ msgstr ""
 msgid "No blocked attempts found."
 msgstr ""
 
+msgid "No other firewall manager is in the way"
+msgstr ""
+
 msgid "No problems found in the rules."
 msgstr ""
 
 msgid "No rules yet."
 msgstr ""
 
+msgid "No, undo it"
+msgstr ""
+
 msgid "None"
+msgstr ""
+
+msgid "Not authorised. Ask an administrator, or use the command below."
 msgstr ""
 
 msgid "Not connected"
@@ -377,7 +428,13 @@ msgstr ""
 msgid "Only accept connections from {networks} in: {profiles}"
 msgstr ""
 
+msgid "Open fwmanager"
+msgstr ""
+
 msgid "Options"
+msgstr ""
+
+msgid "Please log out and back in, then open fwmanager again."
 msgstr ""
 
 msgid "Policy check for {p}:"
@@ -416,6 +473,9 @@ msgstr ""
 msgid "Reach the IPv6 gateway"
 msgstr ""
 
+msgid "Ready"
+msgstr ""
+
 msgid "Record blocked attempts"
 msgstr ""
 
@@ -426,6 +486,9 @@ msgid "Refused a request from an account that is not allowed"
 msgstr ""
 
 msgid "Remember"
+msgstr ""
+
+msgid "Remember this choice for this network"
 msgstr ""
 
 msgid "Remembered networks"
@@ -453,6 +516,9 @@ msgid "Renewing the IPv6 address (DHCPv6) would fail."
 msgstr ""
 
 msgid "Replies to your own connections would be blocked."
+msgstr ""
+
+msgid "Restart fwmanager"
 msgstr ""
 
 msgid "Restore the original settings"
@@ -486,6 +552,9 @@ msgid "Rules that will be added."
 msgstr ""
 
 msgid "Rules that will be removed."
+msgstr ""
+
+msgid "Run this in a terminal, then press “Check again”:"
 msgstr ""
 
 msgid "SAFE"
@@ -524,6 +593,9 @@ msgstr ""
 msgid "Shown in the Log page. Higher levels record more."
 msgstr ""
 
+msgid "Skip setup"
+msgstr ""
+
 msgid "Some diagnostics would fail (time exceeded)."
 msgstr ""
 
@@ -557,6 +629,9 @@ msgstr ""
 msgid "Testing…"
 msgstr ""
 
+msgid "The background service is running"
+msgstr ""
+
 msgid "The firewall service is not running"
 msgstr ""
 
@@ -567,6 +642,9 @@ msgid "The local network"
 msgstr ""
 
 msgid "The most recent ones, newest first. Turn logging on in Settings."
+msgstr ""
+
+msgid "The password window is not available. Use the commands shown instead."
 msgstr ""
 
 msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
@@ -584,10 +662,16 @@ msgstr ""
 msgid "The saved settings were damaged, so the strictest profile was used."
 msgstr ""
 
+msgid "The setup step failed. Try the commands shown instead."
+msgstr ""
+
 msgid "The strictest: cafés, airports, hotels."
 msgstr ""
 
 msgid "There is no change waiting for confirmation."
+msgstr ""
+
+msgid "This account may use fwmanager"
 msgstr ""
 
 msgid "This network"
@@ -611,6 +695,9 @@ msgstr ""
 msgid "Undo"
 msgstr ""
 
+msgid "Undone. Pick another profile, or test it first."
+msgstr ""
+
 msgid "Unknown profile."
 msgstr ""
 
@@ -629,6 +716,9 @@ msgstr ""
 msgid "Waiting for confirmation of {p} ({n}s left)"
 msgstr ""
 
+msgid "Waiting for the service"
+msgstr ""
+
 msgid "Waiting for your confirmation"
 msgstr ""
 
@@ -636,6 +726,9 @@ msgid "Warning"
 msgstr ""
 
 msgid "Web server (HTTP/HTTPS)"
+msgstr ""
+
+msgid "Welcome to fwmanager"
 msgstr ""
 
 msgid "What do you want to do?"
@@ -668,7 +761,16 @@ msgstr ""
 msgid "Would break something"
 msgstr ""
 
+msgid "Yes, keep it"
+msgstr ""
+
+msgid "You are all set"
+msgstr ""
+
 msgid "You are not allowed to control the firewall."
+msgstr ""
+
+msgid "You can change this at any time, and fwmanager remembers it per network."
 msgstr ""
 
 msgid "Your SSH session and new SSH connections stay allowed."
@@ -719,7 +821,19 @@ msgstr ""
 msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
 msgstr ""
 
+msgid "fwmanager must not run as root: the service does that part."
+msgstr ""
+
+msgid "fwmanager needs GTK 4 and libadwaita 1.5 or newer, and they were not found. On Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+msgstr ""
+
 msgid "fwmanager needs its background service. Start it with this command:"
+msgstr ""
+
+msgid "fwmanager needs libadwaita 1.5 or newer, but this system has {found}. Use Ubuntu 24.04, Fedora 40 or later. The command line (fwmanager-cli) works on older systems."
+msgstr ""
+
+msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
 msgstr ""
 
 msgid "libvirt manages its own rules (they are left untouched)."
@@ -777,6 +891,9 @@ msgid "turns mDNS off"
 msgstr ""
 
 msgid "turns mDNS on"
+msgstr ""
+
+msgid "ufw is installed"
 msgstr ""
 
 msgid "ufw is not installed"
