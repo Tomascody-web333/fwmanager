@@ -96,7 +96,41 @@ def test_installed_files_are_not_group_or_world_writable(staged):
 def test_wrapper_ignores_python_environment(staged):
     stage(staged)
     text = (staged / "usr/local/bin/fwmanagerd").read_text()
-    assert " -E -c " in text and "PYTHONPATH" not in text
+    assert " -I -c " in text and "PYTHONPATH" not in text
+
+
+def plant(directory):
+    """Modules a local user could drop in a shared directory (e.g. /tmp) an admin cd's into.
+
+    The payload uses builtins only: importing anything could pull in the other planted modules.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    for module in ("argparse", "gi", "json", "gettext", "enum", "re"):
+        (directory / f"{module}.py").write_text("open(__file__ + '.PWNED', 'w').write('ran')\n")
+    return directory
+
+
+@pytest.mark.parametrize("exe", ["fwmanagerd", "fwmanager-cli", "fwmanager"])
+def test_wrappers_never_import_from_the_current_directory(staged, tmp_path, exe):
+    stage(staged)
+    lib = staged / "usr/local/lib/fwmanager"
+    wrapper = (
+        (staged / "usr/local/bin" / exe).read_text().replace("/usr/local/lib/fwmanager", str(lib))
+    )
+    (tmp_path / exe).write_text(wrapper)
+    evil = plant(tmp_path / "evil")
+    subprocess.run(["sh", str(tmp_path / exe), "--help"], cwd=evil, capture_output=True, timeout=60)
+    assert not list(evil.glob("*.PWNED"))
+
+
+def test_installer_never_imports_from_the_current_directory(tmp_path):
+    evil = plant(tmp_path / "evil")
+    r = subprocess.run(
+        ["sh", str(INSTALL), "--root", str(tmp_path / "root")],
+        cwd=evil, capture_output=True, text=True, timeout=60, env={**os.environ, "LANG": "C"},
+    )  # fmt: skip
+    assert r.returncode == 0, r.stderr
+    assert not list(evil.glob("*.PWNED"))
 
 
 def test_no_config_without_lang(staged):
