@@ -1,6 +1,7 @@
 #!/bin/sh
 # Development installer for fwmanager (meant for a VM or container, run with sudo).
 # Not a package: it copies files into place, creates the `fwmanager` group and starts the daemon.
+# Requires ufw (fwmanager drives it); it is not installed for you.
 #
 #   sudo scripts/dev-install.sh --user NAME [--lang pt|en] [--no-systemd]
 #
@@ -40,7 +41,7 @@ if [ "$STAGED" -eq 0 ]; then
     [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)"
     id "$USER_NAME" >/dev/null 2>&1 || die "user does not exist: $USER_NAME"
     [ "$(id -u "$USER_NAME")" -ne 0 ] || die "refusing to use a uid 0 account"
-    command -v nft >/dev/null 2>&1 || die "nft not found (install nftables first)"
+    command -v ufw >/dev/null 2>&1 || die "ufw not found (install it first: apt install ufw)"
 else
     USE_SYSTEMD=0
 fi

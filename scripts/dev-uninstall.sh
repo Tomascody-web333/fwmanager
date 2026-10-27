@@ -1,10 +1,10 @@
 #!/bin/sh
-# Removes everything dev-install.sh put in place, including the `inet fwmanager` table,
+# Removes everything dev-install.sh put in place, including fwmanager's changes to ufw,
 # so the machine is left with working networking. Run with sudo.
 #
 #   sudo scripts/dev-uninstall.sh [--no-systemd]
 #
-# --root DIR   (tests only) remove from DIR and skip group/systemd/nft steps.
+# --root DIR   (tests only) remove from DIR and skip group/systemd/ufw steps.
 set -eu
 
 GROUP=fwmanager
@@ -40,10 +40,14 @@ if [ "$USE_SYSTEMD" -eq 1 ]; then
     systemctl disable --now fwmanagerd.service 2>/dev/null || true
 fi
 
-# Drop our firewall table first: with a `policy drop` input chain left behind and nothing
-# managing it, the machine would stay locked down. Other tables are never touched.
-if [ "$STAGED" -eq 0 ] && command -v nft >/dev/null 2>&1; then
-    nft delete table inet fwmanager 2>/dev/null || true
+# Undo our changes to ufw first: our rules, our managed block in before.rules and, if
+# fwmanager is the one that switched ufw on, ufw itself. Otherwise the machine could stay
+# locked down with nobody managing it. The user's own ufw rules are never touched.
+if [ "$STAGED" -eq 0 ]; then
+    if [ -x /usr/local/bin/fwmanagerd ] && command -v ufw >/dev/null 2>&1; then
+        /usr/local/bin/fwmanagerd --cleanup \
+            || echo "Warning: could not clean ufw; check 'ufw status' and /etc/ufw/before.rules."
+    fi
 fi
 
 rm -f "$ROOT/usr/local/bin/fwmanagerd" "$ROOT/usr/local/bin/fwmanager-cli" \

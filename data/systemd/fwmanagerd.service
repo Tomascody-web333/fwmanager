@@ -1,7 +1,7 @@
 [Unit]
-Description=fwmanager firewall daemon
-Documentation=man:nft(8)
-After=dbus.service
+Description=fwmanager daemon (profiles and safe changes for ufw)
+Documentation=man:ufw(8)
+After=dbus.service ufw.service
 Wants=dbus.service
 Before=network-pre.target
 Wants=network-pre.target
@@ -11,13 +11,17 @@ Type=dbus
 BusName=org.fwmanager.Control
 ExecStart=/usr/local/bin/fwmanagerd
 User=root
-CapabilityBoundingSet=CAP_NET_ADMIN
-AmbientCapabilities=CAP_NET_ADMIN
+# The daemon only drives ufw, which needs netfilter access. iptables (legacy) uses raw
+# AF_INET sockets, hence CAP_NET_RAW and the INET families on top of the original set.
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW
 NoNewPrivileges=yes
 ProtectSystem=strict
 ProtectHome=yes
 PrivateTmp=yes
-RestrictAddressFamilies=AF_UNIX AF_NETLINK
+RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
+# ufw keeps its configuration in /etc/ufw and /etc/default/ufw and its lock in /run.
+ReadWritePaths=/etc/ufw /etc/default /run
 StateDirectory=fwmanager
 Restart=on-failure
 
