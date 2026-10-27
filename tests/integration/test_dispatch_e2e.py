@@ -1,4 +1,4 @@
-"""NetworkManager dispatcher flow against the real daemon and nft (inside a netns)."""
+"""NetworkManager dispatcher flow against the real daemon and ufw (inside a netns)."""
 
 import json
 import shutil
@@ -12,7 +12,6 @@ from helpers.harness import (
     Daemon,
     bring_lo_up,
     run_cli_in_ns,
-    snapshot_of,
 )
 
 from fwmanager.cli import dispatch as d
@@ -25,10 +24,9 @@ OTHER = "223e4567-e89b-12d3-a456-426614174000"
 
 
 @pytest.fixture
-def env(nft, netns_prefix, private_bus, tmp_path):
+def env(nft, netns_prefix, private_bus, tmp_path, ufw_root):
     bring_lo_up(netns_prefix)
-    daemon = Daemon(netns_prefix, private_bus, timeout=10, state_dir=tmp_path / "state")
-    daemon.initial = snapshot_of(nft)  # first boot: publico
+    daemon = Daemon(netns_prefix, private_bus, ufw_root, timeout=20, state_dir=tmp_path / "state")
     daemon.state_dir = tmp_path / "state"
     yield daemon
     daemon.stop()
@@ -110,18 +108,18 @@ def test_malicious_environment_is_ignored(env, netns_prefix):
     assert bad_iface.returncode == 1
 
 
-def test_lost_connectivity_rolls_back_for_real(env, nft):
-    """Real daemon + real nft, with a pinger that sees the gateway die after the change."""
+def test_lost_connectivity_rolls_back_for_real(env):
+    """Real daemon + real ufw, with a pinger that sees the gateway die after the change."""
     env.client.set_network_profile("", UUID, "casa")
-    before = snapshot_of(nft)
+    before = env.fp()
 
     def ping(addr, iface, timeout):
-        return snapshot_of(nft) == before  # reachable only while the old rules are in place
+        return env.fp() == before  # reachable only while the old rules are in place
 
     ctx = d.Context("lo", UUID, (d.Gateway("192.168.1.1", 4),))
     code = d.dispatch(Client(env.bus), ctx, ping=ping, sleep=lambda s: None)
     assert code == d.EXIT_REVERTED
-    assert snapshot_of(nft) == before
+    assert env.fp() == before
     assert env.client.status()["pending_profile"] == ""
     assert not (env.state_dir / "state.json").exists()  # a reverted profile is never saved
 

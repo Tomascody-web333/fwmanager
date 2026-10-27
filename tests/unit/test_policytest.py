@@ -107,7 +107,7 @@ class FakeClient:
     def status(self):
         return {
             "active_profile": self.current,
-            "table_present": True,
+            "firewall_active": True,
             "pending_profile": self.pending,
             "blocking_conflicts": self.conflicts,
         }

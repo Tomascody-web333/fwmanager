@@ -5,8 +5,8 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
-from fwmanager.core.nft import Nft
+from helpers.harness import make_ufw_root
+from helpers.nftcli import NftCli
 
 
 @pytest.fixture(scope="session")
@@ -35,7 +35,7 @@ def netns_prefix():
 @pytest.fixture
 def nft(netns_prefix):
     """Real nft bound to the private namespace, starting from an empty ruleset."""
-    n = Nft(prefix=netns_prefix)
+    n = NftCli(netns_prefix)
     n.run(["flush", "ruleset"])
     yield n
     n.run(["flush", "ruleset"])
@@ -78,3 +78,14 @@ def private_bus():
     proc.terminate()
     proc.wait()
     shutil.rmtree(d, ignore_errors=True)
+
+
+@pytest.fixture(scope="session")
+def ufw_available():
+    if not shutil.which("ufw"):
+        pytest.skip("ufw is not installed")
+
+
+@pytest.fixture
+def ufw_root(tmp_path, ufw_available):
+    return make_ufw_root(tmp_path)

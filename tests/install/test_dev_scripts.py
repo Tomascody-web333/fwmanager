@@ -131,23 +131,13 @@ real = pytest.mark.skipif(
 
 
 @real
-def test_real_install_and_uninstall_roundtrip(netns_prefix, nft):
-    if grp.getgrall() and any(g.gr_name == "fwmanager" for g in grp.getgrall()):
+def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
+    if not shutil.which("ufw"):
+        pytest.skip("ufw is not installed")
+    if any(g.gr_name == "fwmanager" for g in grp.getgrall()):
         pytest.skip("group fwmanager already exists on this machine")
     user = "nobody"
-    # A foreign table that must survive, plus our table that must be removed.
-    nft.run(["add", "table", "ip", "docker_like"])
-    nft.run(["add", "table", "inet", "fwmanager"])
-    nft.run(
-        [
-            "add",
-            "chain",
-            "inet",
-            "fwmanager",
-            "input",
-            "{ type filter hook input priority 0; policy drop; }",
-        ]
-    )
+    env = {"PATH": "/usr/bin:/bin"}
     try:
         r = sh(INSTALL, "--user", user, "--lang", "pt", "--no-systemd")
         assert r.returncode == 0, r.stderr
@@ -160,26 +150,26 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, nft):
         for exe in ("fwmanager-cli", "fwmanagerd"):
             h = subprocess.run(
                 [f"/usr/local/bin/{exe}", "--help"],
-                capture_output=True,
-                text=True,
-                timeout=30,
-                env={"PATH": "/usr/bin:/bin"},
-            )
+                capture_output=True, text=True, timeout=30, env=env,
+            )  # fmt: skip
             assert h.returncode == 0 and "usage" in h.stdout.lower(), h.stderr
-        # And the CLI renders rules straight from the installed copy.
-        out = subprocess.run(
-            ["/usr/local/bin/fwmanager-cli", "render", "publico"],
-            capture_output=True,
-            text=True,
-            timeout=30,
-            env={"PATH": "/usr/bin:/bin"},
-        )
-        assert "policy drop" in out.stdout
+        # The installed copy can clean a ufw tree (relocated, so the real /etc/ufw is untouched).
+        root = tmp_path / "ufwroot"
+        (root / "etc/default").mkdir(parents=True)
+        (root / "lib").mkdir()
+        shutil.copytree("/etc/ufw", root / "etc/ufw")
+        shutil.copy("/etc/default/ufw", root / "etc/default/ufw")
+        shutil.copytree("/lib/ufw", root / "lib/ufw")
+        c = subprocess.run(
+            ["/usr/local/bin/fwmanagerd", "--cleanup", f"--ufw-rootdir={root}",
+             f"--state-dir={tmp_path / 'state'}"],
+            capture_output=True, text=True, timeout=60, env=env,
+        )  # fmt: skip
+        assert c.returncode == 0 and c.stdout.strip() == "cleaned", c.stderr
 
         r = sh(UNINSTALL, "--no-systemd", prefix=netns_prefix)
         assert r.returncode == 0, r.stderr
-        assert nft.list_table_json("inet", "fwmanager") is None
-        assert "ip docker_like" in nft.run(["list", "tables"])
+        assert "Warning" not in r.stdout + r.stderr
         assert not any(g.gr_name == "fwmanager" for g in grp.getgrall())
         for path in (
             "/usr/local/bin/fwmanagerd",

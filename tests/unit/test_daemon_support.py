@@ -93,13 +93,14 @@ def unit():
 def test_systemd_unit_hardening(unit):
     expected = {
         "User": "root",
-        "CapabilityBoundingSet": "CAP_NET_ADMIN",
-        "AmbientCapabilities": "CAP_NET_ADMIN",
+        "CapabilityBoundingSet": "CAP_NET_ADMIN CAP_NET_RAW",
+        "AmbientCapabilities": "CAP_NET_ADMIN CAP_NET_RAW",
         "NoNewPrivileges": "yes",
         "ProtectSystem": "strict",
         "ProtectHome": "yes",
         "PrivateTmp": "yes",
-        "RestrictAddressFamilies": "AF_UNIX AF_NETLINK",
+        "RestrictAddressFamilies": "AF_UNIX AF_NETLINK AF_INET AF_INET6",
+        "ReadWritePaths": "/etc/ufw /etc/default /run",
         "StateDirectory": "fwmanager",
     }
     for key, value in expected.items():
