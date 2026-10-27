@@ -77,6 +77,35 @@ class Client:
         """Read-only policy check done by the daemon: (severity, code, detail) tuples."""
         return self._call("CheckProfile", GLib.Variant("(s)", (name,)), "(a(sss))")[0]
 
+    def get_profile(self, name: str) -> dict:
+        return self._call("GetProfile", GLib.Variant("(s)", (name,)), "(a{sv})")[0]
+
+    def set_profile(self, name, services, ping, mdns, source_kind, cidrs=()) -> None:
+        self._call(
+            "SetProfile",
+            GLib.Variant(
+                "(sasbbsas)", (name, list(services), ping, mdns, source_kind, list(cidrs))
+            ),
+        )
+
+    def reset_profile(self, name: str) -> None:
+        self._call("ResetProfile", GLib.Variant("(s)", (name,)))
+
+    def list_services(self) -> list[tuple[str, str]]:
+        return self._call("ListServices", reply="(a(ss))")[0]
+
+    def get_options(self) -> dict:
+        return self._call("GetOptions", reply="(a{sv})")[0]
+
+    def set_options(self, router_mode: bool, log_level: str = "") -> None:
+        self._call("SetOptions", GLib.Variant("(bs)", (router_mode, log_level)))
+
+    def get_events(self) -> list[tuple[int, str, str]]:
+        return self._call("GetEvents", reply="(a(tss))")[0]
+
+    def get_recent_blocked(self, limit: int = 50) -> list[tuple[str, ...]]:
+        return self._call("GetRecentBlocked", GLib.Variant("(u)", (limit,)), "(a(ssssss))")[0]
+
     def list_networks(self) -> list[tuple[str, str, str]]:
         return self._call("ListNetworks", reply="(a(sss))")[0]
 

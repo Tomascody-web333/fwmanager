@@ -141,3 +141,59 @@ def test_same_ssid_different_uuid_does_not_match():
     nets = [Network("Cafe", UUID, "casa")]
     other = "223e4567-e89b-12d3-a456-426614174000"
     assert find_profile(nets, "Cafe", other) is None  # a different connection
+
+
+# -- edited profiles and options ---------------------------------------------
+
+
+def test_profiles_roundtrip(store):
+    from fwmanager.core.profiles import Profile, Source
+
+    custom = {
+        "casa": Profile("casa", ("ssh", "web"), True, False, Source("cidrs", ("10.1.0.0/16",))),
+        "publico": Profile("publico", (), False, False, Source("any")),
+    }
+    store.save_profiles(custom)
+    assert store.load_profiles() == custom
+    assert Store(store._dir).load_profiles() == custom
+
+
+def test_profiles_missing_is_empty(store):
+    assert store.load_profiles() == {}
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {"version": 1, "profiles": "x"},
+        {"version": 1, "profiles": {"casa": {}}},
+        {"version": 1, "profiles": {"CASA": {"services": [], "ping": 1, "mdns": 0,
+                                              "source": {"kind": "any"}}}},
+        {"version": 1, "profiles": {"casa": {"services": ["a b"], "ping": 1, "mdns": 0,
+                                              "source": {"kind": "any"}}}},
+        {"version": 1, "profiles": {"casa": {"services": [], "ping": 1, "mdns": 0,
+                                              "source": {"kind": "bogus"}}}},
+        {"version": 1, "profiles": {"casa": {"services": [], "ping": 1, "mdns": 0,
+                                              "source": {"kind": "any", "cidrs": ["1.2.3.4"]}}}},
+    ],
+)  # fmt: skip
+def test_corrupt_profiles(store, payload):
+    store._dir.mkdir()
+    (store._dir / "profiles.json").write_text(json.dumps(payload))
+    with pytest.raises(StoreCorrupt):
+        store.load_profiles()
+
+
+def test_options_roundtrip_and_defaults(store):
+    from fwmanager.core.backend import Options
+
+    assert store.load_options() == Options()
+    store.save_options(Options(router_mode=True, log_level="medium"))
+    assert store.load_options() == Options(router_mode=True, log_level="medium")
+
+
+def test_corrupt_options(store):
+    store._dir.mkdir()
+    (store._dir / "options.json").write_text('{"version": 1, "log_level": "loud"}')
+    with pytest.raises(StoreCorrupt):
+        store.load_options()

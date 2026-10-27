@@ -11,7 +11,7 @@ from pathlib import Path
 
 from gi.repository import Gio, GLib
 
-from fwmanager.core.backend import UfwBackend
+from fwmanager.core.backend import Options, UfwBackend
 from fwmanager.core.conflicts import Conflicts, SystemdUnits
 from fwmanager.core.conflicts import detect as detect_conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
@@ -23,7 +23,8 @@ from fwmanager.core.ufw_runner import Ufw
 from fwmanager.daemon import auth
 from fwmanager.daemon.interface import BUS_NAME
 from fwmanager.daemon.service import ControlService
-from fwmanager.daemon.startup import FAILED, startup_apply
+from fwmanager.daemon.startup import FAILED, effective_profiles, startup_apply
+from fwmanager.errors import FwError
 
 log = logging.getLogger("fwmanager")
 
@@ -79,7 +80,14 @@ def main(argv: list[str] | None = None) -> int:
         return detect_conflicts(units.is_active)
 
     try:
-        outcome = startup_apply(manager, store, DEFAULT_PROFILES, detect)
+        startup_options = store.load_options()
+    except FwError:
+        log.exception("saved options are damaged; using the defaults")
+        startup_options = Options()
+    try:
+        outcome = startup_apply(
+            manager, store, effective_profiles(store, DEFAULT_PROFILES), detect, startup_options
+        )
     except Exception:  # the daemon must still come up so the UI can explain the problem
         log.exception("startup apply failed")
         outcome = FAILED

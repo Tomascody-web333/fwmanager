@@ -26,6 +26,38 @@ INTROSPECTION_XML = f"""
       <arg type="s" name="profile" direction="in"/>
       <arg type="a(sss)" name="findings" direction="out"/>
     </method>
+    <method name="GetProfile">
+      <arg type="s" name="profile" direction="in"/>
+      <arg type="a{{sv}}" name="details" direction="out"/>
+    </method>
+    <method name="SetProfile">
+      <arg type="s" name="profile" direction="in"/>
+      <arg type="as" name="services" direction="in"/>
+      <arg type="b" name="ping" direction="in"/>
+      <arg type="b" name="mdns" direction="in"/>
+      <arg type="s" name="source_kind" direction="in"/>
+      <arg type="as" name="cidrs" direction="in"/>
+    </method>
+    <method name="ResetProfile">
+      <arg type="s" name="profile" direction="in"/>
+    </method>
+    <method name="ListServices">
+      <arg type="a(ss)" name="services" direction="out"/>
+    </method>
+    <method name="GetOptions">
+      <arg type="a{{sv}}" name="options" direction="out"/>
+    </method>
+    <method name="SetOptions">
+      <arg type="b" name="router_mode" direction="in"/>
+      <arg type="s" name="log_level" direction="in"/>
+    </method>
+    <method name="GetEvents">
+      <arg type="a(tss)" name="events" direction="out"/>
+    </method>
+    <method name="GetRecentBlocked">
+      <arg type="u" name="limit" direction="in"/>
+      <arg type="a(ssssss)" name="packets" direction="out"/>
+    </method>
     <method name="ListNetworks">
       <arg type="a(sss)" name="networks" direction="out"/>
     </method>

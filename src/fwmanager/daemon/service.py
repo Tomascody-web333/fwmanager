@@ -6,15 +6,18 @@ Clients can only invoke fixed commands; no rule text is ever accepted.
 from __future__ import annotations
 
 import logging
+import time
+from collections import deque
 from collections.abc import Callable
 
 from gi.repository import Gio, GLib
 
+from fwmanager.core import blocklog
 from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.policy_check import check_profile
-from fwmanager.core.profiles import Profile
+from fwmanager.core.profiles import Profile, Source
 from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
@@ -39,10 +42,35 @@ class ControlService:
         self._startup = startup_outcome
         self._timeout = confirm_timeout
         self._mgr = manager
-        self._profiles = profiles
+        self._defaults = dict(profiles)
+        self._profiles = dict(profiles)
+        self._options = Options()
+        self._events: deque[tuple[int, str, str]] = deque(maxlen=200)
         self._authorize = authorize
         self._conn: Gio.DBusConnection | None = None
-        manager.on_revert = lambda name: self._emit("Reverted", "(s)", (name,))
+        self._load_saved_settings()
+        self._record("startup", startup_outcome)
+        manager.on_revert = self._on_reverted
+
+    def _load_saved_settings(self) -> None:
+        """Edited profiles and options; damaged files fall back to the built-in defaults."""
+        if self._store is None:
+            return
+        try:
+            self._profiles.update(self._store.load_profiles())
+        except FwError:
+            log.exception("saved profiles are damaged; using the built-in ones")
+        try:
+            self._options = self._store.load_options()
+        except FwError:
+            log.exception("saved options are damaged; using the defaults")
+
+    def _record(self, kind: str, detail: str = "") -> None:
+        self._events.append((int(time.time()), kind, detail))
+
+    def _on_reverted(self, name: str) -> None:
+        self._record("reverted", name)
+        self._emit("Reverted", "(s)", (name,))
 
     def register(self, conn: Gio.DBusConnection) -> None:
         self._conn = conn
@@ -74,6 +102,7 @@ class ControlService:
                 raise AccessDenied("cannot identify caller") from exc
             if not self._authorize(uid):
                 log.warning("denied %s from uid %d", method, uid)
+                self._record("denied", "")
                 raise AccessDenied("caller is not in the fwmanager group")
             log.info("call %s from uid %d", method, uid)
             invocation.return_value(self.dispatch(method, params.unpack()))
@@ -93,13 +122,15 @@ class ControlService:
             profile = self._profiles.get(name)
             if profile is None:
                 raise ValidationError("unknown profile", code="unknown_profile")
-            self._mgr.apply(profile, timeout=self._timeout)
+            self._mgr.apply(profile, self._options, timeout=self._timeout)
+            self._record("applied", name)
             self._emit("Applied", "(su)", (name, self._timeout))
             return None
         if method == "Confirm":
             name = self._mgr.pending_profile()
             self._mgr.confirm()
             self._persist_confirmed(name)
+            self._record("confirmed", name or "")
             self._emit("Confirmed", "(s)", (name,))
             return None
         if method == "Rollback":
@@ -131,10 +162,48 @@ class ControlService:
             if profile is None:
                 raise ValidationError("unknown profile", code="unknown_profile")
             report = check_profile(
-                profile, self._mgr.backend, Options(), self._detect()
+                profile, self._mgr.backend, self._options, self._detect()
             )  # read-only: nothing is applied
             return GLib.Variant(
                 "(a(sss))", ([(f.severity, f.code, f.detail) for f in report.findings],)
+            )
+        if method == "GetProfile":
+            return GLib.Variant("(a{sv})", (self._profile_variant(self._get_profile(args[0])),))
+        if method == "SetProfile":
+            return self._set_profile(*args)
+        if method == "ResetProfile":
+            name = self._get_profile(args[0]).name
+            self._profiles[name] = self._defaults[name]
+            self._save_profiles()
+            return None
+        if method == "ListServices":
+            items = sorted((s.id, s.title) for s in self._mgr.catalog.values())
+            return GLib.Variant("(a(ss))", (items,))
+        if method == "GetOptions":
+            o = self._options
+            return GLib.Variant(
+                "(a{sv})",
+                (
+                    {
+                        "router_mode": GLib.Variant("b", o.router_mode),
+                        "log_level": GLib.Variant("s", o.log_level or ""),
+                    },
+                ),
+            )
+        if method == "SetOptions":
+            router_mode, log_level = args
+            new = Options(router_mode=bool(router_mode), log_level=log_level or None)
+            self._require_store().save_options(new)  # persisted first: never half-applied
+            self._options = new
+            self._record("options", "")
+            return None
+        if method == "GetEvents":
+            return GLib.Variant("(a(tss))", (list(self._events),))
+        if method == "GetRecentBlocked":
+            items = blocklog.read_recent(args[0])
+            return GLib.Variant(
+                "(a(ssssss))",
+                ([(b.when, b.iface, b.src, b.dst, b.proto, b.dport) for b in items],),
             )
         if method == "ListNetworks":
             nets = self._load_networks()
@@ -161,6 +230,48 @@ class ControlService:
             Network(ssid, uuid, next(iter(self._profiles)))
             return GLib.Variant("(s)", (find_profile(self._load_networks(), ssid, uuid) or "",))
         raise ValidationError("unknown method", code="invalid_input")
+
+    def _get_profile(self, name: str) -> Profile:
+        name = validate_name(name, "profile")
+        profile = self._profiles.get(name)
+        if profile is None:
+            raise ValidationError("unknown profile", code="unknown_profile")
+        return profile
+
+    def _profile_variant(self, p: Profile) -> dict:
+        return {
+            "name": GLib.Variant("s", p.name),
+            "services": GLib.Variant("as", list(p.services)),
+            "ping": GLib.Variant("b", p.ping),
+            "mdns": GLib.Variant("b", p.mdns),
+            "source_kind": GLib.Variant("s", p.source.kind),
+            "cidrs": GLib.Variant("as", list(p.source.cidrs)),
+            "customized": GLib.Variant("b", p != self._defaults[p.name]),
+        }
+
+    def _set_profile(self, name, services, ping, mdns, kind, cidrs) -> None:
+        current = self._get_profile(name)  # only the built-in profiles can be edited
+        catalog = self._mgr.catalog
+        if len(services) > len(catalog):
+            raise ValidationError("too many services", code="invalid_service")
+        for sid in services:
+            validate_name(sid, "service")
+            if sid not in catalog:
+                raise ValidationError("unknown service", code="unknown_service")
+        new = Profile(
+            current.name, tuple(services), bool(ping), bool(mdns), Source(kind, tuple(cidrs))
+        )
+        self._profiles[new.name] = new
+        try:
+            self._save_profiles()
+        except FwError:
+            self._profiles[new.name] = current  # keep memory and disk in step
+            raise
+        self._record("profile_edited", new.name)
+
+    def _save_profiles(self) -> None:
+        custom = {n: p for n, p in self._profiles.items() if p != self._defaults[n]}
+        self._require_store().save_profiles(custom)
 
     def _require_store(self) -> Store:
         if self._store is None:

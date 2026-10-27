@@ -43,6 +43,10 @@ class FirewallManager:
         self._clock = clock
         self._pending: _Pending | None = None
 
+    @property
+    def catalog(self):
+        return self.backend.catalog
+
     def apply(
         self,
         profile: Profile,

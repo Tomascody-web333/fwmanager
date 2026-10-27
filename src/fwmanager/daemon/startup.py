@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from collections.abc import Callable
 
+from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import FirewallManager
 from fwmanager.core.profiles import Profile
@@ -24,11 +25,21 @@ FAILED = "apply_failed"
 UFW_MISSING = "ufw_missing"
 
 
+def effective_profiles(store: Store, defaults: dict[str, Profile]) -> dict[str, Profile]:
+    """Built-in profiles overlaid with the user's edits; damaged edits are ignored."""
+    try:
+        return {**defaults, **store.load_profiles()}
+    except FwError:
+        log.exception("saved profiles are damaged; using the built-in ones")
+        return dict(defaults)
+
+
 def startup_apply(
     manager: FirewallManager,
     store: Store,
     profiles: dict[str, Profile],
     detect: Callable[[], Conflicts],
+    options: Options | None = None,
 ) -> str:
     """Apply the saved profile without a confirmation timer (nobody is there to confirm).
 
@@ -59,7 +70,7 @@ def startup_apply(
         outcome, name = STATE_CORRUPT, SAFE_PROFILE
 
     try:
-        manager.apply(profiles[name], require_confirm=False)
+        manager.apply(profiles[name], options, require_confirm=False)
     except FwError as exc:
         log.error("could not apply %s at startup: %s", name, exc.message)
         return FAILED

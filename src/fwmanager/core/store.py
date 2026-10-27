@@ -12,9 +12,13 @@ import uuid as uuid_mod
 from dataclasses import dataclass
 from pathlib import Path
 
+from fwmanager.core.backend import Options
+from fwmanager.core.profiles import Profile, Source
 from fwmanager.core.validate import validate_name
 from fwmanager.errors import StoreCorrupt, StoreError, ValidationError
 
+PROFILES_FILE = "profiles.json"
+OPTIONS_FILE = "options.json"
 STATE_FILE = "state.json"
 NETWORKS_FILE = "networks.json"
 VERSION = 1
@@ -137,6 +141,63 @@ class Store:
 
     def clear_ufw_marker(self) -> None:
         (self._dir / self._UFW_MARKER).unlink(missing_ok=True)
+
+    # -- edited profiles -------------------------------------------------------------
+
+    def load_profiles(self) -> dict[str, Profile]:
+        """Profiles the user customised; absent names fall back to the built-in ones."""
+        data = self._read(PROFILES_FILE)
+        if data is None:
+            return {}
+        raw = data.get("profiles")
+        if not isinstance(raw, dict) or len(raw) > 16:
+            raise StoreCorrupt("profiles.json is malformed")
+        try:
+            return {
+                name: Profile(
+                    name,
+                    tuple(p["services"]),
+                    bool(p["ping"]),
+                    bool(p["mdns"]),
+                    Source(p["source"]["kind"], tuple(p["source"].get("cidrs", ()))),
+                )
+                for name, p in raw.items()
+            }
+        except (ValidationError, KeyError, TypeError, AttributeError) as exc:
+            raise StoreCorrupt("profiles.json holds an invalid profile") from exc
+
+    def save_profiles(self, profiles: dict[str, Profile]) -> None:
+        self._write(
+            PROFILES_FILE,
+            {
+                "profiles": {
+                    n: {
+                        "services": list(p.services),
+                        "ping": p.ping,
+                        "mdns": p.mdns,
+                        "source": {"kind": p.source.kind, "cidrs": list(p.source.cidrs)},
+                    }
+                    for n, p in profiles.items()
+                }
+            },
+        )
+
+    # -- daemon-wide options ---------------------------------------------------------
+
+    def load_options(self) -> Options:
+        data = self._read(OPTIONS_FILE)
+        if data is None:
+            return Options()
+        try:
+            level = data.get("log_level")
+            return Options(router_mode=bool(data.get("router_mode", False)), log_level=level)
+        except ValidationError as exc:
+            raise StoreCorrupt("options.json holds an invalid value") from exc
+
+    def save_options(self, options: Options) -> None:
+        self._write(
+            OPTIONS_FILE, {"router_mode": options.router_mode, "log_level": options.log_level}
+        )
 
     # -- network -> profile mapping ---------------------------------------------
 
