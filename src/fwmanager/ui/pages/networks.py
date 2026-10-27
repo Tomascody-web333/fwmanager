@@ -74,7 +74,6 @@ class NetworksPage(Adw.PreferencesPage):
         for ssid, uuid, profile in result:
             row = Adw.ActionRow(
                 title=ssid or _("Connection {id}").format(id=uuid[:8]),
-                subtitle=uuid if ssid and uuid else "",
             )
             combo = Gtk.DropDown.new_from_strings([state.profile_title(n) for n in self._names])
             combo.set_valign(Gtk.Align.CENTER)

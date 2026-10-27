@@ -61,12 +61,18 @@ per-network profiles).
 ## The interface
 
 Run `fwmanager` as your normal user (it refuses to run as root). On the first run the setup
-wizard appears (see above); it can be skipped and is never shown again once finished. Pages: **Home** (state, quick
-profile switching, a "waiting for confirmation" card with a countdown), **Profiles** (edit what
-each profile opens), **Networks** (which profile for which Wi-Fi), **Rules** (plain-language sentences, below), **Log** (what the service did
-and recent blocked attempts) and **Settings**. Every profile has a **Test** button that runs the
-policy test below before you apply anything. Ctrl+1..6 jump between pages, and the page switcher
-moves to the bottom on narrow windows.
+wizard appears (see above); it can be skipped and is never shown again once finished. Five pages:
+
+- **Overview**: one sentence on how protected the computer is and what that means ("Lets
+  nothing in. Hidden on the network."), the current network, and the profiles. Each profile
+  says in plain words what it lets in, and has **Use**, **Test** (the policy test below) and an
+  edit button. After a switch a card asks "Is your connection still working?" with a countdown.
+- **Networks**: which profile for which Wi-Fi.
+- **Rules**: plain-language sentences (below).
+- **Log**: what the service did, and recent blocked attempts.
+- **Settings**.
+
+Ctrl+1..5 jump between pages, and the page switcher moves to the bottom on narrow windows.
 
 If the service is not running, your account is not in the `fwmanager` group, ufw is missing or
 firewalld is active, the window explains it in your language and offers a **Fix this** button

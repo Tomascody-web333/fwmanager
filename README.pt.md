@@ -63,13 +63,19 @@ perfis automáticos por rede).
 
 Execute o `fwmanager` como utilizador normal (recusa-se a correr como root). Na primeira
 execução aparece o assistente de configuração (ver acima); pode ser saltado e não volta a
-aparecer depois de concluído. Páginas: **Início** (estado, mudança rápida de perfil, um cartão
-“a aguardar confirmação” com contagem decrescente), **Perfis** (editar o que cada perfil abre),
-**Redes** (que perfil para que Wi-Fi), **Regras** (frases em linguagem simples, abaixo),
-**Registo** (o que o serviço fez e as tentativas bloqueadas recentes) e **Definições**. Cada
-perfil tem um botão **Testar** que corre o teste de política descrito abaixo antes de aplicar
-seja o que for. Ctrl+1..6 saltam entre páginas e o seletor de páginas passa para baixo em
-janelas estreitas.
+aparecer depois de concluído. Cinco páginas:
+
+- **Início**: uma frase sobre quão protegido está o computador e o que isso significa ("Não
+  deixa entrar nada. Invisível na rede."), a rede atual e os perfis. Cada perfil diz em palavras
+  simples o que deixa entrar e tem **Usar**, **Testar** (o teste de política descrito abaixo) e um
+  botão para o editar. Depois de mudar, um cartão pergunta "A sua ligação continua a
+  funcionar?" com contagem decrescente.
+- **Redes**: que perfil para que Wi-Fi.
+- **Regras**: frases em linguagem simples (abaixo).
+- **Registo**: o que o serviço fez e as tentativas bloqueadas recentes.
+- **Definições**.
+
+Ctrl+1..5 saltam entre páginas e o seletor de páginas passa para baixo em janelas estreitas.
 
 Se o serviço não estiver a correr, a sua conta não estiver no grupo `fwmanager`, o ufw faltar
 ou o firewalld estiver ativo, a janela explica-o no seu idioma e oferece um botão **Corrigir**

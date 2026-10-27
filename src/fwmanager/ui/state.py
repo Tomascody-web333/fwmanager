@@ -109,20 +109,46 @@ def source_title(kind: str) -> str:
     return _(SOURCE_TITLES[kind]) if kind in SOURCE_TITLES else kind
 
 
-def yes_no(value: bool) -> str:
-    return _("yes") if value else _("no")
-
-
 def describe_profile(details: dict, service_titles: dict[str, str]) -> str:
-    """One line for a profile row: what is open, to whom, ping and mDNS."""
-    services = [_(service_titles.get(s, s)) for s in details["services"]]
-    opened = ", ".join(services) if services else _("nothing is open")
-    return _("{opened} · from: {source} · ping: {ping} · mDNS: {mdns}").format(
-        opened=opened,
-        source=source_title(details["source_kind"]),
-        ping=yes_no(details["ping"]),
-        mdns=yes_no(details["mdns"]),
-    )
+    """Two short sentences for a profile row: who may connect, and whether it can be seen."""
+    services = ", ".join(_(service_titles.get(s, s)) for s in details["services"])
+    if not services:
+        lets_in = _("Lets nothing in.")
+    elif details["source_kind"] == "lan":
+        lets_in = _("Lets in {services}, from the local network only.").format(services=services)
+    elif details["source_kind"] == "cidrs":
+        lets_in = _("Lets in {services}, only from the networks you chose.").format(
+            services=services
+        )
+    else:
+        lets_in = _("Lets in {services}, from anywhere.").format(services=services)
+    ping, mdns = details["ping"], details["mdns"]
+    if ping and mdns:
+        seen = _("Visible on the network.")
+    elif ping:
+        seen = _("Answers ping, but does not announce itself.")
+    elif mdns:
+        seen = _("Announces itself, but does not answer ping.")
+    else:
+        seen = _("Hidden on the network.")
+    return f"{lets_in} {seen}"
+
+
+def protection_title(status: dict) -> str:
+    """The one sentence at the top of the home page."""
+    active = status.get("active_profile", "")
+    if not status.get("firewall_active"):
+        return _("The firewall is off")
+    if not active:
+        return _("The firewall is on")
+    return _("Protected with the {profile} profile").format(profile=profile_title(active))
+
+
+def short_time(when: str) -> str:
+    """``2026-10-27T17:32:01.123+00:00`` -> ``2026-10-27 17:32:01``; other formats unchanged."""
+    if len(when) >= 19 and when[10] == "T":
+        return f"{when[:10]} {when[11:19]}"
+    return when
 
 
 def countdown_text(profile: str, seconds: int) -> str:

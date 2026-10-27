@@ -13,7 +13,7 @@ from fwmanager.ui.worker import run_sync
 
 pytestmark = pytest.mark.ui
 
-PAGES = ("home", "profiles", "networks", "rules", "log", "settings")
+PAGES = ("home", "networks", "rules", "log", "settings")
 
 
 def xdotool(*args):
@@ -63,15 +63,15 @@ def test_ctrl_number_opens_each_page(focused, number, page):
 
 
 def test_shortcuts_work_from_any_page_and_in_any_order(focused):
-    for key, page in (("ctrl+5", "log"), ("ctrl+2", "profiles"), ("ctrl+6", "settings"),
+    for key, page in (("ctrl+4", "log"), ("ctrl+2", "networks"), ("ctrl+5", "settings"),
                       ("ctrl+1", "home")):  # fmt: skip
         focused.press(key)
         assert focused.win.views.get_visible_child_name() == page
 
 
 def test_unrelated_keys_change_nothing(focused):
-    focused.press("ctrl+3")
-    for key in ("ctrl+7", "ctrl+0", "alt+3", "3"):
+    focused.press("ctrl+2")
+    for key in ("ctrl+6", "ctrl+0", "alt+3", "3"):
         focused.press(key)
     assert focused.win.views.get_visible_child_name() == "networks"
 

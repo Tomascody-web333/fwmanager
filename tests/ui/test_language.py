@@ -63,19 +63,19 @@ def page_titles(app):
 
 def test_user_setting_wins(make_app):
     app = make_app(user_lang="pt", system_lang="en")
-    assert page_titles(app) == ["Casa", "Perfis", "Redes", "Regras", "Registo", "Definições"]
+    assert page_titles(app) == ["Início", "Redes", "Regras", "Registo", "Definições"]
     assert "Estado" in texts(app.window.home)
 
 
 def test_system_config_is_used_without_a_user_setting(make_app):
     app = make_app(system_lang="pt")
-    assert page_titles(app)[0] == "Casa"
+    assert page_titles(app)[0] == "Início"
 
 
 def test_english_when_nothing_says_otherwise(make_app, monkeypatch):
     monkeypatch.setenv("LANG", "en_US.UTF-8")
     app = make_app()
-    assert page_titles(app) == ["Home", "Profiles", "Networks", "Rules", "Log", "Settings"]
+    assert page_titles(app) == ["Overview", "Networks", "Rules", "Log", "Settings"]
 
 
 def test_changing_language_rebuilds_the_window_and_remembers_it(make_app):
@@ -85,7 +85,7 @@ def test_changing_language_rebuilds_the_window_and_remembers_it(make_app):
     app.window.settings.language.set_selected(1)  # English
     pump(0.4)
     assert app.window is not old_window and app.controller is controller  # same daemon link
-    assert page_titles(app) == ["Home", "Profiles", "Networks", "Rules", "Log", "Settings"]
+    assert page_titles(app) == ["Overview", "Networks", "Rules", "Log", "Settings"]
     assert 'lang = "en"' in app.settings_file.read_text()
     assert app.window.stack.get_visible_child_name() == "main"
     # Nothing language-related went to the daemon.
@@ -97,7 +97,7 @@ def test_changing_back_to_portuguese(make_app):
     app = make_app(user_lang="en")
     app.window.settings.language.set_selected(0)
     pump(0.4)
-    assert page_titles(app)[0] == "Casa" and 'lang = "pt"' in app.settings_file.read_text()
+    assert page_titles(app)[0] == "Início" and 'lang = "pt"' in app.settings_file.read_text()
 
 
 def test_selecting_the_current_language_does_nothing(make_app):

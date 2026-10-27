@@ -17,7 +17,6 @@ from fwmanager.ui.pages.home import HomePage  # noqa: E402
 from fwmanager.ui.pages.log import LogPage  # noqa: E402
 from fwmanager.ui.pages.networks import NetworksPage  # noqa: E402
 from fwmanager.ui.pages.problem import ProblemPage  # noqa: E402
-from fwmanager.ui.pages.profiles import ProfilesPage  # noqa: E402
 from fwmanager.ui.pages.rules import RulesPage  # noqa: E402
 from fwmanager.ui.pages.settings import SettingsPage  # noqa: E402
 from fwmanager.ui.wizard import SetupWizard  # noqa: E402
@@ -48,14 +47,12 @@ class MainWindow(Adw.ApplicationWindow):
 
         # -- pages ---
         self.home = HomePage(controller, self.open_policy_test)
-        self.profiles = ProfilesPage(controller, self.home.load)
         self.networks = NetworksPage(controller)
         self.rules = RulesPage(controller, self._refresh_profiles)
         self.log = LogPage(controller)
         self.settings = SettingsPage(controller, user_settings, on_language, on_notifications)
         self.pages = [
             ("home", self.home),
-            ("profiles", self.profiles),
             ("networks", self.networks),
             ("rules", self.rules),
             ("log", self.log),
@@ -157,7 +154,6 @@ class MainWindow(Adw.ApplicationWindow):
         if not self._was_ok:  # first time (or back after a problem): load everything
             self._was_ok = True
             self.home.load()
-            self.profiles.load()
             self.rules.load()
             self.settings.load()
             self.networks.load()
@@ -168,7 +164,6 @@ class MainWindow(Adw.ApplicationWindow):
     def _refresh_profiles(self) -> None:
         """Rules change what profiles allow: redraw the pages that describe them."""
         self.home.load()
-        self.profiles.load()
 
     def _network_loaded(self, net, _error) -> None:
         self.home.set_current_network(net)

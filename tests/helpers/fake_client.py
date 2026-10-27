@@ -33,6 +33,7 @@ class FakeDaemon:
         self.pending = ""
         self.seconds = 30
         self.ufw_installed = True
+        self.firewall_active = True
         self.conflicts = []
         self.warnings = []
         self.startup = "ok"
@@ -64,7 +65,7 @@ class FakeClient:
         d = self.d
         return {
             "ufw_installed": d.ufw_installed,
-            "firewall_active": True,
+            "firewall_active": d.firewall_active,
             "active_profile": d.active,
             "pending_profile": d.pending,
             "seconds_left": d.seconds if d.pending else 0,

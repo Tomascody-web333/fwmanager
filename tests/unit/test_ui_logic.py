@@ -114,12 +114,35 @@ def test_profile_titles_and_unknown_names():
     assert state.profile_title("mine") == "mine" and state.profile_hint("mine") == ""
 
 
-def test_describe_profile():
+def test_describe_profile_in_plain_words():
     details = {"services": ["ssh", "samba"], "source_kind": "lan", "ping": True, "mdns": False}
-    text = state.describe_profile(details, {"ssh": "SSH", "samba": "File sharing (Samba)"})
-    assert text == "SSH, File sharing (Samba) · from: Local network only · ping: yes · mDNS: no"
-    closed = state.describe_profile({**details, "services": []}, {})
-    assert closed.startswith("nothing is open")
+    titles = {"ssh": "SSH", "samba": "File sharing (Samba)"}
+    assert state.describe_profile(details, titles) == (
+        "Lets in SSH, File sharing (Samba), from the local network only. "
+        "Answers ping, but does not announce itself."
+    )
+    anywhere = {**details, "source_kind": "any", "mdns": True}
+    assert state.describe_profile(anywhere, titles).endswith(
+        "from anywhere. Visible on the network."
+    )
+    chosen = {**details, "source_kind": "cidrs", "ping": False, "mdns": True}
+    assert "only from the networks you chose" in state.describe_profile(chosen, titles)
+    closed = {**details, "services": [], "ping": False}
+    assert state.describe_profile(closed, {}) == "Lets nothing in. Hidden on the network."
+    assert "ping:" not in state.describe_profile(details, titles)  # no jargon left
+
+
+def test_protection_title():
+    assert state.protection_title({"firewall_active": False}) == "The firewall is off"
+    on = {"firewall_active": True, "active_profile": "publico"}
+    assert state.protection_title(on) == "Protected with the Public profile"
+    assert state.protection_title({**on, "active_profile": ""}) == "The firewall is on"
+
+
+def test_short_time():
+    assert state.short_time("2026-10-27T17:32:01.123456+00:00") == "2026-10-27 17:32:01"
+    assert state.short_time("Oct 27 17:32:01") == "Oct 27 17:32:01"
+    assert state.short_time("") == ""
 
 
 def test_parse_cidrs():

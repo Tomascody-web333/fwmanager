@@ -66,7 +66,7 @@ class LogPage(Adw.PreferencesPage):
             target = f"{dst}:{dport}" if dport else dst
             row = Adw.ActionRow(
                 title=_("{src} tried to reach {target}").format(src=src, target=target),
-                subtitle=" · ".join(p for p in (proto, iface, when) if p),
+                subtitle=" · ".join(p for p in (proto, iface, state.short_time(when)) if p),
             )
             self.blocked.add(row)
             self._block_rows.append(row)

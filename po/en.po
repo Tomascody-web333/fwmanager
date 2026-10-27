@@ -2,9 +2,6 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: en\n"
 
-msgid "A change is undone after 30 seconds unless you confirm it."
-msgstr "A change is undone after 30 seconds unless you confirm it."
-
 msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 msgstr "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 
@@ -16,12 +13,6 @@ msgstr "A shared network at work or school."
 
 msgid "Accept connections from"
 msgstr "Accept connections from"
-
-msgid "Active"
-msgstr "Active"
-
-msgid "Active profile"
-msgstr "Active profile"
 
 msgid "Active profile: {p}"
 msgstr "Active profile: {p}"
@@ -59,6 +50,9 @@ msgstr "Allowed. fwmanager has to be restarted to notice it."
 msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 
+msgid "Announces itself, but does not answer ping."
+msgstr "Announces itself, but does not answer ping."
+
 msgid "Another change is waiting for confirmation."
 msgstr "Another change is waiting for confirmation."
 
@@ -73,6 +67,9 @@ msgstr "Another firewall manager is active"
 
 msgid "Answer ping"
 msgstr "Answer ping"
+
+msgid "Answers ping, but does not announce itself."
+msgstr "Answers ping, but does not announce itself."
 
 msgid "Anything that needs administrator rights is asked once, with the usual password window. After that, fwmanager never asks again."
 msgstr "Anything that needs administrator rights is asked once, with the usual password window. After that, fwmanager never asks again."
@@ -119,6 +116,9 @@ msgstr "Cancel"
 msgid "Cancelled. Nothing was changed."
 msgstr "Cancelled. Nothing was changed."
 
+msgid "Change what this profile lets in"
+msgstr "Change what this profile lets in"
+
 msgid "Changed the settings"
 msgstr "Changed the settings"
 
@@ -137,11 +137,11 @@ msgstr "Checking your system"
 msgid "Checking…"
 msgstr "Checking…"
 
+msgid "Choose a profile below to turn it on."
+msgstr "Choose a profile below to turn it on."
+
 msgid "Choose the details below."
 msgstr "Choose the details below."
-
-msgid "Choose what each profile lets in. Select one to edit it."
-msgstr "Choose what each profile lets in. Select one to edit it."
 
 msgid "Close"
 msgstr "Close"
@@ -157,9 +157,6 @@ msgstr "Command copied"
 
 msgid "Command to run"
 msgstr "Command to run"
-
-msgid "Confirm"
-msgstr "Confirm"
 
 msgid "Confirmed {name}"
 msgstr "Confirmed {name}"
@@ -215,6 +212,9 @@ msgstr "Done."
 msgid "Edit {name}"
 msgstr "Edit {name}"
 
+msgid "Edit {profile}"
+msgstr "Edit {profile}"
+
 msgid "Edited {name}"
 msgstr "Edited {name}"
 
@@ -254,6 +254,9 @@ msgstr "General"
 msgid "Get started"
 msgstr "Get started"
 
+msgid "Hidden on the network."
+msgstr "Hidden on the network."
+
 msgid "Hide this computer (no ping, no mDNS)"
 msgstr "Hide this computer (no ping, no mDNS)"
 
@@ -280,6 +283,9 @@ msgstr "IPv6 would stop working (neighbour discovery)."
 
 msgid "IPv6 would stop working (router advertisements)."
 msgstr "IPv6 would stop working (router advertisements)."
+
+msgid "In use"
+msgstr "In use"
 
 msgid "Internal error."
 msgstr "Internal error."
@@ -325,6 +331,18 @@ msgstr "KDE Connect"
 
 msgid "Language"
 msgstr "Language"
+
+msgid "Lets in {services}, from anywhere."
+msgstr "Lets in {services}, from anywhere."
+
+msgid "Lets in {services}, from the local network only."
+msgstr "Lets in {services}, from the local network only."
+
+msgid "Lets in {services}, only from the networks you chose."
+msgstr "Lets in {services}, only from the networks you chose."
+
+msgid "Lets nothing in."
+msgstr "Lets nothing in."
 
 msgid "Lets others check that this computer is on."
 msgstr "Lets others check that this computer is on."
@@ -386,9 +404,6 @@ msgstr "No rules yet."
 msgid "No, undo it"
 msgstr "No, undo it"
 
-msgid "None"
-msgstr "None"
-
 msgid "Not authorised. Ask an administrator, or use the command below."
 msgstr "Not authorised. Ask an administrator, or use the command below."
 
@@ -431,6 +446,12 @@ msgstr "Open fwmanager"
 msgid "Options"
 msgstr "Options"
 
+msgid "Overview"
+msgstr "Overview"
+
+msgid "Pick how open this computer should be. After a switch you have 30 seconds to confirm that everything still works, otherwise it is undone."
+msgstr "Pick how open this computer should be. After a switch you have 30 seconds to confirm that everything still works, otherwise it is undone."
+
 msgid "Please log out and back in, then open fwmanager again."
 msgstr "Please log out and back in, then open fwmanager again."
 
@@ -455,11 +476,14 @@ msgstr "Profile"
 msgid "Profile for {name}"
 msgstr "Profile for {name}"
 
-msgid "Profile saved. Apply it again to use the changes."
-msgstr "Profile saved. Apply it again to use the changes."
+msgid "Profile saved. Use it again to apply the changes."
+msgstr "Profile saved. Use it again to apply the changes."
 
 msgid "Profiles"
 msgstr "Profiles"
+
+msgid "Protected with the {profile} profile"
+msgstr "Protected with the {profile} profile"
 
 msgid "Public"
 msgstr "Public"
@@ -608,8 +632,8 @@ msgstr "Specific networks"
 msgid "Status"
 msgstr "Status"
 
-msgid "Switch profile"
-msgstr "Switch profile"
+msgid "Switch to this profile now"
+msgstr "Switch to this profile now"
 
 msgid "Syncthing"
 msgstr "Syncthing"
@@ -631,6 +655,12 @@ msgstr "That would make the profile too large to apply quickly. Use fewer networ
 
 msgid "The background service is running"
 msgstr "The background service is running"
+
+msgid "The firewall is off"
+msgstr "The firewall is off"
+
+msgid "The firewall is on"
+msgstr "The firewall is on"
 
 msgid "The firewall service is not running"
 msgstr "The firewall service is not running"
@@ -692,9 +722,6 @@ msgstr "UNSAFE"
 msgid "Undid {name}"
 msgstr "Undid {name}"
 
-msgid "Undo"
-msgstr "Undo"
-
 msgid "Undone. Pick another profile, or test it first."
 msgstr "Undone. Pick another profile, or test it first."
 
@@ -704,11 +731,17 @@ msgstr "Unknown profile."
 msgid "Unknown service."
 msgstr "Unknown service."
 
+msgid "Use"
+msgstr "Use"
+
 msgid "Use the same profile every time you connect here."
 msgstr "Use the same profile every time you connect here."
 
 msgid "Used to find printers and shared devices by name."
 msgstr "Used to find printers and shared devices by name."
+
+msgid "Visible on the network."
+msgstr "Visible on the network."
 
 msgid "WARNING: previous rules could not be confirmed as restored."
 msgstr "WARNING: previous rules could not be confirmed as restored."
@@ -718,9 +751,6 @@ msgstr "Waiting for confirmation of {p} ({n}s left)"
 
 msgid "Waiting for the service"
 msgstr "Waiting for the service"
-
-msgid "Waiting for your confirmation"
-msgstr "Waiting for your confirmation"
 
 msgid "Warning"
 msgstr "Warning"
@@ -776,6 +806,9 @@ msgstr "You are not allowed to control the firewall."
 msgid "You can change this at any time, and fwmanager remembers it per network."
 msgstr "You can change this at any time, and fwmanager remembers it per network."
 
+msgid "You edited this profile."
+msgstr "You edited this profile."
+
 msgid "Your SSH session and new SSH connections stay allowed."
 msgstr "Your SSH session and new SSH connections stay allowed."
 
@@ -794,6 +827,9 @@ msgstr "Your own settings."
 msgid "Your rules"
 msgstr "Your rules"
 
+msgid "Your rules change this profile."
+msgstr "Your rules change this profile."
+
 msgid "accepts connections from anywhere"
 msgstr "accepts connections from anywhere"
 
@@ -811,9 +847,6 @@ msgstr "confirm immediately, no countdown"
 
 msgid "confirm the pending change"
 msgstr "confirm the pending change"
-
-msgid "edited"
-msgstr "edited"
 
 msgid "fails"
 msgstr "fails"
@@ -851,17 +884,11 @@ msgstr "list available profiles"
 msgid "manage the network to profile mapping"
 msgstr "manage the network to profile mapping"
 
-msgid "no"
-msgstr "no"
-
 msgid "none"
 msgstr "none"
 
 msgid "not applicable"
 msgstr "not applicable"
-
-msgid "nothing is open"
-msgstr "nothing is open"
 
 msgid "only accepts connections from the local network"
 msgstr "only accepts connections from the local network"
@@ -880,9 +907,6 @@ msgstr "profile name"
 
 msgid "revert the pending change"
 msgstr "revert the pending change"
-
-msgid "rules apply"
-msgstr "rules apply"
 
 msgid "show the firewall state"
 msgstr "show the firewall state"
@@ -926,17 +950,11 @@ msgstr "ufw's configuration was edited in a way fwmanager cannot work with."
 msgid "works"
 msgstr "works"
 
-msgid "yes"
-msgstr "yes"
-
 msgid "{before} → {after}"
 msgstr "{before} → {after}"
 
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
-
-msgid "{opened} · from: {source} · ping: {ping} · mDNS: {mdns}"
-msgstr "{opened} · from: {source} · ping: {ping} · mDNS: {mdns}"
 
 msgid "{profile} was undone because it was not confirmed in time."
 msgstr "{profile} was undone because it was not confirmed in time."

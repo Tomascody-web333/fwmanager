@@ -256,7 +256,7 @@ def test_saving_refreshes_the_profile_descriptions(env):
     env.win.rules._saved()
     after = {r.name_: r.get_subtitle() for r in env.win.home._profile_rows}
     assert "Printer sharing (IPP)" not in after["casa"]
-    assert "rules apply" in texts(env.win.profiles)
+    assert "Your rules change this profile." in after["casa"]
 
 
 def test_daemon_errors_while_saving_keep_the_dialog_open(env):

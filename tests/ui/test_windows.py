@@ -63,11 +63,22 @@ def visible_child(env):
 def test_home_lists_the_profiles_and_the_active_one(env):
     assert visible_child(env) == "main"
     t = texts(env.win.home)
-    for expected in ("Home", "Work", "Public", "Custom", "Status", "Active profile"):
+    for expected in ("Home", "Work", "Public", "Custom", "Status", "Profiles"):
         assert expected in t, t
-    assert "Public" in t  # the active profile, in the status row
+    assert "Protected with the Public profile" in t
+    assert "Lets nothing in. Hidden on the network." in t  # what that means, in plain words
     rows = {r.name_: r for r in env.win.home._profile_rows}
     assert rows["publico"].check.get_opacity() == 1 and rows["casa"].check.get_opacity() == 0
+    # The profile in use offers no button to switch to itself.
+    assert not rows["publico"].apply_btn.get_visible() and rows["publico"].in_use.get_visible()
+    assert rows["casa"].apply_btn.get_visible() and not rows["casa"].in_use.get_visible()
+
+
+def test_the_status_says_when_the_firewall_is_off(env):
+    env.daemon.firewall_active = False
+    env.controller.refresh()
+    t = texts(env.win.home)
+    assert "The firewall is off" in t and "Choose a profile below to turn it on." in t
 
 
 def test_apply_goes_to_the_daemon_and_shows_the_pending_card(env):
@@ -132,7 +143,9 @@ def test_banner_for_docker_and_damaged_state(env):
 
 
 def test_pages_can_be_switched(env):
-    for name in ("home", "profiles", "networks", "log", "settings"):
+    assert [name for name, _page in env.win.pages] == [
+        "home", "networks", "rules", "log", "settings"]  # fmt: skip
+    for name in ("home", "networks", "rules", "log", "settings"):
         env.win.views.set_visible_child_name(name)
         assert env.win.views.get_visible_child_name() == name
 
@@ -282,10 +295,16 @@ def test_editor_reset(env):
     assert ("reset_profile", ("trabalho",)) in env.daemon.calls and d.saved == [1]
 
 
-def test_profiles_page_marks_edited_profiles(env):
+def test_profiles_are_edited_from_the_overview(env):
     env.daemon.profiles["casa"]["customized"] = True
-    env.win.profiles.load()
-    assert "edited" in texts(env.win.profiles)
+    env.win.home.load()
+    row = {r.name_: r for r in env.win.home._profile_rows}["casa"]
+    assert "You edited this profile." in row.get_subtitle()
+    row.edit_btn.emit("clicked")
+    pump(0.2)
+    dialog = env.win.get_visible_dialog()
+    assert dialog is not None and dialog.__class__.__name__ == "ProfileEditor"
+    dialog.close()
 
 
 # -- networks, log, settings ---
