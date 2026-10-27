@@ -104,7 +104,7 @@ def translate(profile: Profile, catalog: dict[str, Service], ipv6: bool = True) 
     return rules
 
 
-# -- reading `ufw show added` ---------------------------------------------------
+# -- reading `ufw show added` ---
 
 _PORTS_RE = re.compile(r"^\d{1,5}(:\d{1,5})?(,\d{1,5}(:\d{1,5})?)*$")
 

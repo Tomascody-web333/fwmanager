@@ -139,7 +139,7 @@ def active_marker(config_dir: Path) -> str | None:
         return None
 
 
-# -- exact snapshot ------------------------------------------------------------
+# -- exact snapshot ---
 
 
 @dataclass(frozen=True)

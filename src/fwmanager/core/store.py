@@ -110,7 +110,7 @@ class Store:
         except OSError as exc:
             raise StoreError(f"cannot write {name}: {exc.strerror}") from exc
 
-    # -- last confirmed profile -------------------------------------------------
+    # -- last confirmed profile ---
 
     def load_state(self) -> str | None:
         """Profile name, or ``None`` when no state was ever saved. Raises StoreCorrupt."""
@@ -132,7 +132,7 @@ class Store:
         except OSError:
             pass
 
-    # -- did fwmanager turn ufw on? (so uninstall can turn it off again) ----------
+    # -- did fwmanager turn ufw on? (so uninstall can turn it off again) ---
 
     _UFW_MARKER = "ufw-enabled-by-fwmanager"
 
@@ -148,7 +148,7 @@ class Store:
     def clear_ufw_marker(self) -> None:
         (self._dir / self._UFW_MARKER).unlink(missing_ok=True)
 
-    # -- edited profiles -------------------------------------------------------------
+    # -- edited profiles ---
 
     def load_profiles(self) -> dict[str, Profile]:
         """Profiles the user customised; absent names fall back to the built-in ones."""
@@ -188,7 +188,7 @@ class Store:
             },
         )
 
-    # -- plain-language rules ----------------------------------------------------------
+    # -- plain-language rules ---
 
     def load_rules(self) -> list[Rule]:
         data = self._read(RULES_FILE)
@@ -215,7 +215,7 @@ class Store:
             },
         )
 
-    # -- daemon-wide options ---------------------------------------------------------
+    # -- daemon-wide options ---
 
     def load_options(self) -> Options:
         data = self._read(OPTIONS_FILE)
@@ -232,7 +232,7 @@ class Store:
             OPTIONS_FILE, {"router_mode": options.router_mode, "log_level": options.log_level}
         )
 
-    # -- the user's own ufw default policies (restored on uninstall) -------------------
+    # -- the user's own ufw default policies (restored on uninstall) ---
 
     _DEFAULTS_FILE = "ufw-original-defaults.json"
     _DIRECTIONS = ("incoming", "outgoing", "routed")
@@ -257,7 +257,7 @@ class Store:
     def clear_original_defaults(self) -> None:
         (self._dir / self._DEFAULTS_FILE).unlink(missing_ok=True)
 
-    # -- network -> profile mapping ---------------------------------------------
+    # -- network -> profile mapping ---
 
     def load_networks(self) -> list[Network]:
         data = self._read(NETWORKS_FILE)

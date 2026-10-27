@@ -53,7 +53,7 @@ class UfwBackend:
         self.ufw = ufw
         self.catalog = catalog
 
-    # -- reading ---------------------------------------------------------------
+    # -- reading ---
 
     def listing(self) -> Listing:
         return parse_added(self.ufw.run(["show", "added"]))
@@ -77,7 +77,7 @@ class UfwBackend:
     def is_active(self) -> bool:
         return self.ufw.is_active()
 
-    # -- snapshot --------------------------------------------------------------
+    # -- snapshot ---
 
     def snapshot(self) -> Snapshot:
         root = self.ufw.rootdir or Path("/")
@@ -97,7 +97,7 @@ class UfwBackend:
             # `disable` rewrites ufw.conf; put the snapshot's copy back once more.
             ufw_files.restore_files(root, {"etc/ufw/ufw.conf": snap.files["etc/ufw/ufw.conf"]})
 
-    # -- applying --------------------------------------------------------------
+    # -- applying ---
 
     def apply(self, profile: Profile, options: Options | None = None) -> Plan:
         """Make ufw match ``profile``. Removing comes before adding so a switch can only
