@@ -54,6 +54,24 @@ def test_strip_restores_the_original_exactly():
     assert uf.strip_block(out) == V4
 
 
+@pytest.mark.parametrize("cut", [uf.END, "### BEGIN FWMANAGER profile=publico ###"])
+def test_a_block_cut_by_hand_is_cleaned_up_whole(cut):
+    old = uf.insert_block(V4, uf.build_block("publico", False, False, False), uf.ANCHOR_V4)
+    damaged = old.replace(cut + "\n", "")
+    again = uf.insert_block(damaged, uf.build_block("casa", True, True, False), uf.ANCHOR_V4)
+    assert "echo-request -j DROP" not in again and "5353 -j DROP" not in again
+    assert again.count("FWMANAGER") == 2 and uf.read_profile_marker(again) == "casa"
+    assert uf.strip_block(again) == V4
+
+
+def test_an_admins_identical_rule_elsewhere_survives_the_cleanup():
+    mine = "-A ufw-before-input -p icmp --icmp-type echo-request -j DROP\n"
+    text = V4.replace("COMMIT\n", mine + "COMMIT\n")
+    out = uf.insert_block(text, uf.build_block("publico", False, False, False), uf.ANCHOR_V4)
+    damaged = out.replace(uf.END + "\n", "")
+    assert uf.strip_block(damaged) == text  # theirs, before COMMIT, is not next to our marker
+
+
 def test_missing_anchor_is_unsupported():
     with pytest.raises(uf.UfwUnsupported):
         uf.insert_block("*filter\nCOMMIT\n", "x\n", uf.ANCHOR_V4)
