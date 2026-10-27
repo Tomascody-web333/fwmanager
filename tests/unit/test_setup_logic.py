@@ -52,7 +52,8 @@ def test_creates_the_group_when_it_is_missing():
     "env",
     [{}, {"PKEXEC_UID": ""}, {"PKEXEC_UID": "abc"}, {"PKEXEC_UID": "-1"}, {"PKEXEC_UID": "0"},
      {"PKEXEC_UID": "4242"}, {"PKEXEC_UID": "1001"}, {"PKEXEC_UID": "1002"},
-     {"PKEXEC_UID": "1000; reboot"}],
+     {"PKEXEC_UID": "1000; reboot"}, {"PKEXEC_UID": "²"}, {"PKEXEC_UID": "١٠٠٠"},
+     {"PKEXEC_UID": " 1000"}, {"PKEXEC_UID": "1000\n"}],
 )  # fmt: skip
 def test_refuses_anything_that_is_not_a_plain_pkexec_caller(env):
     rec = Recorder()

@@ -60,3 +60,10 @@ def test_extension_garbage_rejected(tmp_path):
     big.write_text("# " + "x" * 70000)
     with pytest.raises(ValidationError):
         load_catalog([big])
+
+
+def test_an_extension_file_that_is_not_utf8_is_a_validation_error(tmp_path):
+    bad = tmp_path / "extra.toml"
+    bad.write_bytes(b'[x]\ntitle = "\xff"\n')
+    with pytest.raises(ValidationError):
+        load_catalog([bad])

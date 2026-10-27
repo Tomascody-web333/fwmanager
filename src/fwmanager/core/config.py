@@ -20,7 +20,7 @@ def _read_lang(path: Path | None) -> str | None:
     try:
         with Path(path).open("rb") as fh:
             lang = tomllib.load(fh).get("lang")
-    except (OSError, tomllib.TOMLDecodeError):
+    except (OSError, ValueError):  # ValueError: bad TOML, or bytes that are not UTF-8
         return None
     return lang if lang in LANGUAGES else None
 

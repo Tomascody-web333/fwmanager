@@ -45,7 +45,7 @@ def load(path: Path | None = None) -> UserSettings:
     try:
         with path.open("rb") as fh:
             data = tomllib.load(fh)
-    except (OSError, tomllib.TOMLDecodeError):
+    except (OSError, ValueError):  # ValueError: bad TOML, or bytes that are not UTF-8
         return UserSettings()
     lang = data.get("lang")
     notifications = data.get("notifications")

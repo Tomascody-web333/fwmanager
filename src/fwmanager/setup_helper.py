@@ -43,7 +43,7 @@ def _tool(name: str) -> str:
 def caller(env: Mapping[str, str], lookup: Callable = pwd.getpwuid) -> str:
     """The account that ran ``pkexec``. Only ``PKEXEC_UID`` is believed."""
     raw = env.get("PKEXEC_UID", "")
-    if not raw.isdigit():
+    if not (raw.isascii() and raw.isdigit()):  # "²" and "١٠٠٠" are digits to str.isdigit
         raise Refused("must be started through pkexec")
     uid = int(raw)
     if uid == 0:

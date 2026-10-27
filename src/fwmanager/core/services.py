@@ -57,7 +57,7 @@ def _load_file(path: Path) -> dict[str, Service]:
     try:
         with path.open("rb") as fh:
             return parse_catalog(tomllib.load(fh))
-    except tomllib.TOMLDecodeError as exc:
+    except ValueError as exc:  # bad TOML, or bytes that are not UTF-8
         raise ValidationError("catalog is not valid TOML", code="invalid_service") from exc
 
 

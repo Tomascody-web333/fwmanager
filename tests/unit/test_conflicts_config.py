@@ -43,3 +43,9 @@ def test_bad_language_files_fall_through(tmp_path):
     other.write_text('lang = "klingon"\n')
     assert resolve_language(bad, other, env_lang="pt") == "pt"
     assert system_language("PT") == "pt"
+
+
+def test_a_system_config_that_is_not_utf8_is_ignored(tmp_path):
+    bad = tmp_path / "config.toml"
+    bad.write_bytes(b'lang = "\xff"')
+    assert resolve_language(None, bad, env_lang="pt_PT.UTF-8") == "pt"

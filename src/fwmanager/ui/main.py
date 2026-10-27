@@ -39,6 +39,14 @@ def _adw_version() -> tuple[int, int] | None:
     return Adw.get_major_version(), Adw.get_minor_version()
 
 
+def _can_open_windows() -> bool:
+    """False without a graphical session (over SSH, in a text console)."""
+    from gi.repository import Gdk, Gtk
+
+    # PyGObject's init_check can say yes with no display at all; the display is what counts.
+    return bool(Gtk.init_check()) and Gdk.Display.get_default() is not None
+
+
 def main(argv: list[str] | None = None) -> int:
     from fwmanager.ui.settings import settings_path
 
@@ -49,6 +57,15 @@ def main(argv: list[str] | None = None) -> int:
     problem = runtime_problem(_adw_version())
     if problem:
         print(problem, file=sys.stderr)
+        return 1
+    if not _can_open_windows():
+        print(
+            _(
+                "fwmanager needs a graphical session to open its window. "
+                "Over SSH or in a text console, use fwmanager-cli."
+            ),
+            file=sys.stderr,
+        )
         return 1
     from fwmanager.ui.app import FwApplication
 

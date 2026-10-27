@@ -291,3 +291,9 @@ def test_settings_style_operations_forward_arguments():
     assert names == ["set_options", "set_profile", "set_network_profile", "remove_network",
                      "reset_profile"]  # fmt: skip
     assert client.calls[0][1] == (True, "low")
+
+
+def test_a_settings_file_that_is_not_utf8_gives_the_defaults(tmp_path):
+    p = tmp_path / "settings.toml"
+    p.write_bytes(b"\xff\xfe\x00 lang = 'pt'")
+    assert us.load(p) == us.UserSettings(None, True)
