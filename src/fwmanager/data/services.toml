@@ -1,0 +1,46 @@
+# Built-in service catalog. Each entry is validated on load; titles are
+# display-only and never reach a firewall rule.
+
+[ssh]
+title = "SSH"
+ports = ["22/tcp"]
+
+[samba]
+title = "File sharing (Samba)"
+ports = ["139/tcp", "445/tcp"]
+
+[kdeconnect]
+title = "KDE Connect"
+ports = ["1714-1764/tcp", "1714-1764/udp"]
+
+[syncthing]
+title = "Syncthing"
+ports = ["22000/tcp", "22000/udp", "21027/udp"]
+
+[ipp]
+title = "Printer sharing (IPP)"
+ports = ["631/tcp", "631/udp"]
+
+[web]
+title = "Web server (HTTP/HTTPS)"
+ports = ["80/tcp", "443/tcp"]
+
+[ftp]
+title = "FTP"
+ports = ["21/tcp"]
+
+[rdp]
+title = "Remote desktop (RDP)"
+ports = ["3389/tcp"]
+
+[vnc]
+title = "Remote desktop (VNC)"
+ports = ["5900-5909/tcp"]
+
+[nfs]
+title = "NFS"
+ports = ["2049/tcp", "2049/udp"]
+
+[mqtt]
+title = "MQTT"
+ports = ["1883/tcp", "8883/tcp"]
