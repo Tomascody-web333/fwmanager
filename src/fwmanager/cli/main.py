@@ -9,9 +9,8 @@ import os
 import sys
 
 from fwmanager.client import Client
-from fwmanager.core.profiles import DEFAULT_PROFILES
 from fwmanager.core.services import load_catalog
-from fwmanager.errors import FwError, ValidationError
+from fwmanager.errors import FwError
 from fwmanager.i18n import N_, _, set_language
 from fwmanager.messages import describe_error, describe_finding, describe_probe
 
@@ -111,40 +110,29 @@ VERDICT_TEXT = {"safe": N_("SAFE"), "warnings": N_("SAFE WITH WARNINGS"), "unsaf
 
 
 def _test_policy(client: Client, name: str, static_only: bool) -> int:
-    from fwmanager.core.policy_check import ERROR, Finding, Report, ssh_findings
-    from fwmanager.policytest import run_live_test
+    from fwmanager.core.policy_check import ERROR
+    from fwmanager.policytest import run_policy_test
 
-    profile = DEFAULT_PROFILES.get(name)
-    if profile is None:
-        raise ValidationError("unknown profile", code="unknown_profile")
-    report = Report([Finding(*f) for f in client.check_profile(name)])
-    report.findings += ssh_findings(profile, load_catalog(), os.environ)
-
+    outcome = run_policy_test(client, name, load_catalog(), os.environ, static_only)
     print(_("Policy check for {p}:").format(p=name))
-    for f in report.findings:
+    for f in outcome.findings:
         print(f"  [{f.severity}] {describe_finding(f.code, f.detail)}")
-    if not report.findings:
+    if not outcome.findings:
         print("  " + _("No problems found in the rules."))
-    verdict = report.verdict
-    if any(f.severity == ERROR for f in report.findings):
+    if any(f.severity == ERROR for f in outcome.findings):
         print(_("Live test skipped: fix the errors above first."))
-    elif not static_only:
+    elif outcome.live is not None:
+        live = outcome.live
         print("\n" + _("Live test (the profile is applied for a few seconds, then reverted):"))
-        live = run_live_test(client, name)
+        marks = {True: "ok", False: "FAIL", None: "n/a"}
         for before, after in zip(live.before, live.after, strict=False):
-
-            def mark(p):
-                return {True: "ok", False: "FAIL", None: "n/a"}[p.ok]
-
-            print(f"  {describe_probe(before.name)}: {mark(before)} -> {mark(after)}")
+            print(f"  {describe_probe(before.name)}: {marks[before.ok]} -> {marks[after.ok]}")
         for probe in live.regressions:
             print("  " + _("BROKEN by this profile: {p}").format(p=describe_probe(probe)))
         if not live.restored:
             print(_("WARNING: previous rules could not be confirmed as restored."))
-        if live.verdict == "unsafe":
-            verdict = "unsafe"
-    print("\n" + _("Result: {v}").format(v=_(VERDICT_TEXT[verdict])))
-    return {"safe": EXIT_OK, "warnings": EXIT_WARNINGS, "unsafe": EXIT_UNSAFE}[verdict]
+    print("\n" + _("Result: {v}").format(v=_(VERDICT_TEXT[outcome.verdict])))
+    return {"safe": EXIT_OK, "warnings": EXIT_WARNINGS, "unsafe": EXIT_UNSAFE}[outcome.verdict]
 
 
 def run(args: argparse.Namespace) -> int:

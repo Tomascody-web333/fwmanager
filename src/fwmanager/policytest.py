@@ -186,3 +186,53 @@ def seconds_since(start: float) -> float:
 
 def is_remote_session(env=os.environ) -> bool:
     return bool(env.get("SSH_CONNECTION"))
+
+
+# -- full policy test (static + live), shared by the CLI and the interface ------------------
+
+
+@dataclass
+class PolicyOutcome:
+    profile: str
+    findings: list
+    live: LiveResult | None
+    verdict: str  # safe | warnings | unsafe
+
+    @property
+    def can_apply(self) -> bool:
+        return self.verdict != "unsafe"
+
+    @property
+    def live_skipped(self) -> bool:
+        return self.live is None
+
+
+def profile_from_details(details: dict):
+    """Build a Profile from the daemon's ``GetProfile`` answer (so edits are honoured)."""
+    from fwmanager.core.profiles import Profile, Source
+
+    return Profile(
+        details["name"],
+        tuple(details["services"]),
+        details["ping"],
+        details["mdns"],
+        Source(details["source_kind"], tuple(details["cidrs"])),
+    )
+
+
+def run_policy_test(
+    client, name: str, catalog: dict, env=os.environ, static_only: bool = False
+) -> PolicyOutcome:
+    """Static analysis (daemon) plus, unless it found errors, the live before/after test."""
+    from fwmanager.core.policy_check import ERROR, Finding, Report, ssh_findings
+
+    details = client.get_profile(name)
+    report = Report([Finding(*f) for f in client.check_profile(name)])
+    report.findings += ssh_findings(profile_from_details(details), catalog, env)
+    verdict = report.verdict
+    live = None
+    if not static_only and not any(f.severity == ERROR for f in report.findings):
+        live = run_live_test(client, name)
+        if live.verdict == "unsafe":
+            verdict = "unsafe"
+    return PolicyOutcome(name, report.findings, live, verdict)
