@@ -1,0 +1,282 @@
+# Translations for fwmanager (pt_PT).
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: pt_PT\n"
+
+msgid "Active profile: {p}"
+msgstr ""
+
+msgid "Allowed services are reachable from any network."
+msgstr ""
+
+msgid "Another change is waiting for confirmation."
+msgstr ""
+
+msgid "Another firewall manager (firewalld) is active."
+msgstr ""
+
+msgid "Another firewall manager (firewalld) is active. Disable it first, then try again."
+msgstr ""
+
+msgid "Applied."
+msgstr ""
+
+msgid "BROKEN by this profile: {p}"
+msgstr ""
+
+msgid "Confirmed."
+msgstr ""
+
+msgid "Connections could hang (destination unreachable)."
+msgstr ""
+
+msgid "Could not save the settings."
+msgstr ""
+
+msgid "DNS resolver answers"
+msgstr ""
+
+msgid "Docker manages its own rules (they are left untouched)."
+msgstr ""
+
+msgid "Error: {msg}"
+msgstr ""
+
+msgid "FTP"
+msgstr ""
+
+msgid "File sharing (Samba)"
+msgstr ""
+
+msgid "Firewall manager client"
+msgstr ""
+
+msgid "IPv6 connections could hang (packet-too-big)."
+msgstr ""
+
+msgid "IPv6 is not enabled in ufw, so it is not filtered."
+msgstr ""
+
+msgid "IPv6 would stop working (neighbour discovery)."
+msgstr ""
+
+msgid "IPv6 would stop working (router advertisements)."
+msgstr ""
+
+msgid "Internal error."
+msgstr ""
+
+msgid "Invalid input."
+msgstr ""
+
+msgid "Invalid network (name or UUID)."
+msgstr ""
+
+msgid "Invalid network address (CIDR)."
+msgstr ""
+
+msgid "Invalid option."
+msgstr ""
+
+msgid "Invalid packets would not be dropped."
+msgstr ""
+
+msgid "Invalid port."
+msgstr ""
+
+msgid "Invalid profile."
+msgstr ""
+
+msgid "Invalid protocol."
+msgstr ""
+
+msgid "Invalid service."
+msgstr ""
+
+msgid "Invalid traffic source."
+msgstr ""
+
+msgid "KDE Connect"
+msgstr ""
+
+msgid "Live test (the profile is applied for a few seconds, then reverted):"
+msgstr ""
+
+msgid "Live test skipped: fix the errors above first."
+msgstr ""
+
+msgid "Local (loopback) traffic would be blocked."
+msgstr ""
+
+msgid "Local IPv4 connections"
+msgstr ""
+
+msgid "Local IPv6 connections"
+msgstr ""
+
+msgid "MQTT"
+msgstr ""
+
+msgid "NFS"
+msgstr ""
+
+msgid "No problems found in the rules."
+msgstr ""
+
+msgid "Policy check for {p}:"
+msgstr ""
+
+msgid "Press Enter to confirm, r to revert ({n}s left)... "
+msgstr ""
+
+msgid "Previous rules restored."
+msgstr ""
+
+msgid "Printer sharing (IPP)"
+msgstr ""
+
+msgid "Reach the IPv4 gateway"
+msgstr ""
+
+msgid "Reach the IPv6 gateway"
+msgstr ""
+
+msgid "Remote desktop (RDP)"
+msgstr ""
+
+msgid "Remote desktop (VNC)"
+msgstr ""
+
+msgid "Renewing the IPv4 address (DHCP) would fail."
+msgstr ""
+
+msgid "Renewing the IPv6 address (DHCPv6) would fail."
+msgstr ""
+
+msgid "Replies to your own connections would be blocked."
+msgstr ""
+
+msgid "Result: {v}"
+msgstr ""
+
+msgid "Router mode may interfere with Docker, VMs and containers."
+msgstr ""
+
+msgid "Rules that will be added."
+msgstr ""
+
+msgid "Rules that will be removed."
+msgstr ""
+
+msgid "SAFE"
+msgstr ""
+
+msgid "SAFE WITH WARNINGS"
+msgstr ""
+
+msgid "SSH"
+msgstr ""
+
+msgid "Some diagnostics would fail (time exceeded)."
+msgstr ""
+
+msgid "Some fwmanager rules have an unexpected shape."
+msgstr ""
+
+msgid "Syncthing"
+msgstr ""
+
+msgid "The fwmanager service is not running."
+msgstr ""
+
+msgid "The rules touch something fwmanager does not manage."
+msgstr ""
+
+msgid "The saved firewall state was damaged; the safest profile was used."
+msgstr ""
+
+msgid "There is no change waiting for confirmation."
+msgstr ""
+
+msgid "Too many saved networks."
+msgstr ""
+
+msgid "UNSAFE"
+msgstr ""
+
+msgid "Unknown profile."
+msgstr ""
+
+msgid "Unknown service."
+msgstr ""
+
+msgid "WARNING: previous rules could not be confirmed as restored."
+msgstr ""
+
+msgid "Waiting for confirmation of {p} ({n}s left)"
+msgstr ""
+
+msgid "Web server (HTTP/HTTPS)"
+msgstr ""
+
+msgid "You are not allowed to control the firewall."
+msgstr ""
+
+msgid "Your SSH session and new SSH connections stay allowed."
+msgstr ""
+
+msgid "Your SSH session survives, but you could not open a new one."
+msgstr ""
+
+msgid "apply a profile (auto-reverts unless confirmed)"
+msgstr ""
+
+msgid "check that a profile will not break the machine"
+msgstr ""
+
+msgid "confirm immediately, no countdown"
+msgstr ""
+
+msgid "confirm the pending change"
+msgstr ""
+
+msgid "libvirt manages its own rules (they are left untouched)."
+msgstr ""
+
+msgid "list available profiles"
+msgstr ""
+
+msgid "manage the network to profile mapping"
+msgstr ""
+
+msgid "none"
+msgstr ""
+
+msgid "only analyse the rules, change nothing"
+msgstr ""
+
+msgid "profile name"
+msgstr ""
+
+msgid "revert the pending change"
+msgstr ""
+
+msgid "show the firewall state"
+msgstr ""
+
+msgid "ufw is not installed."
+msgstr ""
+
+msgid "ufw is not installed. Install it first (for example: sudo apt install ufw)."
+msgstr ""
+
+msgid "ufw is off and will be turned on."
+msgstr ""
+
+msgid "ufw refused one of the rules."
+msgstr ""
+
+msgid "ufw rejected the change."
+msgstr ""
+
+msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr ""

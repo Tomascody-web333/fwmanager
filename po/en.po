@@ -1,0 +1,282 @@
+# Translations for fwmanager (en).
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: en\n"
+
+msgid "Active profile: {p}"
+msgstr "Active profile: {p}"
+
+msgid "Allowed services are reachable from any network."
+msgstr "Allowed services are reachable from any network."
+
+msgid "Another change is waiting for confirmation."
+msgstr "Another change is waiting for confirmation."
+
+msgid "Another firewall manager (firewalld) is active."
+msgstr "Another firewall manager (firewalld) is active."
+
+msgid "Another firewall manager (firewalld) is active. Disable it first, then try again."
+msgstr "Another firewall manager (firewalld) is active. Disable it first, then try again."
+
+msgid "Applied."
+msgstr "Applied."
+
+msgid "BROKEN by this profile: {p}"
+msgstr "BROKEN by this profile: {p}"
+
+msgid "Confirmed."
+msgstr "Confirmed."
+
+msgid "Connections could hang (destination unreachable)."
+msgstr "Connections could hang (destination unreachable)."
+
+msgid "Could not save the settings."
+msgstr "Could not save the settings."
+
+msgid "DNS resolver answers"
+msgstr "DNS resolver answers"
+
+msgid "Docker manages its own rules (they are left untouched)."
+msgstr "Docker manages its own rules (they are left untouched)."
+
+msgid "Error: {msg}"
+msgstr "Error: {msg}"
+
+msgid "FTP"
+msgstr "FTP"
+
+msgid "File sharing (Samba)"
+msgstr "File sharing (Samba)"
+
+msgid "Firewall manager client"
+msgstr "Firewall manager client"
+
+msgid "IPv6 connections could hang (packet-too-big)."
+msgstr "IPv6 connections could hang (packet-too-big)."
+
+msgid "IPv6 is not enabled in ufw, so it is not filtered."
+msgstr "IPv6 is not enabled in ufw, so it is not filtered."
+
+msgid "IPv6 would stop working (neighbour discovery)."
+msgstr "IPv6 would stop working (neighbour discovery)."
+
+msgid "IPv6 would stop working (router advertisements)."
+msgstr "IPv6 would stop working (router advertisements)."
+
+msgid "Internal error."
+msgstr "Internal error."
+
+msgid "Invalid input."
+msgstr "Invalid input."
+
+msgid "Invalid network (name or UUID)."
+msgstr "Invalid network (name or UUID)."
+
+msgid "Invalid network address (CIDR)."
+msgstr "Invalid network address (CIDR)."
+
+msgid "Invalid option."
+msgstr "Invalid option."
+
+msgid "Invalid packets would not be dropped."
+msgstr "Invalid packets would not be dropped."
+
+msgid "Invalid port."
+msgstr "Invalid port."
+
+msgid "Invalid profile."
+msgstr "Invalid profile."
+
+msgid "Invalid protocol."
+msgstr "Invalid protocol."
+
+msgid "Invalid service."
+msgstr "Invalid service."
+
+msgid "Invalid traffic source."
+msgstr "Invalid traffic source."
+
+msgid "KDE Connect"
+msgstr "KDE Connect"
+
+msgid "Live test (the profile is applied for a few seconds, then reverted):"
+msgstr "Live test (the profile is applied for a few seconds, then reverted):"
+
+msgid "Live test skipped: fix the errors above first."
+msgstr "Live test skipped: fix the errors above first."
+
+msgid "Local (loopback) traffic would be blocked."
+msgstr "Local (loopback) traffic would be blocked."
+
+msgid "Local IPv4 connections"
+msgstr "Local IPv4 connections"
+
+msgid "Local IPv6 connections"
+msgstr "Local IPv6 connections"
+
+msgid "MQTT"
+msgstr "MQTT"
+
+msgid "NFS"
+msgstr "NFS"
+
+msgid "No problems found in the rules."
+msgstr "No problems found in the rules."
+
+msgid "Policy check for {p}:"
+msgstr "Policy check for {p}:"
+
+msgid "Press Enter to confirm, r to revert ({n}s left)... "
+msgstr "Press Enter to confirm, r to revert ({n}s left)... "
+
+msgid "Previous rules restored."
+msgstr "Previous rules restored."
+
+msgid "Printer sharing (IPP)"
+msgstr "Printer sharing (IPP)"
+
+msgid "Reach the IPv4 gateway"
+msgstr "Reach the IPv4 gateway"
+
+msgid "Reach the IPv6 gateway"
+msgstr "Reach the IPv6 gateway"
+
+msgid "Remote desktop (RDP)"
+msgstr "Remote desktop (RDP)"
+
+msgid "Remote desktop (VNC)"
+msgstr "Remote desktop (VNC)"
+
+msgid "Renewing the IPv4 address (DHCP) would fail."
+msgstr "Renewing the IPv4 address (DHCP) would fail."
+
+msgid "Renewing the IPv6 address (DHCPv6) would fail."
+msgstr "Renewing the IPv6 address (DHCPv6) would fail."
+
+msgid "Replies to your own connections would be blocked."
+msgstr "Replies to your own connections would be blocked."
+
+msgid "Result: {v}"
+msgstr "Result: {v}"
+
+msgid "Router mode may interfere with Docker, VMs and containers."
+msgstr "Router mode may interfere with Docker, VMs and containers."
+
+msgid "Rules that will be added."
+msgstr "Rules that will be added."
+
+msgid "Rules that will be removed."
+msgstr "Rules that will be removed."
+
+msgid "SAFE"
+msgstr "SAFE"
+
+msgid "SAFE WITH WARNINGS"
+msgstr "SAFE WITH WARNINGS"
+
+msgid "SSH"
+msgstr "SSH"
+
+msgid "Some diagnostics would fail (time exceeded)."
+msgstr "Some diagnostics would fail (time exceeded)."
+
+msgid "Some fwmanager rules have an unexpected shape."
+msgstr "Some fwmanager rules have an unexpected shape."
+
+msgid "Syncthing"
+msgstr "Syncthing"
+
+msgid "The fwmanager service is not running."
+msgstr "The fwmanager service is not running."
+
+msgid "The rules touch something fwmanager does not manage."
+msgstr "The rules touch something fwmanager does not manage."
+
+msgid "The saved firewall state was damaged; the safest profile was used."
+msgstr "The saved firewall state was damaged; the safest profile was used."
+
+msgid "There is no change waiting for confirmation."
+msgstr "There is no change waiting for confirmation."
+
+msgid "Too many saved networks."
+msgstr "Too many saved networks."
+
+msgid "UNSAFE"
+msgstr "UNSAFE"
+
+msgid "Unknown profile."
+msgstr "Unknown profile."
+
+msgid "Unknown service."
+msgstr "Unknown service."
+
+msgid "WARNING: previous rules could not be confirmed as restored."
+msgstr "WARNING: previous rules could not be confirmed as restored."
+
+msgid "Waiting for confirmation of {p} ({n}s left)"
+msgstr "Waiting for confirmation of {p} ({n}s left)"
+
+msgid "Web server (HTTP/HTTPS)"
+msgstr "Web server (HTTP/HTTPS)"
+
+msgid "You are not allowed to control the firewall."
+msgstr "You are not allowed to control the firewall."
+
+msgid "Your SSH session and new SSH connections stay allowed."
+msgstr "Your SSH session and new SSH connections stay allowed."
+
+msgid "Your SSH session survives, but you could not open a new one."
+msgstr "Your SSH session survives, but you could not open a new one."
+
+msgid "apply a profile (auto-reverts unless confirmed)"
+msgstr "apply a profile (auto-reverts unless confirmed)"
+
+msgid "check that a profile will not break the machine"
+msgstr "check that a profile will not break the machine"
+
+msgid "confirm immediately, no countdown"
+msgstr "confirm immediately, no countdown"
+
+msgid "confirm the pending change"
+msgstr "confirm the pending change"
+
+msgid "libvirt manages its own rules (they are left untouched)."
+msgstr "libvirt manages its own rules (they are left untouched)."
+
+msgid "list available profiles"
+msgstr "list available profiles"
+
+msgid "manage the network to profile mapping"
+msgstr "manage the network to profile mapping"
+
+msgid "none"
+msgstr "none"
+
+msgid "only analyse the rules, change nothing"
+msgstr "only analyse the rules, change nothing"
+
+msgid "profile name"
+msgstr "profile name"
+
+msgid "revert the pending change"
+msgstr "revert the pending change"
+
+msgid "show the firewall state"
+msgstr "show the firewall state"
+
+msgid "ufw is not installed."
+msgstr "ufw is not installed."
+
+msgid "ufw is not installed. Install it first (for example: sudo apt install ufw)."
+msgstr "ufw is not installed. Install it first (for example: sudo apt install ufw)."
+
+msgid "ufw is off and will be turned on."
+msgstr "ufw is off and will be turned on."
+
+msgid "ufw refused one of the rules."
+msgstr "ufw refused one of the rules."
+
+msgid "ufw rejected the change."
+msgstr "ufw rejected the change."
+
+msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr "ufw's configuration was edited in a way fwmanager cannot work with."

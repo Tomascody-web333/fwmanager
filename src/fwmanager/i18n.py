@@ -7,12 +7,20 @@ import os
 
 DOMAIN = "fwmanager"
 
+DEFAULT_LOCALEDIR = "/usr/share/locale"
+
 _translation: gettext.NullTranslations = gettext.NullTranslations()
+_language = "en"
+
+
+def current_language() -> str:
+    return _language
 
 
 def set_language(lang: str | None, localedir: str | None = None) -> None:
     """Select the UI language ("pt", "pt_PT", "en", ...). Unknown means English."""
-    global _translation
+    global _translation, _language
+    _language = "pt" if (lang or "").lower().startswith("pt") else "en"
     if not lang:
         _translation = gettext.NullTranslations()
         return
@@ -22,7 +30,7 @@ def set_language(lang: str | None, localedir: str | None = None) -> None:
         candidates = ["pt_PT", "pt"]
     _translation = gettext.translation(
         DOMAIN,
-        localedir=localedir or os.environ.get("FWMANAGER_LOCALEDIR"),
+        localedir=localedir or os.environ.get("FWMANAGER_LOCALEDIR") or DEFAULT_LOCALEDIR,
         languages=candidates,
         fallback=True,
     )
