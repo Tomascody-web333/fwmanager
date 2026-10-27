@@ -59,6 +59,10 @@ def test_interface_is_fixed_command_set():
         "Rollback",
         "GetStatus",
         "ListProfiles",
+        "ListNetworks",
+        "SetNetworkProfile",
+        "RemoveNetwork",
+        "GetNetworkProfile",
     }
     apply = next(m for m in info.methods if m.name == "ApplyProfile")
     assert [a.signature for a in apply.in_args] == ["s"]

@@ -1,84 +1,24 @@
 """End-to-end tests: real daemon (inside a netns) on a private bus, real nft."""
 
 import json
-import os
-import signal
-import subprocess
-import sys
 import time
-from pathlib import Path
 
 import pytest
 from gi.repository import GLib
+from helpers.harness import Daemon, busctl_as, snapshot_of, wait_until
 
 from fwmanager.cli.main import main as cli_main
-from fwmanager.client import Client
 from fwmanager.errors import FwError
 
 pytestmark = pytest.mark.integration
 
-ROOT = Path(__file__).resolve().parents[2]
-
-
-class Daemon:
-    def __init__(self, prefix, bus, group="root", timeout=30):
-        env = {**os.environ, "PYTHONPATH": str(ROOT / "src")}
-        self.proc = subprocess.Popen(
-            [
-                *prefix,
-                sys.executable,
-                "-m",
-                "fwmanager.daemon.main",
-                "--bus-address",
-                bus,
-                "--group",
-                group,
-                "--confirm-timeout",
-                str(timeout),
-            ],
-            env=env,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        self.bus = bus
-        for _ in range(100):
-            try:
-                self.client = Client(bus)
-                self.client.list_profiles()
-                return
-            except FwError:
-                time.sleep(0.05)
-        self.proc.kill()
-        raise RuntimeError("daemon did not start: " + self.proc.stderr.read())
-
-    def stop(self):
-        if self.proc.poll() is None:
-            self.proc.send_signal(signal.SIGTERM)
-        try:
-            self.proc.wait(5)
-        except subprocess.TimeoutExpired:
-            self.proc.kill()
-        return self.proc.stderr.read()
-
 
 @pytest.fixture
-def daemon(nft, netns_prefix, private_bus):
-    d = Daemon(netns_prefix, private_bus, timeout=2)
+def daemon(nft, netns_prefix, private_bus, tmp_path):
+    d = Daemon(netns_prefix, private_bus, timeout=2, state_dir=tmp_path / "state")
+    d.initial = snapshot_of(nft)  # first boot already applied "publico"
     yield d
     d.stop()
-
-
-def table_exists(nft):
-    return nft.list_table_json("inet", "fwmanager") is not None
-
-
-def wait_until(cond, seconds=5):
-    end = time.monotonic() + seconds
-    while time.monotonic() < end:
-        if cond():
-            return True
-        time.sleep(0.05)
-    return False
 
 
 def test_apply_confirm_status(daemon, nft):
@@ -93,9 +33,9 @@ def test_apply_confirm_status(daemon, nft):
 
 
 def test_timeout_reverts_via_daemon(daemon, nft):
-    daemon.client.apply_profile("publico")
-    assert table_exists(nft)
-    assert wait_until(lambda: not table_exists(nft), 6)
+    daemon.client.apply_profile("casa")
+    assert snapshot_of(nft) != daemon.initial
+    assert wait_until(lambda: snapshot_of(nft) == daemon.initial, 6)
     assert daemon.client.status()["pending_profile"] == ""
 
 
@@ -135,7 +75,7 @@ def test_malicious_profile_names_rejected(daemon, nft, evil):
     with pytest.raises(FwError) as exc:
         daemon.client.apply_profile(evil)
     assert exc.value.code == "invalid_profile"
-    assert not table_exists(nft)
+    assert snapshot_of(nft) == daemon.initial
 
 
 def test_unknown_profile(daemon, nft):
@@ -161,7 +101,7 @@ def test_wrong_argument_types_rejected_by_bus(daemon, nft):
                 3000,
                 None,
             )
-    assert not table_exists(nft)
+    assert snapshot_of(nft) == daemon.initial
 
 
 def test_no_method_accepts_rule_text(daemon):
@@ -169,26 +109,10 @@ def test_no_method_accepts_rule_text(daemon):
     from fwmanager.daemon.interface import interface_info
 
     methods = {m.name for m in interface_info().methods}
-    assert methods == {"ApplyProfile", "Confirm", "Rollback", "GetStatus", "ListProfiles"}
-
-
-def busctl_as(uid, bus, method, *args):
-    return subprocess.run(
-        [
-            "busctl",
-            f"--address={bus}",
-            "call",
-            "org.fwmanager.Control",
-            "/org/fwmanager/Control",
-            "org.fwmanager.Control",
-            method,
-            *args,
-        ],
-        capture_output=True,
-        text=True,
-        user=uid,
-        timeout=15,
-    )
+    assert methods == {
+        "ApplyProfile", "Confirm", "Rollback", "GetStatus", "ListProfiles",
+        "ListNetworks", "SetNetworkProfile", "RemoveNetwork", "GetNetworkProfile",
+    }  # fmt: skip
 
 
 @pytest.mark.parametrize(
@@ -198,7 +122,7 @@ def test_user_outside_group_is_refused(daemon, nft, method, args):
     r = busctl_as(65534, daemon.bus, method, *args)  # "nobody" is not in group root
     assert r.returncode != 0
     assert "not in the fwmanager group" in r.stderr
-    assert not table_exists(nft)
+    assert snapshot_of(nft) == daemon.initial
 
 
 def test_user_in_group_is_accepted(daemon):
@@ -208,10 +132,11 @@ def test_user_in_group_is_accepted(daemon):
 
 def test_sigterm_with_pending_change_restores_previous_state(nft, netns_prefix, private_bus):
     d = Daemon(netns_prefix, private_bus, timeout=60)
-    d.client.apply_profile("publico")
-    assert table_exists(nft)
+    before = snapshot_of(nft)  # first boot already applied "publico"
+    d.client.apply_profile("casa")
+    assert snapshot_of(nft) != before
     log = d.stop()
-    assert not table_exists(nft)
+    assert snapshot_of(nft) == before
     assert "Traceback" not in log
 
 
