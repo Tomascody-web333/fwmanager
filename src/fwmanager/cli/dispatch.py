@@ -101,7 +101,7 @@ def lookup_ssid(uuid: str, run: Callable = subprocess.run) -> str:
     return ssid
 
 
-# -- ICMP echo -------------------------------------------------------------------
+# -- ICMP echo ---
 
 
 def checksum(data: bytes) -> int:
@@ -160,7 +160,7 @@ def reachable(gw: Gateway, iface: str, tries: int, timeout: float, ping: Callabl
     return any(ping(gw.address, iface, timeout) for _ in range(tries))
 
 
-# -- main flow -------------------------------------------------------------------
+# -- main flow ---
 
 
 def wait_for_idle(client, seconds: int, sleep: Callable[[float], None]) -> bool:

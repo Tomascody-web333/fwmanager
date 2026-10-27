@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -29,6 +31,7 @@ class FwApplication(Adw.Application):
         self.controller: Controller | None = None
         self.window: MainWindow | None = None
         self.user_settings = us.UserSettings()
+        self._wizard_options: dict = {}  # tests inject fakes for the helper and the relaunch
 
     # -- language ---
 
@@ -45,8 +48,13 @@ class FwApplication(Adw.Application):
         self._apply_language()
         self._build_window()
 
+    def set_setup_stage(self, stage: str) -> None:
+        """Remember how far first-run setup got (it resumes there after a restart)."""
+        self.user_settings = self.user_settings.with_stage(stage)
+        us.save(self.user_settings, self._settings_path)
+
     def set_notifications(self, enabled: bool) -> None:
-        self.user_settings = us.UserSettings(self.user_settings.lang, enabled)
+        self.user_settings = replace(self.user_settings, notifications=enabled)
         us.save(self.user_settings, self._settings_path)
 
     # -- life cycle ---
@@ -63,7 +71,13 @@ class FwApplication(Adw.Application):
     def _build_window(self) -> None:
         old = self.window
         self.window = MainWindow(
-            self, self.controller, self.user_settings, self.change_language, self.set_notifications
+            self,
+            self.controller,
+            self.user_settings,
+            self.change_language,
+            self.set_notifications,
+            self.set_setup_stage,
+            self._wizard_options,
         )
         self.window.present()
         if old is not None:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import getpass
+
 import gi
 
 gi.require_version("Gtk", "4.0")
@@ -18,10 +20,20 @@ from fwmanager.ui.pages.problem import ProblemPage  # noqa: E402
 from fwmanager.ui.pages.profiles import ProfilesPage  # noqa: E402
 from fwmanager.ui.pages.rules import RulesPage  # noqa: E402
 from fwmanager.ui.pages.settings import SettingsPage  # noqa: E402
+from fwmanager.ui.wizard import SetupWizard  # noqa: E402
 
 
 class MainWindow(Adw.ApplicationWindow):
-    def __init__(self, app, controller, user_settings, on_language, on_notifications) -> None:
+    def __init__(
+        self,
+        app,
+        controller,
+        user_settings,
+        on_language,
+        on_notifications,
+        on_setup_stage=lambda stage: None,
+        wizard_options: dict | None = None,
+    ) -> None:
         super().__init__(
             application=app,
             title="fwmanager",
@@ -77,6 +89,22 @@ class MainWindow(Adw.ApplicationWindow):
         loading.set_child(Gtk.Spinner(spinning=True, width_request=32, height_request=32))
         self.stack.add_named(loading, "loading")
         self.stack.set_visible_child_name("loading")
+
+        # First run: the setup wizard takes over until it is finished or skipped.
+        self.wizard = None
+        if user_settings.setup_stage != "done":
+            options = dict(wizard_options or {})
+            self.wizard = SetupWizard(
+                controller,
+                user_settings,
+                options.pop("user", getpass.getuser()),
+                on_language,
+                on_setup_stage,
+                self._wizard_finished,
+                **options,
+            )
+            self.stack.add_named(self.wizard, "setup")
+            self.stack.set_visible_child_name("setup")
         self.toasts.set_child(self.stack)
         self.set_content(self.toasts)
 
@@ -107,7 +135,18 @@ class MainWindow(Adw.ApplicationWindow):
 
     # -- reacting to the daemon ---
 
+    def _wizard_finished(self) -> None:
+        wizard, self.wizard = self.wizard, None
+        self.stack.set_visible_child_name("loading")
+        if wizard is not None:
+            self.stack.remove(wizard)
+        self._was_ok = False
+        self.on_snapshot(self.controller.snapshot)
+
     def on_snapshot(self, snap) -> None:
+        if self.wizard is not None:
+            self.wizard.on_snapshot(snap)  # setup explains problems itself, in its own steps
+            return
         if snap.screen != state.OK:
             self._was_ok = False
             if snap.problem:

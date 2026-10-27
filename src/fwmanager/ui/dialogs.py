@@ -317,7 +317,7 @@ class RuleEditor(Adw.Dialog):
         self.template.connect("notify::selected", lambda *_: self._build_details())
         self._build_details()
 
-    # -- the blanks, per template ---------------------------------------------------------------
+    # -- the blanks, per template ---
 
     @property
     def current(self) -> str:
@@ -371,7 +371,7 @@ class RuleEditor(Adw.Dialog):
         self.cidrs.set_visible(self.scope.get_selected() == 1)
         self._changed()
 
-    # -- reading the blanks, then the sentence and the preview -------------------------------------
+    # -- reading the blanks, then the sentence and the preview ---
 
     def _collect(self) -> dict | None:
         """The parameters as the daemon wants them, or ``None`` while something is missing."""

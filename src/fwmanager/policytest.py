@@ -188,7 +188,7 @@ def is_remote_session(env=os.environ) -> bool:
     return bool(env.get("SSH_CONNECTION"))
 
 
-# -- full policy test (static + live), shared by the CLI and the interface ------------------
+# -- full policy test (static + live), shared by the CLI and the interface ---
 
 
 @dataclass

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE policyconfig PUBLIC
+ "-//freedesktop//DTD PolicyKit Policy Configuration 1.0//EN"
+ "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
+<policyconfig>
+  <vendor>fwmanager</vendor>
+  <vendor_url>https://github.com/tomascody-web333/fwmanager</vendor_url>
+
+  <!-- One administrator confirmation, once: let this account use fwmanager and start its service. -->
+  <action id="org.fwmanager.setup">
+    <description>Set up fwmanager for this account</description>
+    <description xml:lang="pt">Configurar o fwmanager para esta conta</description>
+    <message>Authentication is required to let your account manage the firewall with fwmanager</message>
+    <message xml:lang="pt">É preciso autenticação para permitir que a sua conta gira a firewall com o fwmanager</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin_keep</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/fwmanager/fwmanager-setup</annotate>
+  </action>
+</policyconfig>
