@@ -2,8 +2,8 @@
 
 import pytest
 from helpers.fake_client import FakeClient, FakeDaemon
+from helpers.gtk_tools import texts
 from helpers.shot import pump
-from test_windows import texts  # noqa: I001
 
 from fwmanager import i18n_build as ib
 from fwmanager.i18n import set_language

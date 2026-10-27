@@ -1,0 +1,363 @@
+"""Windows and dialogs: what is shown, and what each control sends to the daemon."""
+
+import pytest
+from helpers.fake_client import FakeClient, FakeDaemon
+from helpers.gtk_tools import find, texts
+from helpers.shot import pump
+
+from fwmanager.errors import FwError
+from fwmanager.i18n import set_language
+from fwmanager.ui.controller import Controller
+from fwmanager.ui.worker import run_sync
+
+pytestmark = pytest.mark.ui
+
+
+@pytest.fixture(autouse=True)
+def english():
+    set_language(None)
+    yield
+    set_language(None)
+
+
+@pytest.fixture
+def daemon():
+    return FakeDaemon()
+
+
+@pytest.fixture
+def env(gtk, daemon, tmp_path):
+    from gi.repository import Adw
+
+    from fwmanager.ui import settings as us
+    from fwmanager.ui.window import MainWindow
+
+    controller = Controller(lambda: FakeClient(daemon), run=run_sync, user="ana")
+    app = Adw.Application(application_id="org.fwmanager.Test")
+    app.register()
+    changes = {"lang": [], "notifications": []}
+    win = MainWindow(
+        app, controller, us.UserSettings(), changes["lang"].append, changes["notifications"].append
+    )
+    win.present()
+    pump(0.3)
+
+    class Env:
+        pass
+
+    e = Env()
+    e.win, e.controller, e.daemon, e.app, e.changes = win, controller, daemon, app, changes
+    yield e
+    controller.stop_polling()
+    win.destroy()
+
+
+def visible_child(env):
+    return env.win.stack.get_visible_child_name()
+
+
+def test_home_lists_the_profiles_and_the_active_one(env):
+    assert visible_child(env) == "main"
+    t = texts(env.win.home)
+    for expected in ("Home", "Work", "Public", "Custom", "Status", "Active profile"):
+        assert expected in t, t
+    assert "Public" in t  # the active profile, in the status row
+    rows = {r.name_: r for r in env.win.home._profile_rows}
+    assert rows["publico"].check.get_opacity() == 1 and rows["casa"].check.get_opacity() == 0
+
+
+def test_apply_goes_to_the_daemon_and_shows_the_pending_card(env):
+    row = {r.name_: r for r in env.win.home._profile_rows}["casa"]
+    row.apply_btn.emit("clicked")
+    pump(0.1)
+    assert ("apply_profile", ("casa",)) in env.daemon.calls
+    assert env.win.home.pending_group.get_visible()
+    assert "Home will be undone in 30 s" in env.win.home.pending_row.get_subtitle()
+    # While something is pending nothing else can be applied or tested.
+    assert not row.apply_btn.get_sensitive() and not row.test_btn.get_sensitive()
+
+
+def test_confirm_and_undo_buttons(env):
+    env.daemon.pending = "casa"
+    env.controller.refresh()
+    env.win.home.confirm_btn.emit("clicked")
+    assert ("confirm", ()) in env.daemon.calls and env.daemon.active == "casa"
+    assert not env.win.home.pending_group.get_visible()
+    env.daemon.pending = "trabalho"
+    env.controller.refresh()
+    env.win.home.undo_btn.emit("clicked")
+    assert ("rollback", ()) in env.daemon.calls and not env.win.home.pending_group.get_visible()
+
+
+@pytest.mark.parametrize(
+    "setup,title,command",
+    [
+        (lambda d: setattr(d, "error", FwError("x", code="daemon_unavailable")),
+         "The firewall service is not running", "systemctl enable --now fwmanagerd"),
+        (lambda d: setattr(d, "error", FwError("x", code="access_denied")),
+         "Your account is not allowed to use fwmanager", "usermod -aG fwmanager ana"),
+        (lambda d: setattr(d, "ufw_installed", False),
+         "ufw is not installed", "sudo apt install ufw"),
+        (lambda d: setattr(d, "conflicts", ["firewalld"]),
+         "Another firewall manager is active", "systemctl disable --now firewalld.service"),
+    ],
+)  # fmt: skip
+def test_problem_screens(env, setup, title, command):
+    setup(env.daemon)
+    env.controller.refresh()
+    pump(0.2)
+    assert visible_child(env) == "problem"
+    t = texts(env.win.problem)
+    assert title in t and any(command in x for x in t)
+    # fixing it and pressing "Try again" brings the normal window back
+    env.daemon.error, env.daemon.ufw_installed, env.daemon.conflicts = None, True, []
+    env.win.problem.retry_btn.emit("clicked")
+    assert visible_child(env) == "main"
+
+
+def test_banner_for_docker_and_damaged_state(env):
+    env.daemon.warnings = ["docker"]
+    env.controller.refresh()
+    assert env.win.banner.get_revealed() and "Docker" in env.win.banner.get_title()
+    env.daemon.warnings, env.daemon.startup = [], "state_corrupt"
+    env.controller.refresh()
+    assert "damaged" in env.win.banner.get_title()
+    env.daemon.startup = "ok"
+    env.controller.refresh()
+    assert not env.win.banner.get_revealed()
+
+
+def test_pages_can_be_switched(env):
+    for name in ("home", "profiles", "networks", "log", "settings"):
+        env.win.views.set_visible_child_name(name)
+        assert env.win.views.get_visible_child_name() == name
+
+
+def test_narrow_window_moves_the_switcher_to_the_bottom(env):
+    env.win.set_default_size(420, 700)
+    env.win.set_size_request(420, 700)
+    pump(0.6)
+    assert env.win.bottom_bar.get_reveal() and not env.win.switcher.get_visible()
+
+
+# -- the test-policy dialog ---------------------------------------------------------------------
+
+
+def outcome(verdict, findings=(), live=None):
+    from fwmanager.core.policy_check import Finding
+    from fwmanager.policytest import PolicyOutcome
+
+    return PolicyOutcome("casa", [Finding(*f) for f in findings], live, verdict)
+
+
+def open_dialog(env, result):
+    from fwmanager.ui.dialogs import PolicyTestDialog
+
+    applied = []
+    dialog = PolicyTestDialog(env.controller, "casa", applied.append)
+    dialog.present(env.win)
+    dialog.show_outcome(result)
+    pump(0.2)
+    dialog.applied = applied
+    return dialog
+
+
+def test_safe_verdict_allows_applying(env):
+    d = open_dialog(env, outcome("safe", [("info", "ssh_ok", "x")]))
+    t = texts(d)
+    assert "Safe to use" in t and "Your SSH session and new SSH connections stay allowed." in t
+    assert d.apply_btn.get_sensitive() and d.apply_btn.get_label() == "Apply"
+    d.apply_btn.emit("clicked")
+    assert d.applied == ["casa"]
+
+
+def test_warnings_allow_applying_anyway(env):
+    d = open_dialog(env, outcome("warnings", [("warning", "exposed_to_any", "x")]))
+    assert "Safe, with warnings" in texts(d)
+    assert d.apply_btn.get_sensitive() and d.apply_btn.get_label() == "Apply anyway"
+
+
+def test_unsafe_verdict_blocks_applying(env):
+    d = open_dialog(env, outcome("unsafe", [("error", "missing_loopback", "x")]))
+    t = texts(d)
+    assert "Would break something" in t and "Local (loopback) traffic would be blocked." in t
+    assert not d.apply_btn.get_sensitive()
+    d.apply_btn.emit("clicked")  # even a forced click must not apply it
+    assert d.applied == []
+
+
+def test_live_results_show_before_and_after(env):
+    from fwmanager.policytest import LiveResult, Probe
+
+    live = LiveResult(
+        [Probe("dns", True), Probe("gateway_v6", None)],
+        [Probe("dns", False), Probe("gateway_v6", None)],
+        True,
+    )
+    d = open_dialog(env, outcome("unsafe", [], live))
+    t = texts(d)
+    assert "DNS resolver answers" in t and "works → fails" in t
+    assert "not applicable → not applicable" in t
+
+
+def test_dialog_runs_the_real_check_through_the_controller(env, monkeypatch):
+    from fwmanager import policytest as pt
+    from fwmanager.ui.dialogs import PolicyTestDialog
+
+    monkeypatch.setattr(pt, "run_probes", lambda: [pt.Probe("loopback_v4", True)])
+    d = PolicyTestDialog(env.controller, "trabalho", lambda n: None)
+    d.present(env.win)
+    d.start()
+    pump(0.3)
+    assert d.outcome is not None and d.outcome.verdict == "safe"
+    assert ("apply_profile", ("trabalho",)) in env.daemon.calls  # the live test applied it...
+    assert ("rollback", ()) in env.daemon.calls and env.daemon.pending == ""  # ...and undid it
+    assert d.stack.get_visible_child_name() == "result"
+
+
+def test_test_button_opens_the_dialog(env, monkeypatch):
+    from fwmanager import policytest as pt
+
+    monkeypatch.setattr(pt, "run_probes", lambda: [pt.Probe("loopback_v4", True)])
+    row = {r.name_: r for r in env.win.home._profile_rows}["trabalho"]
+    row.test_btn.emit("clicked")
+    pump(0.4)
+    assert ("check_profile", ("trabalho",)) in env.daemon.calls
+
+
+# -- profile editor --------------------------------------------------------------------------------
+
+
+def editor(env, name="trabalho"):
+    from fwmanager.ui.dialogs import ProfileEditor
+
+    saved = []
+    details = env.controller._client.get_profile(name)
+    titles = dict(FakeClient().list_services())
+    dialog = ProfileEditor(env.controller, details, titles, lambda: saved.append(1))
+    dialog.present(env.win)
+    pump(0.2)
+    dialog.saved = saved
+    return dialog
+
+
+def test_editor_shows_the_current_settings(env):
+    d = editor(env)
+    assert d._service_rows["ssh"].get_active() and not d._service_rows["web"].get_active()
+    assert d.ping.get_active() and not d.mdns.get_active()
+    assert not d.cidrs.get_visible()  # only for "specific networks"
+
+
+def test_editor_saves_what_was_changed(env):
+    d = editor(env)
+    d._service_rows["web"].set_active(True)
+    d.mdns.set_active(True)
+    d.source.set_selected(2)  # specific networks
+    assert d.cidrs.get_visible()
+    d.cidrs.set_text("10.1.0.0/16, 192.168.5.0/24")
+    d.save_btn.emit("clicked")
+    pump(0.1)
+    call = [c for c in env.daemon.calls if c[0] == "set_profile"][-1][1]
+    assert call == (
+        "trabalho", ["ssh", "web"], True, True, "cidrs", ["10.1.0.0/16", "192.168.5.0/24"]
+    )  # fmt: skip
+    assert d.saved == [1]
+
+
+def test_editor_errors_stay_in_the_dialog(env):
+    d = editor(env)
+    env.daemon.error = FwError("bad", code="invalid_cidr")
+    d.save_btn.emit("clicked")
+    assert d.saved == [] and d.save_btn.get_sensitive()
+
+
+def test_editor_reset(env):
+    env.daemon.profiles["trabalho"]["customized"] = True
+    d = editor(env)
+    d.reset_btn.emit("clicked")
+    assert ("reset_profile", ("trabalho",)) in env.daemon.calls and d.saved == [1]
+
+
+def test_profiles_page_marks_edited_profiles(env):
+    env.daemon.profiles["casa"]["customized"] = True
+    env.win.profiles.load()
+    assert "edited" in texts(env.win.profiles)
+
+
+# -- networks, log, settings -----------------------------------------------------------------------
+
+
+def test_networks_page_lists_and_changes_remembered_networks(env):
+    env.win.networks.load()
+    assert "Casa WiFi" in texts(env.win.networks)
+    uuid = env.daemon.networks[0][1]
+    row = env.win.networks._rows[0]
+    drop = find(row, lambda w: w.__class__.__name__ == "DropDown")[0]
+    drop.set_selected(1)  # Work
+    assert ("set_network_profile", ("Casa WiFi", uuid, "trabalho")) in env.daemon.calls
+    remove = find(row, lambda w: w.__class__.__name__ == "Button")[0]
+    remove.emit("clicked")
+    assert ("remove_network", ("Casa WiFi", uuid)) in env.daemon.calls
+    assert env.win.networks._rows == [] or "Casa WiFi" not in texts(env.win.networks)
+
+
+def test_networks_page_remembers_the_current_network(env):
+    from fwmanager.ui.netinfo import CurrentNetwork
+
+    net = CurrentNetwork("Cafe auto", "Café", "u-1", "802-11-wireless")
+    env.win.networks._current_loaded(net, None)
+    assert env.win.networks.current_group.get_visible()
+    env.win.networks.current_row.set_selected(2)  # Public
+    env.win.networks.remember_btn.emit("clicked")
+    assert ("set_network_profile", ("Café", "u-1", "publico")) in env.daemon.calls
+
+
+def test_networks_page_preselects_the_remembered_profile(env):
+    from fwmanager.ui.netinfo import CurrentNetwork
+
+    uuid = env.daemon.networks[0][1]
+    env.win.networks.load()
+    env.win.networks._current_loaded(
+        CurrentNetwork("x", "Casa WiFi", uuid, "802-11-wireless"), None
+    )
+    assert env.win.networks.current_row.get_selected() == 0  # Home, as remembered
+
+
+def test_networks_page_adds_a_network_by_name(env):
+    env.win.networks.ssid_entry.set_text("Biblioteca")
+    env.win.networks.add_profile.set_selected(2)
+    env.win.networks.add_btn.emit("clicked")
+    assert ("set_network_profile", ("Biblioteca", "", "publico")) in env.daemon.calls
+    env.win.networks.ssid_entry.set_text("   ")
+    env.win.networks.add_btn.emit("clicked")
+    assert len([c for c in env.daemon.calls if c[0] == "set_network_profile"]) == 1
+
+
+def test_log_page_shows_events_and_blocked_attempts(env):
+    env.win.log.load()
+    t = texts(env.win.log)
+    assert "Service started" in t and "Confirmed Home" in t
+    assert "203.0.113.9 tried to reach 192.168.1.5:22" in t
+
+
+def test_settings_send_options_to_the_daemon(env):
+    env.win.settings.load()
+    env.win.settings.router.set_active(True)
+    env.win.settings.log_level.set_selected(2)
+    assert ("set_options", (True, "medium")) in env.daemon.calls
+    assert env.daemon.options == {"router_mode": True, "log_level": "medium"}
+
+
+def test_settings_do_not_write_back_while_loading(env):
+    env.daemon.options = {"router_mode": True, "log_level": "high"}
+    before = len([c for c in env.daemon.calls if c[0] == "set_options"])
+    env.win.settings.load()
+    assert env.win.settings.router.get_active()
+    assert len([c for c in env.daemon.calls if c[0] == "set_options"]) == before
+
+
+def test_language_and_notification_switches_call_back(env):
+    assert env.win.settings.language.get_selected() == 1  # English is the current language
+    env.win.settings.language.set_selected(0)  # Português
+    env.win.settings.notifications.set_active(False)
+    assert env.changes["lang"] == ["pt"] and env.changes["notifications"] == [False]
