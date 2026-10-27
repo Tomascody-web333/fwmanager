@@ -67,6 +67,10 @@ class Client:
     def list_profiles(self) -> list[str]:
         return self._call("ListProfiles", reply="(as)")[0]
 
+    def check_profile(self, name: str) -> list[tuple[str, str, str]]:
+        """Read-only policy check done by the daemon: (severity, code, detail) tuples."""
+        return self._call("CheckProfile", GLib.Variant("(s)", (name,)), "(a(sss))")[0]
+
     def list_networks(self) -> list[tuple[str, str, str]]:
         return self._call("ListNetworks", reply="(a(sss))")[0]
 

@@ -12,7 +12,9 @@ from gi.repository import Gio, GLib
 
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
+from fwmanager.core.policy_check import check_profile
 from fwmanager.core.profiles import Profile
+from fwmanager.core.rules import RenderOptions
 from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
@@ -122,6 +124,17 @@ class ControlService:
             )
         if method == "ListProfiles":
             return GLib.Variant("(as)", (sorted(self._profiles),))
+        if method == "CheckProfile":
+            name = validate_name(args[0], "profile")
+            profile = self._profiles.get(name)
+            if profile is None:
+                raise ValidationError("unknown profile", code="unknown_profile")
+            report = check_profile(
+                profile, self._mgr.catalog, RenderOptions(), self._mgr.nft, self._detect()
+            )  # read-only: nothing is applied
+            return GLib.Variant(
+                "(a(sss))", ([(f.severity, f.code, f.detail) for f in report.findings],)
+            )
         if method == "ListNetworks":
             nets = self._load_networks()
             return GLib.Variant("(a(sss))", ([(n.ssid, n.uuid, n.profile) for n in nets],))

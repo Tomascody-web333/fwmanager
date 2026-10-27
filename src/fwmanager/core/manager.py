@@ -46,6 +46,14 @@ class FirewallManager:
         self._clock = clock
         self._pending: _Pending | None = None
 
+    @property
+    def nft(self) -> Nft:
+        return self._nft
+
+    @property
+    def catalog(self) -> dict[str, Service]:
+        return self._catalog
+
     def apply(
         self,
         profile: Profile,

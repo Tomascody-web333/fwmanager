@@ -22,6 +22,10 @@ INTROSPECTION_XML = f"""
     <method name="ListProfiles">
       <arg type="as" name="profiles" direction="out"/>
     </method>
+    <method name="CheckProfile">
+      <arg type="s" name="profile" direction="in"/>
+      <arg type="a(sss)" name="findings" direction="out"/>
+    </method>
     <method name="ListNetworks">
       <arg type="a(sss)" name="networks" direction="out"/>
     </method>
