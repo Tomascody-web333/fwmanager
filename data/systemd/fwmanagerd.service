@@ -21,7 +21,8 @@ ProtectHome=yes
 PrivateTmp=yes
 RestrictAddressFamilies=AF_UNIX AF_NETLINK AF_INET AF_INET6
 # ufw keeps its configuration in /etc/ufw and /etc/default/ufw and its lock in /run.
-ReadWritePaths=/etc/ufw /etc/default /run
+# Only that one file of /etc/default: ufw rewrites it in place, and so does fwmanager.
+ReadWritePaths=/etc/ufw /etc/default/ufw /run
 StateDirectory=fwmanager
 StateDirectoryMode=0700
 Restart=on-failure

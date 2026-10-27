@@ -33,6 +33,9 @@
   marcadas como vindas do kernel.
 - **Os ficheiros de estado são privados.** `/var/lib/fwmanager` só pode ser lido pelo root (tem a
   lista das redes que usa).
+- **O serviço só escreve o que o ufw precisa**: `/etc/ufw`, o ficheiro `/etc/default/ufw`
+  (e não o resto de `/etc/default`), o seu bloqueio em `/run` e a sua própria pasta
+  `/var/lib/fwmanager`.
 - **Limites de tamanho.** Um perfil pode precisar no máximo de 40 regras do ufw, para que
   aplicá-lo demore segundos e não minutos em que o serviço não responderia a ninguém.
 - **Nada é enviado para lado nenhum.** Sem acesso à rede, contas ou telemetria; os registos

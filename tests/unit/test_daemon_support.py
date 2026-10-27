@@ -112,7 +112,7 @@ def test_systemd_unit_hardening(unit):
         "ProtectHome": "yes",
         "PrivateTmp": "yes",
         "RestrictAddressFamilies": "AF_UNIX AF_NETLINK AF_INET AF_INET6",
-        "ReadWritePaths": "/etc/ufw /etc/default /run",
+        "ReadWritePaths": "/etc/ufw /etc/default/ufw /run",
         "StateDirectory": "fwmanager",
     }
     for key, value in expected.items():

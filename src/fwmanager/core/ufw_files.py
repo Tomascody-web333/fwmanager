@@ -7,6 +7,7 @@ accepts. The block header also records the active profile name.
 
 from __future__ import annotations
 
+import errno
 import os
 import re
 from dataclasses import dataclass
@@ -56,8 +57,40 @@ def build_block(profile: str, ping: bool, mdns: bool, v6: bool) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _our_lines() -> frozenset[str]:
+    """Every line a block of ours can hold besides its BEGIN and END markers."""
+    lines = set()
+    for v6 in (False, True):
+        lines.update(build_block("x", False, False, v6).splitlines()[1:-1])
+    return frozenset(lines)
+
+
 def strip_block(text: str) -> str:
-    return BLOCK_RE.sub("", text)
+    """Remove our block, including what is left of one whose BEGIN or END was deleted by hand.
+
+    Leftovers are only our marker lines and the lines of ours right next to them, so a rule the
+    administrator wrote elsewhere is kept even if it looks the same.
+    """
+    text = BLOCK_RE.sub("", text)
+    if BEGIN not in text and END not in text:
+        return text
+    ours = _our_lines()
+    lines = text.splitlines(keepends=True)
+    drop = set()
+    for i, line in enumerate(lines):
+        if line.startswith(BEGIN):
+            drop.add(i)
+            j = i + 1
+            while j < len(lines) and lines[j].rstrip("\n") in ours:
+                drop.add(j)
+                j += 1
+        elif line.rstrip("\n") == END:
+            drop.add(i)
+            j = i - 1
+            while j >= 0 and lines[j].rstrip("\n") in ours:
+                drop.add(j)
+                j -= 1
+    return "".join(line for i, line in enumerate(lines) if i not in drop)
 
 
 def read_profile_marker(text: str) -> str | None:
@@ -77,11 +110,21 @@ def insert_block(text: str, block: str, anchor: str) -> str:
 
 
 def write_atomic(path: Path, data: bytes, mode: int | None = None) -> None:
-    """Replace ``path`` keeping owner and permissions; a crash never leaves a partial file."""
+    """Replace ``path`` keeping owner and permissions; a crash never leaves a partial file.
+
+    The service may write only the file itself, not its directory (systemd's ReadWritePaths
+    names /etc/default/ufw alone). Then it is rewritten in place, as ufw itself does.
+    """
+    tmp = path.with_name(f".{path.name}.fwmanager-tmp")
     try:
         st = path.stat() if path.exists() else None
-        tmp = path.with_name(f".{path.name}.fwmanager-tmp")
-        fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        try:
+            fd = os.open(tmp, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        except OSError as exc:
+            if st is None or exc.errno not in (errno.EROFS, errno.EACCES, errno.EPERM):
+                raise
+            _write_in_place(path, data)
+            return
         with os.fdopen(fd, "wb") as fh:
             fh.write(data)
             fh.flush()
@@ -94,6 +137,14 @@ def write_atomic(path: Path, data: bytes, mode: int | None = None) -> None:
         os.replace(tmp, path)
     except OSError as exc:
         raise StoreError(f"cannot write {path.name}: {exc.strerror}") from exc
+
+
+def _write_in_place(path: Path, data: bytes) -> None:
+    with open(path, "r+b") as fh:
+        fh.write(data)
+        fh.truncate()
+        fh.flush()
+        os.fsync(fh.fileno())
 
 
 def apply_block(config_dir: Path, profile: str, ping: bool, mdns: bool, v6: bool) -> bool:

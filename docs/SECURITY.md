@@ -29,6 +29,8 @@
   line with `logger`, is only a fallback, and only lines tagged as kernel lines are shown.
 - **State files are private.** `/var/lib/fwmanager` is readable by root only (it lists the
   networks you use).
+- **The service writes only what ufw needs**: `/etc/ufw`, the single file `/etc/default/ufw`
+  (not the rest of `/etc/default`), its lock in `/run`, and its own `/var/lib/fwmanager`.
 - **Size limits.** A profile may need at most 40 ufw rules, so applying one takes seconds, not
   minutes during which the service would answer nobody.
 - **Nothing is sent anywhere.** No network access, accounts or telemetry; logs never contain rule
