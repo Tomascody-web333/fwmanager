@@ -105,3 +105,16 @@ def test_systemd_unit_hardening(unit):
     }
     for key, value in expected.items():
         assert unit[key] == value, key
+
+
+def test_remote_error_prefix_is_stripped():
+    from fwmanager.client import _strip_remote_prefix
+
+    name = "org.fwmanager.Error.NoPending"
+    assert _strip_remote_prefix(f"GDBus.Error:{name}: nothing to confirm", name) == (
+        "nothing to confirm"
+    )
+    assert _strip_remote_prefix("plain text", name) == "plain text"
+    assert _strip_remote_prefix("GDBus.Error:x: y", None) == "GDBus.Error:x: y"
+    # a colon inside the daemon's own message must survive
+    assert _strip_remote_prefix(f"GDBus.Error:{name}: a: b", name) == "a: b"

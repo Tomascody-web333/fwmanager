@@ -12,6 +12,12 @@ from fwmanager.errors import FwError, code_from_dbus_error
 CALL_TIMEOUT_MS = 20000
 
 
+def _strip_remote_prefix(message: str, remote: str | None) -> str:
+    """GLib prepends ``GDBus.Error:<name>: `` to remote errors; keep only the daemon's text."""
+    prefix = f"GDBus.Error:{remote}: "
+    return message[len(prefix) :] if remote and message.startswith(prefix) else message
+
+
 class Client:
     def __init__(self, bus_address: str | None = None) -> None:
         try:
@@ -49,8 +55,7 @@ class Client:
                 code = "access_denied"
             else:
                 code = "daemon_unavailable"
-            Gio.DBusError.strip_remote_error(exc)  # edits exc.message in place, returns a bool
-            raise FwError(exc.message, code=code) from exc
+            raise FwError(_strip_remote_prefix(exc.message, remote), code=code) from exc
         return result.unpack() if result is not None else None
 
     def apply_profile(self, name: str) -> None:
