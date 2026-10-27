@@ -204,3 +204,16 @@ opcional: `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
   palavra-passe.
 - A unidade systemd é menos restritiva do que o mínimo (`CAP_NET_RAW`, `AF_INET`, escrita em
   `/etc/ufw`) porque o ufw e o iptables o exigem.
+
+## Licença
+
+[PolyForm Noncommercial 1.0.0](LICENSE). Em resumo (o que vale é o [texto da licença](LICENSE)):
+
+- Pode usar, estudar, alterar e partilhar o fwmanager para qualquer fim **não comercial**: em
+  casa, para aprender, em projetos pessoais, em escolas, associações e instituições públicas.
+- **Não** pode vendê-lo nem usá-lo comercialmente sem autorização do autor.
+- Quem o passar a outros tem de manter a licença e a linha
+  `Required Notice: Copyright (c) 2026 Tomascody-web333`, para ninguém apresentar o trabalho
+  como seu.
+
+Para uso comercial, peça autorização ao autor abrindo uma issue.

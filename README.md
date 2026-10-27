@@ -194,3 +194,16 @@ install/uninstall test changes the machine, so it is opt-in:
   warns when you pick Home, Work or Custom for a Wi-Fi without a password.
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.
+
+## License
+
+[PolyForm Noncommercial 1.0.0](LICENSE). In short (the [license text](LICENSE) is what counts):
+
+- You may use, study, change and share fwmanager for any **noncommercial** purpose: at home,
+  for learning, in hobby projects, in schools, charities and public institutions.
+- You may **not** sell it or use it commercially without the author's permission.
+- Whoever passes it on must keep the license and the line
+  `Required Notice: Copyright (c) 2026 Tomascody-web333`, so nobody can present the work as
+  their own.
+
+For commercial use, ask the author by opening an issue.
