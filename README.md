@@ -161,6 +161,8 @@ fwmanager-cli setup               # first-run setup, as in the window
 fwmanager-cli status              # is it on, which profile, what it lets in
 fwmanager-cli profiles            # every profile, in plain words
 fwmanager-cli apply home          # switch; press Enter to keep it, r to undo (30 s)
+fwmanager-cli edit home --block samba --ping off   # change what a profile allows and blocks
+fwmanager-cli reset home          # back to the defaults
 fwmanager-cli networks list       # which profile on which network
 fwmanager-cli uninstall           # remove fwmanager (asks for a yes, then the password)
 ```

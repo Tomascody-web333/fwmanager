@@ -60,13 +60,25 @@ class ProfileEditor(Adw.Dialog):
         errors = Adw.PreferencesGroup()
         self.error_row = warning_row()  # what the service refused, inside the dialog
         errors.add(self.error_row)
+        # Changed from the defaults: say so up front, with the way back.
+        self.customized_row = Adw.ActionRow(
+            title=_("You changed this profile."), visible=bool(details.get("customized"))
+        )
+        restore = button(_("Restore defaults"))
+        restore.connect("clicked", self._reset)
+        self.customized_row.add_suffix(restore)
+        errors.add(self.customized_row)
         page.add(errors)
         services = Adw.PreferencesGroup(
-            title=_("Services that others may reach"),
-            description=_("Everything else coming in from the network stays blocked."),
+            title=_("What this profile lets in"),
+            description=_(
+                "Switch a service off to block it. Anything not on this list is always blocked."
+            ),
         )
         for sid, title in sorted(service_titles.items(), key=lambda kv: _(kv[1]).lower()):
             row = Adw.SwitchRow(title=_(title), active=sid in details["services"])
+            row.connect("notify::active", lambda r, _p: self._show_allowed(r))
+            self._show_allowed(row)
             self._service_rows[sid] = row
             services.add(row)
         page.add(services)
@@ -98,6 +110,7 @@ class ProfileEditor(Adw.Dialog):
 
         reset = Adw.PreferencesGroup()
         self.reset_btn = button(_("Restore the original settings"), flat=True)
+        self.reset_btn.set_sensitive(bool(details.get("customized")))  # nothing to restore yet
         self.reset_btn.connect("clicked", self._reset)
         reset.add(self.reset_btn)
         page.add(reset)
@@ -114,6 +127,10 @@ class ProfileEditor(Adw.Dialog):
         view.set_content(page)
         self.set_child(view)
         self._sync()
+
+    @staticmethod
+    def _show_allowed(row: Adw.SwitchRow) -> None:
+        row.set_subtitle(_("Allowed") if row.get_active() else _("Blocked"))
 
     def _kind(self) -> str:
         return state.SOURCE_ORDER[self.source.get_selected()]

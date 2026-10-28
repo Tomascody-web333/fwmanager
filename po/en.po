@@ -44,6 +44,9 @@ msgstr "Allow a service only in some profiles"
 msgid "Allow {service} only in: {profiles}"
 msgstr "Allow {service} only in: {profiles}"
 
+msgid "Allowed"
+msgstr "Allowed"
+
 msgid "Allowed networks (e.g. 192.168.1.0/24)"
 msgstr "Allowed networks (e.g. 192.168.1.0/24)"
 
@@ -119,6 +122,9 @@ msgstr "Block everything coming in, except {services}, in: {profiles}"
 msgid "Block everything coming in, in: {profiles}"
 msgstr "Block everything coming in, in: {profiles}"
 
+msgid "Blocked"
+msgstr "Blocked"
+
 msgid "Blocked connection attempts"
 msgstr "Blocked connection attempts"
 
@@ -140,8 +146,8 @@ msgstr "Cancelled. Nothing was changed."
 msgid "Cancelled. Previous rules restored."
 msgstr "Cancelled. Previous rules restored."
 
-msgid "Change what this profile lets in"
-msgstr "Change what this profile lets in"
+msgid "Change what this profile allows and blocks"
+msgstr "Change what this profile allows and blocks"
 
 msgid "Changed the settings"
 msgstr "Changed the settings"
@@ -254,9 +260,6 @@ msgstr "Error"
 msgid "Error: {msg}"
 msgstr "Error: {msg}"
 
-msgid "Everything else coming in from the network stays blocked."
-msgstr "Everything else coming in from the network stays blocked."
-
 msgid "FTP"
 msgstr "FTP"
 
@@ -358,6 +361,9 @@ msgstr "Invalid traffic source."
 
 msgid "Is your connection still working?"
 msgstr "Is your connection still working?"
+
+msgid "It is in use: apply it again to use the changes: fwmanager-cli apply {p}"
+msgstr "It is in use: apply it again to use the changes: fwmanager-cli apply {p}"
 
 msgid "It should work, but read the notes below first."
 msgstr "It should work, but read the notes below first."
@@ -635,6 +641,9 @@ msgstr "Replies to your own connections would be blocked."
 msgid "Restart fwmanager"
 msgstr "Restart fwmanager"
 
+msgid "Restore defaults"
+msgstr "Restore defaults"
+
 msgid "Restore the original settings"
 msgstr "Restore the original settings"
 
@@ -686,6 +695,9 @@ msgstr "SAFE"
 msgid "SAFE WITH WARNINGS"
 msgstr "SAFE WITH WARNINGS"
 
+msgid "SERVICE"
+msgstr "SERVICE"
+
 msgid "SSH"
 msgstr "SSH"
 
@@ -704,6 +716,9 @@ msgstr "Save rule"
 msgid "Saved."
 msgstr "Saved."
 
+msgid "Saved. Now {p}:"
+msgstr "Saved. Now {p}:"
+
 msgid "See the names with: fwmanager-cli profiles"
 msgstr "See the names with: fwmanager-cli profiles"
 
@@ -712,9 +727,6 @@ msgstr "Service"
 
 msgid "Service started"
 msgstr "Service started"
-
-msgid "Services that others may reach"
-msgstr "Services that others may reach"
 
 msgid "Settings"
 msgstr "Settings"
@@ -745,6 +757,9 @@ msgstr "Start it with: sudo systemctl enable --now fwmanagerd"
 
 msgid "Status"
 msgstr "Status"
+
+msgid "Switch a service off to block it. Anything not on this list is always blocked."
+msgstr "Switch a service off to block it. Anything not on this list is always blocked."
 
 msgid "Switch to this profile now"
 msgstr "Switch to this profile now"
@@ -875,6 +890,9 @@ msgstr "Unknown profile."
 msgid "Unknown service."
 msgstr "Unknown service."
 
+msgid "Unknown service: {name}"
+msgstr "Unknown service: {name}"
+
 msgid "Use"
 msgstr "Use"
 
@@ -889,6 +907,9 @@ msgstr "Visible on the network."
 
 msgid "WARNING: previous rules could not be confirmed as restored."
 msgstr "WARNING: previous rules could not be confirmed as restored."
+
+msgid "WHO"
+msgstr "WHO"
 
 msgid "Waiting for confirmation of {p} ({n}s left)"
 msgstr "Waiting for confirmation of {p} ({n}s left)"
@@ -919,6 +940,9 @@ msgstr "What fwmanager did"
 
 msgid "What happens"
 msgstr "What happens"
+
+msgid "What this profile lets in"
+msgstr "What this profile lets in"
 
 msgid "What was checked"
 msgstr "What was checked"
@@ -968,6 +992,12 @@ msgstr "You are not allowed to control the firewall."
 msgid "You can change this at any time, and fwmanager remembers it per network."
 msgstr "You can change this at any time, and fwmanager remembers it per network."
 
+msgid "You can use:"
+msgstr "You can use:"
+
+msgid "You changed this profile."
+msgstr "You changed this profile."
+
 msgid "You edited this profile."
 msgstr "You edited this profile."
 
@@ -1001,8 +1031,20 @@ msgstr "Your rules change this profile."
 msgid "accepts connections from anywhere"
 msgstr "accepts connections from anywhere"
 
+msgid "answer ping"
+msgstr "answer ping"
+
+msgid "anywhere"
+msgstr "anywhere"
+
 msgid "argument %(argument_name)s: %(message)s"
 msgstr "argument %(argument_name)s: %(message)s"
+
+msgid "be visible on the local network"
+msgstr "be visible on the local network"
+
+msgid "change what a profile allows and blocks"
+msgstr "change what a profile allows and blocks"
 
 msgid "check that a profile will not break the machine"
 msgstr "check that a profile will not break the machine"
@@ -1079,6 +1121,9 @@ msgstr "libvirt manages its own rules (they are left untouched)."
 msgid "list the profiles and what each one lets in"
 msgstr "list the profiles and what each one lets in"
 
+msgid "local"
+msgstr "local"
+
 msgid "machine-readable output"
 msgstr "machine-readable output"
 
@@ -1124,8 +1169,17 @@ msgstr "profile name"
 msgid "profile to use, without asking"
 msgstr "profile to use, without asking"
 
+msgid "put a profile back to its defaults"
+msgstr "put a profile back to its defaults"
+
 msgid "remove fwmanager and undo its changes to the firewall"
 msgstr "remove fwmanager and undo its changes to the firewall"
+
+msgid "services to block"
+msgstr "services to block"
+
+msgid "services to let in"
+msgstr "services to let in"
 
 msgid "set fwmanager up (the same as the window's first run)"
 msgstr "set fwmanager up (the same as the window's first run)"
@@ -1205,6 +1259,9 @@ msgstr "warning"
 msgid "which profile to use on which network"
 msgstr "which profile to use on which network"
 
+msgid "who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"
+msgstr "who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"
+
 msgid "works"
 msgstr "works"
 
@@ -1225,6 +1282,9 @@ msgstr "{profile} was undone because it was not confirmed in time."
 
 msgid "{profile} will be undone in {n} s unless you confirm."
 msgstr "{profile} will be undone in {n} s unless you confirm."
+
+msgid "{p} is back to its defaults."
+msgstr "{p} is back to its defaults."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tried to reach {target}"

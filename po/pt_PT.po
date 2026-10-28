@@ -44,6 +44,9 @@ msgstr "Permitir um serviço apenas em alguns perfis"
 msgid "Allow {service} only in: {profiles}"
 msgstr "Permitir {service} apenas em: {profiles}"
 
+msgid "Allowed"
+msgstr "Permitido"
+
 msgid "Allowed networks (e.g. 192.168.1.0/24)"
 msgstr "Redes permitidas (por exemplo, 192.168.1.0/24)"
 
@@ -119,6 +122,9 @@ msgstr "Bloquear tudo o que entra, exceto {services}, em: {profiles}"
 msgid "Block everything coming in, in: {profiles}"
 msgstr "Bloquear tudo o que entra, em: {profiles}"
 
+msgid "Blocked"
+msgstr "Bloqueado"
+
 msgid "Blocked connection attempts"
 msgstr "Tentativas de ligação bloqueadas"
 
@@ -140,8 +146,8 @@ msgstr "Cancelado. Nada foi alterado."
 msgid "Cancelled. Previous rules restored."
 msgstr "Cancelado. As regras anteriores foram repostas."
 
-msgid "Change what this profile lets in"
-msgstr "Mudar o que este perfil deixa entrar"
+msgid "Change what this profile allows and blocks"
+msgstr "Mudar o que este perfil permite e bloqueia"
 
 msgid "Changed the settings"
 msgstr "Alterou as definições"
@@ -254,9 +260,6 @@ msgstr "Erro"
 msgid "Error: {msg}"
 msgstr "Erro: {msg}"
 
-msgid "Everything else coming in from the network stays blocked."
-msgstr "Tudo o resto que chega da rede continua bloqueado."
-
 msgid "FTP"
 msgstr "FTP"
 
@@ -358,6 +361,9 @@ msgstr "Origem de tráfego inválida."
 
 msgid "Is your connection still working?"
 msgstr "A sua ligação continua a funcionar?"
+
+msgid "It is in use: apply it again to use the changes: fwmanager-cli apply {p}"
+msgstr "Está em uso: aplique-o de novo para usar as alterações: fwmanager-cli apply {p}"
 
 msgid "It should work, but read the notes below first."
 msgstr "Deve funcionar, mas leia primeiro as notas abaixo."
@@ -635,6 +641,9 @@ msgstr "As respostas às suas próprias ligações seriam bloqueadas."
 msgid "Restart fwmanager"
 msgstr "Reiniciar o fwmanager"
 
+msgid "Restore defaults"
+msgstr "Repor as predefinições"
+
 msgid "Restore the original settings"
 msgstr "Repor as definições originais"
 
@@ -686,6 +695,9 @@ msgstr "SEGURO"
 msgid "SAFE WITH WARNINGS"
 msgstr "SEGURO COM AVISOS"
 
+msgid "SERVICE"
+msgstr "SERVIÇO"
+
 msgid "SSH"
 msgstr "SSH"
 
@@ -704,6 +716,9 @@ msgstr "Guardar regra"
 msgid "Saved."
 msgstr "Guardado."
 
+msgid "Saved. Now {p}:"
+msgstr "Guardado. Agora {p}:"
+
 msgid "See the names with: fwmanager-cli profiles"
 msgstr "Veja os nomes com: fwmanager-cli profiles"
 
@@ -712,9 +727,6 @@ msgstr "Serviço"
 
 msgid "Service started"
 msgstr "Serviço iniciado"
-
-msgid "Services that others may reach"
-msgstr "Serviços a que outros podem aceder"
 
 msgid "Settings"
 msgstr "Definições"
@@ -745,6 +757,9 @@ msgstr "Arranque-o com: sudo systemctl enable --now fwmanagerd"
 
 msgid "Status"
 msgstr "Estado"
+
+msgid "Switch a service off to block it. Anything not on this list is always blocked."
+msgstr "Desligue um serviço para o bloquear. Tudo o que não estiver nesta lista fica sempre bloqueado."
 
 msgid "Switch to this profile now"
 msgstr "Mudar já para este perfil"
@@ -875,6 +890,9 @@ msgstr "Perfil desconhecido."
 msgid "Unknown service."
 msgstr "Serviço desconhecido."
 
+msgid "Unknown service: {name}"
+msgstr "Serviço desconhecido: {name}"
+
 msgid "Use"
 msgstr "Usar"
 
@@ -889,6 +907,9 @@ msgstr "Visível na rede."
 
 msgid "WARNING: previous rules could not be confirmed as restored."
 msgstr "AVISO: não foi possível confirmar que as regras anteriores foram repostas."
+
+msgid "WHO"
+msgstr "QUEM"
 
 msgid "Waiting for confirmation of {p} ({n}s left)"
 msgstr "À espera de confirmação de {p} (faltam {n} s)"
@@ -919,6 +940,9 @@ msgstr "O que o fwmanager fez"
 
 msgid "What happens"
 msgstr "O que acontece"
+
+msgid "What this profile lets in"
+msgstr "O que este perfil deixa entrar"
 
 msgid "What was checked"
 msgstr "O que foi verificado"
@@ -968,6 +992,12 @@ msgstr "Não tem permissão para controlar a firewall."
 msgid "You can change this at any time, and fwmanager remembers it per network."
 msgstr "Pode alterar isto a qualquer momento, e o fwmanager lembra-se dele para cada rede."
 
+msgid "You can use:"
+msgstr "Pode usar:"
+
+msgid "You changed this profile."
+msgstr "Alterou este perfil."
+
 msgid "You edited this profile."
 msgstr "Editou este perfil."
 
@@ -1001,8 +1031,20 @@ msgstr "As suas regras alteram este perfil."
 msgid "accepts connections from anywhere"
 msgstr "aceita ligações de qualquer lado"
 
+msgid "answer ping"
+msgstr "responder a ping"
+
+msgid "anywhere"
+msgstr "qualquer"
+
 msgid "argument %(argument_name)s: %(message)s"
 msgstr "argumento %(argument_name)s: %(message)s"
+
+msgid "be visible on the local network"
+msgstr "ser visível na rede local"
+
+msgid "change what a profile allows and blocks"
+msgstr "mudar o que um perfil permite e bloqueia"
 
 msgid "check that a profile will not break the machine"
 msgstr "verificar que um perfil não vai partir o computador"
@@ -1079,6 +1121,9 @@ msgstr "O libvirt gere as suas próprias regras (ficam intocadas)."
 msgid "list the profiles and what each one lets in"
 msgstr "listar os perfis e o que cada um deixa entrar"
 
+msgid "local"
+msgstr "local"
+
 msgid "machine-readable output"
 msgstr "saída para programas (JSON)"
 
@@ -1124,8 +1169,17 @@ msgstr "nome do perfil"
 msgid "profile to use, without asking"
 msgstr "perfil a usar, sem perguntar"
 
+msgid "put a profile back to its defaults"
+msgstr "repor as predefinições de um perfil"
+
 msgid "remove fwmanager and undo its changes to the firewall"
 msgstr "remover o fwmanager e desfazer as suas alterações à firewall"
+
+msgid "services to block"
+msgstr "serviços a bloquear"
+
+msgid "services to let in"
+msgstr "serviços a deixar entrar"
 
 msgid "set fwmanager up (the same as the window's first run)"
 msgstr "configurar o fwmanager (o mesmo que a primeira execução da janela)"
@@ -1205,6 +1259,9 @@ msgstr "aviso"
 msgid "which profile to use on which network"
 msgstr "que perfil usar em que rede"
 
+msgid "who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"
+msgstr "quem se pode ligar: qualquer, lan, ou redes como 192.168.1.0/24,10.0.0.0/8"
+
 msgid "works"
 msgstr "funciona"
 
@@ -1225,6 +1282,9 @@ msgstr "{profile} foi desfeito porque não foi confirmado a tempo."
 
 msgid "{profile} will be undone in {n} s unless you confirm."
 msgstr "A mudança para {profile} será desfeita dentro de {n} s se não confirmar."
+
+msgid "{p} is back to its defaults."
+msgstr "{p} voltou às predefinições."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tentou aceder a {target}"

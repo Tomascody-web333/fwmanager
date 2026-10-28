@@ -230,3 +230,24 @@ def test_ctrl_c_undoes_the_change_at_once(
         assert d.fp() == d.initial
     finally:
         d.stop()
+
+
+def test_cli_edits_what_a_profile_blocks_and_restores_it(daemon, capsys):
+    bus = ["--bus-address", daemon.bus]
+    c = daemon.client
+    before = c.get_profile("trabalho")
+    assert cli_main([*bus, "edit", "work", "--allow", "samba", "web", "--block", "ssh",
+                     "--ping", "off", "--from", "192.168.1.0/24"]) == 0  # fmt: skip
+    p = c.get_profile("trabalho")
+    assert set(p["services"]) == {"samba", "web"} and p["ping"] is False
+    assert p["source_kind"] == "cidrs" and p["cidrs"] == ["192.168.1.0/24"] and p["customized"]
+    out = capsys.readouterr().out
+    assert "Saved. Now Work (trabalho):" in out and "only from the networks you chose" in out
+    assert cli_main([*bus, "edit", "work", "--allow", "nope"]) == 1
+    err = capsys.readouterr().err
+    assert "Unknown service: nope" in err and "ssh" in err  # and what can be used
+    assert cli_main([*bus, "edit", "work", "--from", "192.168.1.0/16"]) == 1
+    assert "Did you mean 192.168.0.0/16?" in capsys.readouterr().err
+    assert cli_main([*bus, "reset", "work"]) == 0
+    assert c.get_profile("trabalho") == before
+    assert "back to its defaults" in capsys.readouterr().out

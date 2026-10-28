@@ -105,7 +105,7 @@ class HomePage(Adw.PreferencesPage):
             label_for_screen_readers(check, _("In use"))
             row.add_prefix(check)
             edit = button("", flat=True, icon="document-edit-symbolic")
-            edit.set_tooltip_text(_("Change what this profile lets in"))
+            edit.set_tooltip_text(_("Change what this profile allows and blocks"))
             label_for_screen_readers(edit, _("Edit {profile}").format(profile=row.get_title()))
             edit.connect("clicked", lambda _b, n=name: self.edit_profile(n))
             test = button(_("Test"), flat=True)

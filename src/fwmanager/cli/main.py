@@ -62,6 +62,26 @@ def _parser() -> argparse.ArgumentParser:
     sp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
     sp.add_argument("--yes", action="store_true", help=_("confirm immediately, no countdown"))
 
+    sp = sub.add_parser("edit", help=_("change what a profile allows and blocks"))
+    sp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
+    sp.add_argument(
+        "--allow", nargs="+", default=[], metavar=_("SERVICE"), help=_("services to let in")
+    )
+    sp.add_argument(
+        "--block", nargs="+", default=[], metavar=_("SERVICE"), help=_("services to block")
+    )
+    sp.add_argument("--ping", choices=["on", "off"], help=_("answer ping"))
+    sp.add_argument("--mdns", choices=["on", "off"], help=_("be visible on the local network"))
+    sp.add_argument(
+        "--from",
+        dest="source",
+        metavar=_("WHO"),
+        help=_("who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"),
+    )
+
+    sp = sub.add_parser("reset", help=_("put a profile back to its defaults"))
+    sp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
+
     sub.add_parser("confirm", help=_("keep the change that is waiting for confirmation"))
     sub.add_parser("rollback", help=_("undo the change that is waiting for confirmation"))
 
@@ -272,6 +292,60 @@ def _print_profiles(client) -> None:
     print(_("* = in use. Switch with: fwmanager-cli apply NAME"))
 
 
+def resolve_service(arg: str, titles: dict[str, str]) -> str:
+    """A service by its id (ssh) or its title (Samba, "File sharing"), any case or accent."""
+    wanted = _fold(arg)
+    for sid, title in titles.items():
+        if wanted in {_fold(sid), _fold(title), _fold(_(title))}:
+            return sid
+    for sid, title in titles.items():  # "samba" matches "File sharing (Samba)"
+        if wanted and (wanted in _fold(title) or wanted in _fold(_(title))):
+            return sid
+    raise LookupError(arg)
+
+
+def _edit_profile(client, args: argparse.Namespace) -> int:
+    titles = dict(client.list_services())
+    current = client.get_profile(args.profile)
+    services = list(current["services"])
+    try:
+        allow = [resolve_service(a, titles) for a in args.allow]
+        block = [resolve_service(a, titles) for a in args.block]
+    except LookupError as exc:
+        print(_("Unknown service: {name}").format(name=exc.args[0]), file=sys.stderr)
+        print(_("You can use:"), file=sys.stderr)
+        for sid, title in sorted(titles.items()):
+            print(f"  {sid:<12} {_(title)}", file=sys.stderr)
+        return EXIT_ERROR
+    services += [s for s in allow if s not in services]
+    services = [s for s in services if s not in block]
+    ping = current["ping"] if args.ping is None else args.ping == "on"
+    mdns = current["mdns"] if args.mdns is None else args.mdns == "on"
+    kind, cidrs = current["source_kind"], list(current["cidrs"])
+    if args.source:
+        source = _fold(args.source)
+        if source in ("anywhere", "any", _fold(_("anywhere"))):
+            kind, cidrs = "any", []
+        elif source in ("lan", "local", _fold(_("local"))):
+            kind, cidrs = "lan", []
+        else:
+            problem = state.cidr_problem(args.source)
+            if problem:
+                print(problem, file=sys.stderr)
+                return EXIT_ERROR
+            kind, cidrs = "cidrs", state.parse_cidrs(args.source)
+    client.set_profile(args.profile, services, ping, mdns, kind, cidrs)
+    print(_("Saved. Now {p}:").format(p=_profile_label(args.profile)))
+    print("  " + state.describe_profile(client.get_profile(args.profile), titles))
+    if client.status()["active_profile"] == args.profile:
+        print(
+            _("It is in use: apply it again to use the changes: fwmanager-cli apply {p}").format(
+                p=args.profile
+            )
+        )
+    return EXIT_OK
+
+
 def _print_networks(client, as_json: bool) -> None:
     nets = client.list_networks()
     if as_json:
@@ -321,6 +395,11 @@ def run(args: argparse.Namespace, client: _Tracking | None = None) -> int:
         print(_("Previous rules restored."))
     elif args.cmd == "profiles":
         _print_profiles(client)
+    elif args.cmd == "edit":
+        return _edit_profile(client, args)
+    elif args.cmd == "reset":
+        client.reset_profile(args.profile)
+        print(_("{p} is back to its defaults.").format(p=_profile_label(args.profile)))
     elif args.cmd == "status":
         _print_status(client, args.json)
     return EXIT_OK

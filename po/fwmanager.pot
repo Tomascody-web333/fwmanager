@@ -44,6 +44,9 @@ msgstr ""
 msgid "Allow {service} only in: {profiles}"
 msgstr ""
 
+msgid "Allowed"
+msgstr ""
+
 msgid "Allowed networks (e.g. 192.168.1.0/24)"
 msgstr ""
 
@@ -119,6 +122,9 @@ msgstr ""
 msgid "Block everything coming in, in: {profiles}"
 msgstr ""
 
+msgid "Blocked"
+msgstr ""
+
 msgid "Blocked connection attempts"
 msgstr ""
 
@@ -140,7 +146,7 @@ msgstr ""
 msgid "Cancelled. Previous rules restored."
 msgstr ""
 
-msgid "Change what this profile lets in"
+msgid "Change what this profile allows and blocks"
 msgstr ""
 
 msgid "Changed the settings"
@@ -254,9 +260,6 @@ msgstr ""
 msgid "Error: {msg}"
 msgstr ""
 
-msgid "Everything else coming in from the network stays blocked."
-msgstr ""
-
 msgid "FTP"
 msgstr ""
 
@@ -357,6 +360,9 @@ msgid "Invalid traffic source."
 msgstr ""
 
 msgid "Is your connection still working?"
+msgstr ""
+
+msgid "It is in use: apply it again to use the changes: fwmanager-cli apply {p}"
 msgstr ""
 
 msgid "It should work, but read the notes below first."
@@ -635,6 +641,9 @@ msgstr ""
 msgid "Restart fwmanager"
 msgstr ""
 
+msgid "Restore defaults"
+msgstr ""
+
 msgid "Restore the original settings"
 msgstr ""
 
@@ -686,6 +695,9 @@ msgstr ""
 msgid "SAFE WITH WARNINGS"
 msgstr ""
 
+msgid "SERVICE"
+msgstr ""
+
 msgid "SSH"
 msgstr ""
 
@@ -704,6 +716,9 @@ msgstr ""
 msgid "Saved."
 msgstr ""
 
+msgid "Saved. Now {p}:"
+msgstr ""
+
 msgid "See the names with: fwmanager-cli profiles"
 msgstr ""
 
@@ -711,9 +726,6 @@ msgid "Service"
 msgstr ""
 
 msgid "Service started"
-msgstr ""
-
-msgid "Services that others may reach"
 msgstr ""
 
 msgid "Settings"
@@ -744,6 +756,9 @@ msgid "Start it with: sudo systemctl enable --now fwmanagerd"
 msgstr ""
 
 msgid "Status"
+msgstr ""
+
+msgid "Switch a service off to block it. Anything not on this list is always blocked."
 msgstr ""
 
 msgid "Switch to this profile now"
@@ -875,6 +890,9 @@ msgstr ""
 msgid "Unknown service."
 msgstr ""
 
+msgid "Unknown service: {name}"
+msgstr ""
+
 msgid "Use"
 msgstr ""
 
@@ -888,6 +906,9 @@ msgid "Visible on the network."
 msgstr ""
 
 msgid "WARNING: previous rules could not be confirmed as restored."
+msgstr ""
+
+msgid "WHO"
 msgstr ""
 
 msgid "Waiting for confirmation of {p} ({n}s left)"
@@ -918,6 +939,9 @@ msgid "What fwmanager did"
 msgstr ""
 
 msgid "What happens"
+msgstr ""
+
+msgid "What this profile lets in"
 msgstr ""
 
 msgid "What was checked"
@@ -968,6 +992,12 @@ msgstr ""
 msgid "You can change this at any time, and fwmanager remembers it per network."
 msgstr ""
 
+msgid "You can use:"
+msgstr ""
+
+msgid "You changed this profile."
+msgstr ""
+
 msgid "You edited this profile."
 msgstr ""
 
@@ -1001,7 +1031,19 @@ msgstr ""
 msgid "accepts connections from anywhere"
 msgstr ""
 
+msgid "answer ping"
+msgstr ""
+
+msgid "anywhere"
+msgstr ""
+
 msgid "argument %(argument_name)s: %(message)s"
+msgstr ""
+
+msgid "be visible on the local network"
+msgstr ""
+
+msgid "change what a profile allows and blocks"
 msgstr ""
 
 msgid "check that a profile will not break the machine"
@@ -1079,6 +1121,9 @@ msgstr ""
 msgid "list the profiles and what each one lets in"
 msgstr ""
 
+msgid "local"
+msgstr ""
+
 msgid "machine-readable output"
 msgstr ""
 
@@ -1124,7 +1169,16 @@ msgstr ""
 msgid "profile to use, without asking"
 msgstr ""
 
+msgid "put a profile back to its defaults"
+msgstr ""
+
 msgid "remove fwmanager and undo its changes to the firewall"
+msgstr ""
+
+msgid "services to block"
+msgstr ""
+
+msgid "services to let in"
 msgstr ""
 
 msgid "set fwmanager up (the same as the window's first run)"
@@ -1205,6 +1259,9 @@ msgstr ""
 msgid "which profile to use on which network"
 msgstr ""
 
+msgid "who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"
+msgstr ""
+
 msgid "works"
 msgstr ""
 
@@ -1224,6 +1281,9 @@ msgid "{profile} was undone because it was not confirmed in time."
 msgstr ""
 
 msgid "{profile} will be undone in {n} s unless you confirm."
+msgstr ""
+
+msgid "{p} is back to its defaults."
 msgstr ""
 
 msgid "{src} tried to reach {target}"

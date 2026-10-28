@@ -166,6 +166,8 @@ fwmanager-cli setup               # configuração inicial, como na janela
 fwmanager-cli status              # está ligada, que perfil, o que deixa entrar
 fwmanager-cli profiles            # todos os perfis, em palavras simples
 fwmanager-cli apply casa          # mudar; Enter para manter, r para desfazer (30 s)
+fwmanager-cli edit casa --block samba --ping off   # mudar o que um perfil permite e bloqueia
+fwmanager-cli reset casa          # voltar às predefinições
 fwmanager-cli networks list       # que perfil em que rede
 fwmanager-cli uninstall           # remover o fwmanager (pede um sim e depois a palavra-passe)
 ```

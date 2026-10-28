@@ -531,3 +531,22 @@ def test_a_refused_setting_snaps_back_to_what_is_in_effect(env, monkeypatch):
 
 def test_settings_end_with_the_credits(env):
     assert "Made by Tomascody-web333 with help of Claude Code" in texts(env.win.settings)
+
+
+def test_the_editor_says_what_is_allowed_and_what_is_blocked(env):
+    d = editor(env, "trabalho")
+    rows = d._service_rows
+    assert rows["ssh"].get_subtitle() == "Allowed" and rows["samba"].get_subtitle() == "Blocked"
+    rows["samba"].set_active(True)
+    assert rows["samba"].get_subtitle() == "Allowed"
+    assert "Switch a service off to block it." in " ".join(texts(d))
+    assert not d.customized_row.get_visible() and not d.reset_btn.get_sensitive()
+
+
+def test_an_edited_profile_offers_the_defaults_back_at_the_top(env):
+    env.daemon.profiles["trabalho"]["customized"] = True
+    d = editor(env, "trabalho")
+    assert d.customized_row.get_visible() and d.reset_btn.get_sensitive()
+    restore = [w for w in find(d.customized_row, lambda w: w.__class__.__name__ == "Button")]
+    restore[0].emit("clicked")
+    assert ("reset_profile", ("trabalho",)) in env.daemon.calls and d.saved == [1]
