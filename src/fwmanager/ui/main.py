@@ -39,6 +39,16 @@ def _adw_version() -> tuple[int, int] | None:
     return Adw.get_major_version(), Adw.get_minor_version()
 
 
+def _rejoin_group(group_info=None, do_relaunch=None) -> None:
+    """Set up earlier (e.g. `fwmanager-cli setup`), but this session predates the group: start
+    again with it at once, instead of showing a "restart" step for something already done."""
+    from fwmanager.ui import relaunch, setup_state
+
+    info = (group_info or setup_state.group_info)()
+    if info.listed and not info.held:
+        (do_relaunch or relaunch.relaunch)()  # returns only when it cannot be done
+
+
 def _announce_identity() -> None:
     """Before GTK starts: the name desktops use to tie this window to its launcher and icon.
 
@@ -73,6 +83,7 @@ def main(argv: list[str] | None = None) -> int:
     if os.geteuid() == 0:
         print(_("fwmanager must not run as root: the service does that part."), file=sys.stderr)
         return 1
+    _rejoin_group()
     problem = runtime_problem(_adw_version())
     if problem:
         print(problem, file=sys.stderr)

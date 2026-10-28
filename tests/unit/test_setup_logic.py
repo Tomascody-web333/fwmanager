@@ -169,12 +169,25 @@ def test_relaunch_quotes_odd_paths():
 
 
 def test_relaunch_executes_it_or_says_it_cannot(monkeypatch):
-    calls = []
-    assert relaunch.relaunch("/x/fwmanager", execv=lambda p, a: calls.append((p, a)))
+    calls, env = [], {}
+    assert relaunch.relaunch("/x/fwmanager", execv=lambda p, a: calls.append((p, a)), env=env)
     assert calls[0][1][1:3] == ["fwmanager", "-c"]
+    assert env == {relaunch.MARKER: "1"}  # the new process knows it was restarted
     monkeypatch.setattr(relaunch.shutil, "which", lambda name: None)
-    assert relaunch.relaunch("/x/fwmanager", execv=lambda p, a: calls.append(1)) is False
+    assert relaunch.relaunch("/x/fwmanager", execv=lambda p, a: calls.append(1), env={}) is False
     assert len(calls) == 1
+
+
+def test_a_restarted_process_never_restarts_again():
+    calls = []
+    env = {relaunch.MARKER: "1"}
+    assert relaunch.relaunch("/x/f", execv=lambda p, a: calls.append(1), env=env) is False
+    assert calls == []
+
+
+def test_relaunch_passes_the_arguments_quoted():
+    cmd = relaunch.relaunch_command("/x/fwmanager-cli", sg="/usr/bin/sg", args=["setup", "a b"])
+    assert cmd[3] == "/x/fwmanager-cli setup 'a b'"
 
 
 # -- the requirement rows ---

@@ -455,6 +455,12 @@ msgstr "No problems found in the rules."
 msgid "No rules yet."
 msgstr "No rules yet."
 
+msgid "No terminal to ask in: use --profile NAME --yes."
+msgstr "No terminal to ask in: use --profile NAME --yes."
+
+msgid "No terminal to ask in: use --yes."
+msgstr "No terminal to ask in: use --yes."
+
 msgid "No, undo it"
 msgstr "No, undo it"
 
@@ -518,6 +524,9 @@ msgstr "Pick how open this computer should be. After a switch you have 30 second
 msgid "Please log out and back in, then open fwmanager again."
 msgstr "Please log out and back in, then open fwmanager again."
 
+msgid "Please log out and back in, then run fwmanager-cli setup again."
+msgstr "Please log out and back in, then run fwmanager-cli setup again."
+
 msgid "Policy check for {p}:"
 msgstr "Policy check for {p}:"
 
@@ -535,6 +544,9 @@ msgstr "Printer sharing (IPP)"
 
 msgid "Profile"
 msgstr "Profile"
+
+msgid "Profile [{default}]: "
+msgstr "Profile [{default}]: "
 
 msgid "Profile for {name}"
 msgstr "Profile for {name}"
@@ -653,8 +665,14 @@ msgstr "Rules that will be removed."
 msgid "Rules you added to ufw yourself are kept."
 msgstr "Rules you added to ufw yourself are kept."
 
+msgid "Run it as your normal user: it asks for the password itself."
+msgstr "Run it as your normal user: it asks for the password itself."
+
 msgid "Run this in a terminal, then press “Check again”:"
 msgstr "Run this in a terminal, then press “Check again”:"
+
+msgid "Run this, then run fwmanager-cli setup again:"
+msgstr "Run this, then run fwmanager-cli setup again:"
 
 msgid "SAFE"
 msgstr "SAFE"
@@ -706,6 +724,9 @@ msgstr "Some diagnostics would fail (time exceeded)."
 
 msgid "Some fwmanager rules have an unexpected shape."
 msgstr "Some fwmanager rules have an unexpected shape."
+
+msgid "Something is still missing; see above."
+msgstr "Something is still missing; see above."
 
 msgid "Something went wrong: {why}"
 msgstr "Something went wrong: {why}"
@@ -811,6 +832,9 @@ msgstr "Too many saved networks."
 
 msgid "Try again"
 msgstr "Try again"
+
+msgid "Type yes to uninstall: "
+msgstr "Type yes to uninstall: "
 
 msgid "UNSAFE"
 msgstr "UNSAFE"
@@ -926,6 +950,9 @@ msgstr "Yes, keep it"
 msgid "You are all set"
 msgstr "You are all set"
 
+msgid "You are all set. fwmanager switches profile by itself when you change network."
+msgstr "You are all set. fwmanager switches profile by itself when you change network."
+
 msgid "You are not allowed to control the firewall."
 msgstr "You are not allowed to control the firewall."
 
@@ -980,6 +1007,9 @@ msgstr "commands"
 msgid "confirm immediately, no countdown"
 msgstr "confirm immediately, no countdown"
 
+msgid "do not ask for confirmation"
+msgstr "do not ask for confirmation"
+
 msgid "error"
 msgstr "error"
 
@@ -997,6 +1027,9 @@ msgstr "fwmanager"
 
 msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
 msgstr "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
+
+msgid "fwmanager is already set up. Profile in use: {p}"
+msgstr "fwmanager is already set up. Profile in use: {p}"
 
 msgid "fwmanager must not run as root: the service does that part."
 msgstr "fwmanager must not run as root: the service does that part."
@@ -1072,6 +1105,15 @@ msgstr "positional arguments"
 
 msgid "profile name"
 msgstr "profile name"
+
+msgid "profile to use, without asking"
+msgstr "profile to use, without asking"
+
+msgid "remove fwmanager and undo its changes to the firewall"
+msgstr "remove fwmanager and undo its changes to the firewall"
+
+msgid "set fwmanager up (the same as the window's first run)"
+msgstr "set fwmanager up (the same as the window's first run)"
 
 msgid "show the firewall state"
 msgstr "show the firewall state"
@@ -1150,6 +1192,9 @@ msgstr "which profile to use on which network"
 
 msgid "works"
 msgstr "works"
+
+msgid "yes"
+msgstr "yes"
 
 msgid "{before} → {after}"
 msgstr "{before} → {after}"

@@ -455,6 +455,12 @@ msgstr "Não foram encontrados problemas nas regras."
 msgid "No rules yet."
 msgstr "Ainda não há regras."
 
+msgid "No terminal to ask in: use --profile NAME --yes."
+msgstr "Não há terminal para perguntar: use --profile NOME --yes."
+
+msgid "No terminal to ask in: use --yes."
+msgstr "Não há terminal para perguntar: use --yes."
+
 msgid "No, undo it"
 msgstr "Não, desfazer"
 
@@ -518,6 +524,9 @@ msgstr "Escolha quão aberto este computador deve estar. Depois de mudar, tem 30
 msgid "Please log out and back in, then open fwmanager again."
 msgstr "Termine a sessão e volte a entrar; depois abra o fwmanager novamente."
 
+msgid "Please log out and back in, then run fwmanager-cli setup again."
+msgstr "Termine a sessão e volte a entrar; depois execute novamente fwmanager-cli setup."
+
 msgid "Policy check for {p}:"
 msgstr "Verificação da política de {p}:"
 
@@ -535,6 +544,9 @@ msgstr "Partilha de impressoras (IPP)"
 
 msgid "Profile"
 msgstr "Perfil"
+
+msgid "Profile [{default}]: "
+msgstr "Perfil [{default}]: "
 
 msgid "Profile for {name}"
 msgstr "Perfil para {name}"
@@ -653,8 +665,14 @@ msgstr "Regras que vão ser removidas."
 msgid "Rules you added to ufw yourself are kept."
 msgstr "As regras que acrescentou ao ufw por si são mantidas."
 
+msgid "Run it as your normal user: it asks for the password itself."
+msgstr "Execute-o com o seu utilizador normal: ele próprio pede a palavra-passe."
+
 msgid "Run this in a terminal, then press “Check again”:"
 msgstr "Execute isto num terminal e carregue em “Verificar novamente”:"
+
+msgid "Run this, then run fwmanager-cli setup again:"
+msgstr "Execute isto e depois volte a executar fwmanager-cli setup:"
 
 msgid "SAFE"
 msgstr "SEGURO"
@@ -706,6 +724,9 @@ msgstr "Alguns diagnósticos falhariam (tempo excedido)."
 
 msgid "Some fwmanager rules have an unexpected shape."
 msgstr "Algumas regras do fwmanager têm um formato inesperado."
+
+msgid "Something is still missing; see above."
+msgstr "Ainda falta alguma coisa; veja acima."
 
 msgid "Something went wrong: {why}"
 msgstr "Algo correu mal: {why}"
@@ -811,6 +832,9 @@ msgstr "Demasiadas redes guardadas."
 
 msgid "Try again"
 msgstr "Tentar de novo"
+
+msgid "Type yes to uninstall: "
+msgstr "Escreva sim para desinstalar: "
 
 msgid "UNSAFE"
 msgstr "INSEGURO"
@@ -926,6 +950,9 @@ msgstr "Sim, manter"
 msgid "You are all set"
 msgstr "Está tudo pronto"
 
+msgid "You are all set. fwmanager switches profile by itself when you change network."
+msgstr "Está tudo pronto. O fwmanager muda de perfil sozinho quando muda de rede."
+
 msgid "You are not allowed to control the firewall."
 msgstr "Não tem permissão para controlar a firewall."
 
@@ -980,6 +1007,9 @@ msgstr "comandos"
 msgid "confirm immediately, no countdown"
 msgstr "confirmar de imediato, sem contagem decrescente"
 
+msgid "do not ask for confirmation"
+msgstr "não pedir confirmação"
+
 msgid "error"
 msgstr "erro"
 
@@ -997,6 +1027,9 @@ msgstr "fwmanager"
 
 msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
 msgstr "O fwmanager é uma cara amigável para o ufw, por isso o ufw tem de estar instalado primeiro:"
+
+msgid "fwmanager is already set up. Profile in use: {p}"
+msgstr "O fwmanager já está configurado. Perfil em uso: {p}"
 
 msgid "fwmanager must not run as root: the service does that part."
 msgstr "O fwmanager não deve correr como root: essa parte é feita pelo serviço."
@@ -1072,6 +1105,15 @@ msgstr "argumentos"
 
 msgid "profile name"
 msgstr "nome do perfil"
+
+msgid "profile to use, without asking"
+msgstr "perfil a usar, sem perguntar"
+
+msgid "remove fwmanager and undo its changes to the firewall"
+msgstr "remover o fwmanager e desfazer as suas alterações à firewall"
+
+msgid "set fwmanager up (the same as the window's first run)"
+msgstr "configurar o fwmanager (o mesmo que a primeira execução da janela)"
 
 msgid "show the firewall state"
 msgstr "mostrar o estado da firewall"
@@ -1150,6 +1192,9 @@ msgstr "que perfil usar em que rede"
 
 msgid "works"
 msgstr "funciona"
+
+msgid "yes"
+msgstr "sim"
 
 msgid "{before} → {after}"
 msgstr "{before} → {after}"

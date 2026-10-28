@@ -455,6 +455,12 @@ msgstr ""
 msgid "No rules yet."
 msgstr ""
 
+msgid "No terminal to ask in: use --profile NAME --yes."
+msgstr ""
+
+msgid "No terminal to ask in: use --yes."
+msgstr ""
+
 msgid "No, undo it"
 msgstr ""
 
@@ -518,6 +524,9 @@ msgstr ""
 msgid "Please log out and back in, then open fwmanager again."
 msgstr ""
 
+msgid "Please log out and back in, then run fwmanager-cli setup again."
+msgstr ""
+
 msgid "Policy check for {p}:"
 msgstr ""
 
@@ -534,6 +543,9 @@ msgid "Printer sharing (IPP)"
 msgstr ""
 
 msgid "Profile"
+msgstr ""
+
+msgid "Profile [{default}]: "
 msgstr ""
 
 msgid "Profile for {name}"
@@ -653,7 +665,13 @@ msgstr ""
 msgid "Rules you added to ufw yourself are kept."
 msgstr ""
 
+msgid "Run it as your normal user: it asks for the password itself."
+msgstr ""
+
 msgid "Run this in a terminal, then press “Check again”:"
+msgstr ""
+
+msgid "Run this, then run fwmanager-cli setup again:"
 msgstr ""
 
 msgid "SAFE"
@@ -705,6 +723,9 @@ msgid "Some diagnostics would fail (time exceeded)."
 msgstr ""
 
 msgid "Some fwmanager rules have an unexpected shape."
+msgstr ""
+
+msgid "Something is still missing; see above."
 msgstr ""
 
 msgid "Something went wrong: {why}"
@@ -810,6 +831,9 @@ msgid "Too many saved networks."
 msgstr ""
 
 msgid "Try again"
+msgstr ""
+
+msgid "Type yes to uninstall: "
 msgstr ""
 
 msgid "UNSAFE"
@@ -926,6 +950,9 @@ msgstr ""
 msgid "You are all set"
 msgstr ""
 
+msgid "You are all set. fwmanager switches profile by itself when you change network."
+msgstr ""
+
 msgid "You are not allowed to control the firewall."
 msgstr ""
 
@@ -980,6 +1007,9 @@ msgstr ""
 msgid "confirm immediately, no countdown"
 msgstr ""
 
+msgid "do not ask for confirmation"
+msgstr ""
+
 msgid "error"
 msgstr ""
 
@@ -996,6 +1026,9 @@ msgid "fwmanager"
 msgstr ""
 
 msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
+msgstr ""
+
+msgid "fwmanager is already set up. Profile in use: {p}"
 msgstr ""
 
 msgid "fwmanager must not run as root: the service does that part."
@@ -1071,6 +1104,15 @@ msgid "positional arguments"
 msgstr ""
 
 msgid "profile name"
+msgstr ""
+
+msgid "profile to use, without asking"
+msgstr ""
+
+msgid "remove fwmanager and undo its changes to the firewall"
+msgstr ""
+
+msgid "set fwmanager up (the same as the window's first run)"
 msgstr ""
 
 msgid "show the firewall state"
@@ -1149,6 +1191,9 @@ msgid "which profile to use on which network"
 msgstr ""
 
 msgid "works"
+msgstr ""
+
+msgid "yes"
 msgstr ""
 
 msgid "{before} → {after}"

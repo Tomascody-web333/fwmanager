@@ -66,3 +66,18 @@ def test_refuses_to_run_as_root(monkeypatch, capsys):
     monkeypatch.setattr(ui_main.os, "geteuid", lambda: 0)
     assert ui_main.main([]) == 1
     assert "must not run as root" in capsys.readouterr().err
+
+
+def test_a_session_older_than_the_group_restarts_with_it():
+    from fwmanager.ui.setup_state import GroupInfo
+
+    calls = []
+    ui_main._rejoin_group(lambda: GroupInfo(True, True, False), lambda: calls.append(1))
+    assert calls == [1]
+    for info in (
+        GroupInfo(True, True, True),
+        GroupInfo(True, False, False),
+        GroupInfo(False, False, False),
+    ):
+        ui_main._rejoin_group(lambda i=info: i, lambda: calls.append(2))
+    assert calls == [1]  # held already, or not listed at all: nothing to gain

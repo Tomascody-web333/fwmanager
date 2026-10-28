@@ -49,6 +49,10 @@ def _parser() -> argparse.ArgumentParser:
     p.add_argument("--bus-address", help=argparse.SUPPRESS)  # development/tests only
     sub = p.add_subparsers(dest="cmd", title=_("commands"), metavar=_("COMMAND"))
 
+    sp = sub.add_parser("setup", help=_("set fwmanager up (the same as the window's first run)"))
+    sp.add_argument("--profile", metavar=_("PROFILE"), help=_("profile to use, without asking"))
+    sp.add_argument("--yes", action="store_true", help=_("confirm immediately, no countdown"))
+
     sp = sub.add_parser("status", help=_("show the firewall state"))
     sp.add_argument("--json", action="store_true", help=_("machine-readable output"))
 
@@ -66,6 +70,11 @@ def _parser() -> argparse.ArgumentParser:
     sp.add_argument(
         "--static", action="store_true", help=_("only analyse the rules, change nothing")
     )
+
+    sp = sub.add_parser(
+        "uninstall", help=_("remove fwmanager and undo its changes to the firewall")
+    )
+    sp.add_argument("--yes", action="store_true", help=_("do not ask for confirmation"))
 
     sp = sub.add_parser("networks", help=_("which profile to use on which network"))
     nsub = sp.add_subparsers(dest="net_cmd", required=True, metavar=_("ACTION"))
@@ -331,6 +340,32 @@ def _cancelled(client: _Tracking | None) -> int:
     return EXIT_INTERRUPTED
 
 
+def _setup_or_uninstall(args: argparse.Namespace) -> int:
+    from fwmanager.cli import setup_cmd
+
+    deps = setup_cmd.Deps(client=lambda: _Tracking(Client(args.bus_address)))
+    try:
+        if args.cmd == "setup":
+            return setup_cmd.setup(deps, args.profile, args.yes)
+        return setup_cmd.uninstall(deps, args.yes)
+    except KeyboardInterrupt:
+        print("\n" + _("Cancelled."), file=sys.stderr)
+        return EXIT_INTERRUPTED
+    except FwError as exc:
+        print(_("Error: {msg}").format(msg=describe_error(exc)), file=sys.stderr)
+        return EXIT_ERROR
+
+
+def _rejoin_group(argv: list[str]) -> bool:
+    """Just added to the group (by setup) but this shell predates it: run again with it."""
+    from fwmanager.ui import relaunch, setup_state
+
+    info = setup_state.group_info()
+    if not (info.listed and not info.held):
+        return False
+    return relaunch.relaunch(relaunch.current_executable("fwmanager-cli"), args=argv)
+
+
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
     set_language(resolve_language(settings_path(), SYSTEM_CONFIG))
@@ -341,6 +376,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.cmd is None:
         parser.print_help()
         return 2
+    if args.cmd in ("setup", "uninstall"):
+        return _setup_or_uninstall(args)
     client = None
     try:
         if args.cmd != "dispatch":
@@ -349,6 +386,8 @@ def main(argv: list[str] | None = None) -> int:
     except KeyboardInterrupt:
         return _cancelled(client)
     except FwError as exc:
+        if exc.code == "access_denied" and _rejoin_group(argv):
+            return EXIT_ERROR  # only reached when the restart was not possible
         print(_("Error: {msg}").format(msg=describe_error(exc)), file=sys.stderr)
         hint = HINTS.get(exc.code)
         if hint:
