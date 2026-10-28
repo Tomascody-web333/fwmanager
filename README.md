@@ -14,7 +14,14 @@ cuts your connection.
 
 ## Quick start
 
-With APT (updates then arrive with `sudo apt upgrade`):
+From the Launchpad PPA (Ubuntu; updates then arrive with `sudo apt upgrade`):
+
+```sh
+sudo add-apt-repository ppa:tomascody-web333/fwmanager
+sudo apt install fwmanager
+```
+
+Or from the APT repository on GitHub (Ubuntu or Debian):
 
 ```sh
 sudo install -d -m 0755 /etc/apt/keyrings

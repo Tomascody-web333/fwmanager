@@ -14,7 +14,14 @@ segurança que desfaz qualquer alteração que lhe corte a ligação.
 
 ## Início rápido
 
-Com o APT (as atualizações chegam depois com `sudo apt upgrade`):
+Pelo PPA do Launchpad (Ubuntu; as atualizações chegam depois com `sudo apt upgrade`):
+
+```sh
+sudo add-apt-repository ppa:tomascody-web333/fwmanager
+sudo apt install fwmanager
+```
+
+Ou pelo repositório APT no GitHub (Ubuntu ou Debian):
 
 ```sh
 sudo install -d -m 0755 /etc/apt/keyrings
