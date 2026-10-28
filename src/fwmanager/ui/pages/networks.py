@@ -98,10 +98,9 @@ class NetworksPage(Adw.PreferencesPage):
             )
             label_for_screen_readers(combo, _("Profile for {name}").format(name=ssid or uuid))
             remove = button("", flat=True, icon="user-trash-symbolic")
+            remove.set_tooltip_text(_("Forget this network"))
             label_for_screen_readers(remove, _("Forget this network"))
-            remove.connect(
-                "clicked", lambda _b, s=ssid, u=uuid: self._c.remove_network(s, u, self._removed)
-            )
+            remove.connect("clicked", lambda _b, n=(ssid, uuid, profile): self.forget(*n))
             row.add_suffix(combo)
             row.add_suffix(remove)
             self.saved_group.add(row)
@@ -138,6 +137,30 @@ class NetworksPage(Adw.PreferencesPage):
     def _after(self, _result, error) -> None:
         if error is not None:
             toast_error(self, error)
+
+    def forget(self, ssid: str, uuid: str, profile: str) -> None:
+        """Forget at once, with a way back: one wrong click should not cost a setting."""
+
+        def removed(_result, error) -> None:
+            self._after(_result, error)
+            self.load()
+            if error is None:
+                self._offer_undo(ssid, uuid, profile)
+
+        self._c.remove_network(ssid, uuid, removed)
+
+    def _offer_undo(self, ssid: str, uuid: str, profile: str) -> None:
+        overlay = getattr(self.get_root(), "toasts", None)
+        if overlay is None:
+            return
+        name = ssid or _("Connection {id}").format(id=uuid[:8])
+        self.undo_toast = Adw.Toast(
+            title=_("Forgot {name}.").format(name=name), button_label=_("Undo"), timeout=8
+        )
+        self.undo_toast.connect(
+            "button-clicked", lambda *_: self._c.set_network(ssid, uuid, profile, self._removed)
+        )
+        overlay.add_toast(self.undo_toast)
 
     def _removed(self, _result, error) -> None:
         self._after(_result, error)

@@ -139,6 +139,22 @@ never left filtering with nobody managing it. A ufw you enabled yourself stays o
 At boot the daemon re-applies the last confirmed profile with no timer. If `firewalld` is
 active it applies nothing and the interface explains why.
 
+## Command line
+
+`fwmanager-cli` does what the window does, in a terminal: for servers, SSH sessions, older
+systems without libadwaita 1.5, or scripts. Profiles can be typed in English or Portuguese
+(`home`, `casa`, `Público`...).
+
+```sh
+fwmanager-cli status              # is it on, which profile, what it lets in
+fwmanager-cli profiles            # every profile, in plain words
+fwmanager-cli apply home          # switch; press Enter to keep it, r to undo (30 s)
+fwmanager-cli networks list       # which profile on which network
+```
+
+Ctrl+C during `apply` or `test-policy` undoes the change at once. `--json` on `status` and
+`networks list` gives output for scripts.
+
 ## Testing a policy before you trust it
 
 ```sh

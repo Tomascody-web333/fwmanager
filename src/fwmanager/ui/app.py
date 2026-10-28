@@ -79,11 +79,13 @@ class FwApplication(Adw.Application):
         )
         self.window.present()
         if old is not None:
+            old.detach()  # destroying it does not unsubscribe it from the controller
             old.destroy()
 
     def _on_daemon_signal(self, name: str, args: tuple) -> None:
         if name == "Reverted" and self.user_settings.notifications:
             note = Gio.Notification.new(_("fwmanager"))
+            note.set_icon(Gio.ThemedIcon.new(APP_ID))
             note.set_body(
                 _("{profile} was undone because it was not confirmed in time.").format(
                     profile=state.profile_title(args[0])

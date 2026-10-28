@@ -336,3 +336,20 @@ def test_network_text_and_open_wifi_warning():
     assert "With Work" in state.open_wifi_warning(open_, "trabalho")
     for net, profile in ((open_, "publico"), (locked, "casa"), (wired, "casa"), (None, "casa")):
         assert state.open_wifi_warning(net, profile) == ""
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("192.168.1.0/24", ""),
+        ("10.0.0.0/8, 192.168.1.5", ""),  # a single address is fine
+        ("", "Write at least one network"),
+        ("   ", "Write at least one network"),
+        ("192.168.1.0/16", "Did you mean 192.168.0.0/16?"),
+        ("casa", "“casa” is not a network address. Example: 192.168.1.0/24."),
+        ("10.0.0.0/8 300.1.1.1", "“300.1.1.1” is not a network address"),
+    ],
+)
+def test_cidr_problem_explains_in_plain_words(text, expected):
+    problem = state.cidr_problem(text)
+    assert (problem == "") if expected == "" else (expected in problem), problem

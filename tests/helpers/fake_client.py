@@ -94,7 +94,7 @@ class FakeClient:
         base, eff = dict(self.d.profiles[name]), self._effective()[name]
         base.update(services=list(eff.services), ping=eff.ping, mdns=eff.mdns,
                     source_kind=eff.source.kind, cidrs=list(eff.source.cidrs))  # fmt: skip
-        base["affected_by_rules"] = self._objects()[name] != eff
+        base["affected_by_rules"] = not rulebook.same_effect(self._objects()[name], eff)
         return base
 
     def list_services(self):

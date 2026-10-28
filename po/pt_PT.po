@@ -98,6 +98,9 @@ msgstr "Aplicar mesmo assim"
 msgid "Applying…"
 msgstr "A aplicar…"
 
+msgid "At most {n} networks."
+msgstr "No máximo {n} redes."
+
 msgid "BROKEN by this profile: {p}"
 msgstr "PARTIDO por este perfil: {p}"
 
@@ -269,6 +272,9 @@ msgstr "Corrigir"
 msgid "Forget this network"
 msgstr "Esquecer esta rede"
 
+msgid "Forgot {name}."
+msgstr "{name} foi esquecida."
+
 msgid "Forgotten."
 msgstr "Esquecida."
 
@@ -353,8 +359,14 @@ msgstr "Deve funcionar, mas leia primeiro as notas abaixo."
 msgid "KDE Connect"
 msgstr "KDE Connect"
 
+msgid "Keep it"
+msgstr "Manter"
+
 msgid "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
 msgstr "Manter: fwmanager-cli confirm    Desfazer: fwmanager-cli rollback"
+
+msgid "Keep the new profile?"
+msgstr "Manter o novo perfil?"
 
 msgid "Language"
 msgstr "Idioma"
@@ -782,6 +794,12 @@ msgstr "INSEGURO"
 msgid "Undid {name}"
 msgstr "Desfez {name}"
 
+msgid "Undo"
+msgstr "Desfazer"
+
+msgid "Undo it"
+msgstr "Desfazer"
+
 msgid "Undone. Pick another profile, or test it first."
 msgstr "Desfeito. Escolha outro perfil ou teste-o primeiro."
 
@@ -859,6 +877,9 @@ msgstr "Trabalho"
 
 msgid "Would break something"
 msgstr "Iria partir alguma coisa"
+
+msgid "Write at least one network, for example 192.168.1.0/24."
+msgstr "Escreva pelo menos uma rede, por exemplo 192.168.1.0/24."
 
 msgid "Yes, keep it"
 msgstr "Sim, manter"
@@ -1079,6 +1100,9 @@ msgstr "{before} → {after}"
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} está a gerir a firewall. Desligue-o primeiro e depois volte a abrir o fwmanager:"
 
+msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
+msgstr "O perfil {profile} ainda aguarda a sua confirmação. Se fechar sem escolher, é desfeito dentro de poucos segundos."
+
 msgid "{profile} was undone because it was not confirmed in time."
 msgstr "{profile} foi desfeito porque não foi confirmado a tempo."
 
@@ -1087,3 +1111,9 @@ msgstr "A mudança para {profile} será desfeita dentro de {n} s se não confirm
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tentou aceder a {target}"
+
+msgid "“{text}” is not a network address. Did you mean {guess}?"
+msgstr "«{text}» não é um endereço de rede. Queria dizer {guess}?"
+
+msgid "“{text}” is not a network address. Example: 192.168.1.0/24."
+msgstr "«{text}» não é um endereço de rede. Exemplo: 192.168.1.0/24."

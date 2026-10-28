@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 import pytest
 
 from fwmanager.core import rulebook as rb
@@ -180,3 +182,25 @@ def test_apply_rule_is_pure():
     rb.apply_rule(r, before)
     assert before == Profile("casa", ("ssh", "samba", "kdeconnect", "syncthing", "ipp"),
                              True, True, Source("lan"))  # fmt: skip
+
+
+def test_a_rule_that_changes_nothing_reports_nothing():
+    """ "Allow Samba only in Home" when Home already has Samba: no empty "Home:" preview."""
+    cat = load_builtin()
+    names = frozenset(DEFAULT_PROFILES)
+    for template, params in (
+        (rb.ALLOW_ONLY_IN, {"service": "samba", "profiles": ["casa"]}),
+        (rb.BLOCK_ALL_EXCEPT, {"services": ["ipp", "ssh", "samba", "kdeconnect", "syncthing"],
+                               "profiles": ["casa"]}),  # same set as Home, other order
+    ):  # fmt: skip
+        rule = rb.Rule("r1", template, rb.validate_params(template, params, cat, names))
+        after = rb.compile_profiles(DEFAULT_PROFILES, [rule])
+        assert after["casa"] == DEFAULT_PROFILES["casa"]  # not even reordered
+        assert rb.diff_profiles(DEFAULT_PROFILES, after) == []
+
+
+def test_same_effect_ignores_the_order_of_services():
+    a = DEFAULT_PROFILES["casa"]
+    b = replace(a, services=tuple(reversed(a.services)))
+    assert a != b and rb.same_effect(a, b)
+    assert not rb.same_effect(a, replace(a, ping=not a.ping))

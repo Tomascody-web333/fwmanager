@@ -124,3 +124,11 @@ def test_notifications_switch_is_saved(make_app):
     app.window.settings.notifications.set_active(False)
     assert "notifications = false" in app.settings_file.read_text()
     assert app.user_settings.notifications is False
+
+
+def test_switching_language_many_times_leaves_one_window_listening(make_app):
+    app = make_app(user_lang="pt")
+    for choice in (1, 0, 1, 0, 1, 0):
+        app.window.settings.language.set_selected(choice)
+        pump(0.2)
+    assert app.controller.listeners == [app.window.on_snapshot]

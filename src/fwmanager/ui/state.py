@@ -183,6 +183,37 @@ def parse_cidrs(text: str) -> list[str]:
     return [p for p in text.replace(",", " ").split() if p]
 
 
+def cidr_problem(text: str) -> str:
+    """What is wrong with the networks typed so far, in plain words; empty when they are fine.
+
+    The service checks them again; this is only so the person sees a mistake while typing.
+    """
+    import ipaddress
+
+    from fwmanager.core.validate import MAX_CIDRS, validate_cidr
+    from fwmanager.errors import ValidationError
+
+    items = parse_cidrs(text)
+    if not items:
+        return _("Write at least one network, for example 192.168.1.0/24.")
+    if len(items) > MAX_CIDRS:
+        return _("At most {n} networks.").format(n=MAX_CIDRS)
+    for item in items:
+        try:
+            validate_cidr(item)
+        except ValidationError:
+            try:  # e.g. 192.168.1.0/16: right idea, host part not zero
+                guess = str(ipaddress.ip_network(item, strict=False))
+            except ValueError:
+                return _("“{text}” is not a network address. Example: 192.168.1.0/24.").format(
+                    text=item
+                )
+            return _("“{text}” is not a network address. Did you mean {guess}?").format(
+                text=item, guess=guess
+            )
+    return ""
+
+
 def event_text(kind: str, detail: str) -> str:
     """Daemon event codes -> sentences (the daemon itself always logs in English)."""
     name = profile_title(detail) if detail else ""

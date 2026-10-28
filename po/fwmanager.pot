@@ -98,6 +98,9 @@ msgstr ""
 msgid "Applying…"
 msgstr ""
 
+msgid "At most {n} networks."
+msgstr ""
+
 msgid "BROKEN by this profile: {p}"
 msgstr ""
 
@@ -269,6 +272,9 @@ msgstr ""
 msgid "Forget this network"
 msgstr ""
 
+msgid "Forgot {name}."
+msgstr ""
+
 msgid "Forgotten."
 msgstr ""
 
@@ -353,7 +359,13 @@ msgstr ""
 msgid "KDE Connect"
 msgstr ""
 
+msgid "Keep it"
+msgstr ""
+
 msgid "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
+msgstr ""
+
+msgid "Keep the new profile?"
 msgstr ""
 
 msgid "Language"
@@ -782,6 +794,12 @@ msgstr ""
 msgid "Undid {name}"
 msgstr ""
 
+msgid "Undo"
+msgstr ""
+
+msgid "Undo it"
+msgstr ""
+
 msgid "Undone. Pick another profile, or test it first."
 msgstr ""
 
@@ -858,6 +876,9 @@ msgid "Work"
 msgstr ""
 
 msgid "Would break something"
+msgstr ""
+
+msgid "Write at least one network, for example 192.168.1.0/24."
 msgstr ""
 
 msgid "Yes, keep it"
@@ -1079,6 +1100,9 @@ msgstr ""
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr ""
 
+msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
+msgstr ""
+
 msgid "{profile} was undone because it was not confirmed in time."
 msgstr ""
 
@@ -1086,4 +1110,10 @@ msgid "{profile} will be undone in {n} s unless you confirm."
 msgstr ""
 
 msgid "{src} tried to reach {target}"
+msgstr ""
+
+msgid "“{text}” is not a network address. Did you mean {guess}?"
+msgstr ""
+
+msgid "“{text}” is not a network address. Example: 192.168.1.0/24."
 msgstr ""

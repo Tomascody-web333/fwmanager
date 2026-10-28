@@ -332,8 +332,10 @@ class ControlService:
             "mdns": GLib.Variant("b", p.mdns),
             "source_kind": GLib.Variant("s", p.source.kind),
             "cidrs": GLib.Variant("as", list(p.source.cidrs)),
-            "customized": GLib.Variant("b", self._base[p.name] != self._defaults[p.name]),
-            "affected_by_rules": GLib.Variant("b", self._base[p.name] != p),
+            "customized": GLib.Variant(
+                "b", not rulebook.same_effect(self._base[p.name], self._defaults[p.name])
+            ),
+            "affected_by_rules": GLib.Variant("b", not rulebook.same_effect(self._base[p.name], p)),
         }
 
     def _set_profile(self, name, services, ping, mdns, kind, cidrs) -> None:

@@ -92,3 +92,27 @@ def test_tab_moves_through_the_controls(focused):
     focused.press("Tab")
     focused.press("Tab")
     assert focused.win.get_focus() is not start
+
+
+def test_closing_with_a_pending_change_and_pressing_enter_keeps_it(focused):
+    focused.daemon.pending = "casa"
+    focused.controller.refresh()
+    pump(0.2)
+    focused.win.close()
+    pump(0.4)
+    assert focused.win.get_visible()  # it asked first
+    focused.press("Return")  # the default answer: keep it
+    pump(0.4)
+    assert ("confirm", ()) in focused.daemon.calls and focused.daemon.pending == ""
+    assert not focused.win.get_visible()
+
+
+def test_escape_on_that_question_keeps_the_window_open(focused):
+    focused.daemon.pending = "casa"
+    focused.controller.refresh()
+    pump(0.2)
+    focused.win.close()
+    pump(0.4)
+    focused.press("Escape")
+    pump(0.3)
+    assert focused.win.get_visible() and focused.daemon.pending == "casa"

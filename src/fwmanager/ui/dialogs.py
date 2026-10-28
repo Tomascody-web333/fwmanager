@@ -10,14 +10,21 @@ from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.errors import FwError  # noqa: E402
 from fwmanager.i18n import N_, _  # noqa: E402
-from fwmanager.messages import describe_finding, describe_probe, finding_detail  # noqa: E402
+from fwmanager.messages import (  # noqa: E402
+    describe_error,
+    describe_finding,
+    describe_probe,
+    finding_detail,
+)
 from fwmanager.ui import rule_text, state  # noqa: E402
 from fwmanager.ui.common import (  # noqa: E402
     SEVERITY_ICON,
     button,
     clear,
     label_for_screen_readers,
+    show_warning,
     toast_error,
+    warning_row,
 )
 
 VERDICT_ICON = {
@@ -50,6 +57,10 @@ class ProfileEditor(Adw.Dialog):
         self._service_rows: dict[str, Adw.SwitchRow] = {}
 
         page = Adw.PreferencesPage()
+        errors = Adw.PreferencesGroup()
+        self.error_row = warning_row()  # what the service refused, inside the dialog
+        errors.add(self.error_row)
+        page.add(errors)
         services = Adw.PreferencesGroup(
             title=_("Services that others may reach"),
             description=_("Everything else coming in from the network stays blocked."),
@@ -78,8 +89,10 @@ class ProfileEditor(Adw.Dialog):
         )
         self.cidrs = Adw.EntryRow(title=_("Allowed networks (e.g. 192.168.1.0/24)"))
         self.cidrs.set_text(", ".join(details["cidrs"]))
+        self.cidr_problem = warning_row()
         self.source.connect("notify::selected", lambda *_: self._sync())
-        for w in (self.ping, self.mdns, self.source, self.cidrs):
+        self.cidrs.connect("changed", lambda *_: self._sync())
+        for w in (self.ping, self.mdns, self.source, self.cidrs, self.cidr_problem):
             options.add(w)
         page.add(options)
 
@@ -106,7 +119,16 @@ class ProfileEditor(Adw.Dialog):
         return state.SOURCE_ORDER[self.source.get_selected()]
 
     def _sync(self) -> None:
-        self.cidrs.set_visible(self._kind() == "cidrs")
+        wanted = self._kind() == "cidrs"
+        self.cidrs.set_visible(wanted)
+        problem = state.cidr_problem(self.cidrs.get_text()) if wanted else ""
+        show_warning(self.cidr_problem, problem)
+        if problem:
+            self.cidrs.add_css_class("error")
+        else:
+            self.cidrs.remove_css_class("error")
+        if hasattr(self, "save_btn"):  # built after the options
+            self.save_btn.set_sensitive(not problem)
 
     def _save(self, *_args) -> None:
         chosen = [sid for sid, row in self._service_rows.items() if row.get_active()]
@@ -118,9 +140,9 @@ class ProfileEditor(Adw.Dialog):
         )  # fmt: skip
 
     def _saved(self, _result, error) -> None:
-        self.save_btn.set_sensitive(True)
+        self._sync()
         if error is not None:
-            toast_error(self, error)
+            show_warning(self.error_row, describe_error(error))
             return
         self.close()
         self._on_saved()
@@ -289,6 +311,8 @@ class RuleEditor(Adw.Dialog):
         self.sentence_group = Adw.PreferencesGroup(title=_("The rule"))
         self.sentence_row = Adw.ActionRow(title=_("Choose the details below."), title_lines=4)
         self.sentence_group.add(self.sentence_row)
+        self.error_row = warning_row()  # what the service refused when saving
+        self.sentence_group.add(self.error_row)
         page.add(self.sentence_group)
 
         self.preview = Adw.PreferencesGroup(
@@ -434,7 +458,7 @@ class RuleEditor(Adw.Dialog):
     def _saved(self, _result, error: FwError | None) -> None:
         if error is not None:
             self.save_btn.set_sensitive(True)
-            toast_error(self, error)
+            show_warning(self.error_row, describe_error(error))
             return
         self.close()
         self._on_saved()

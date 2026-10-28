@@ -144,6 +144,22 @@ máquina nunca ficar a filtrar sem ninguém a geri-la. Um ufw que ativou por si 
 No arranque do sistema, o serviço volta a aplicar o último perfil confirmado, sem temporizador.
 Se o `firewalld` estiver ativo, não aplica nada e a interface explica porquê.
 
+## Linha de comandos
+
+O `fwmanager-cli` faz o mesmo que a janela, num terminal: para servidores, sessões SSH,
+sistemas mais antigos sem libadwaita 1.5, ou scripts. Os perfis podem ser escritos em
+português ou em inglês (`casa`, `home`, `Público`...).
+
+```sh
+fwmanager-cli status              # está ligada, que perfil, o que deixa entrar
+fwmanager-cli profiles            # todos os perfis, em palavras simples
+fwmanager-cli apply casa          # mudar; Enter para manter, r para desfazer (30 s)
+fwmanager-cli networks list       # que perfil em que rede
+```
+
+Ctrl+C durante um `apply` ou `test-policy` desfaz a alteração de imediato. `--json` em
+`status` e `networks list` dá uma saída para scripts.
+
 ## Testar uma política antes de confiar nela
 
 ```sh

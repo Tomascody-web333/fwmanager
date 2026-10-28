@@ -86,3 +86,4 @@ class SettingsPage(Adw.PreferencesPage):
     def _saved(self, _result, error) -> None:
         if error is not None:
             toast_error(self, error)
+            self.load()  # show what is really in effect, not the choice that was refused

@@ -112,11 +112,17 @@ def apply_rule(rule: Rule, profile: Profile) -> Profile:
     p = rule.params
     if rule.template == ALLOW_ONLY_IN:
         sid = p["service"]
-        keep = [s for s in profile.services if s != sid]
-        services = (*keep, sid) if profile.name in p["profiles"] else tuple(keep)
-        return replace(profile, services=tuple(dict.fromkeys(services)))
+        if profile.name not in p["profiles"]:
+            return replace(profile, services=tuple(s for s in profile.services if s != sid))
+        if sid in profile.services:
+            return profile  # already allowed here: nothing to change, not even the order
+        return replace(profile, services=(*profile.services, sid))
     if rule.template == BLOCK_ALL_EXCEPT:
-        return replace(profile, services=tuple(p["services"])) if _targets(p, profile) else profile
+        if not _targets(p, profile):
+            return profile
+        allowed = p["services"]
+        kept = [s for s in profile.services if s in allowed]  # keep the profile's own order
+        return replace(profile, services=(*kept, *(s for s in allowed if s not in kept)))
     if rule.template == RESTRICT_SOURCE:
         if not _targets(p, profile):
             return profile
@@ -157,6 +163,16 @@ class ProfileChange:
     source: Source | None  # new source, or None if unchanged
 
 
+def same_effect(a: Profile, b: Profile) -> bool:
+    """True when two profiles let in the same things (the order of services does not matter)."""
+    return (set(a.services), a.ping, a.mdns, a.source) == (
+        set(b.services),
+        b.ping,
+        b.mdns,
+        b.source,
+    )
+
+
 def diff_profiles(
     before: Mapping[str, Profile], after: Mapping[str, Profile]
 ) -> list[ProfileChange]:
@@ -164,7 +180,7 @@ def diff_profiles(
     out = []
     for name, new in after.items():
         old = before[name]
-        if old == new:
+        if same_effect(old, new):
             continue
         out.append(
             ProfileChange(

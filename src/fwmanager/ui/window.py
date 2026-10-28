@@ -8,10 +8,11 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gdk, Gtk  # noqa: E402
+from gi.repository import Adw, Gdk, GLib, Gtk  # noqa: E402
 
 from fwmanager.i18n import _  # noqa: E402
 from fwmanager.ui import state  # noqa: E402
+from fwmanager.ui.common import toast_error  # noqa: E402
 from fwmanager.ui.dialogs import PolicyTestDialog  # noqa: E402
 from fwmanager.ui.pages.home import HomePage  # noqa: E402
 from fwmanager.ui.pages.log import LogPage  # noqa: E402
@@ -43,6 +44,7 @@ class MainWindow(Adw.ApplicationWindow):
         )
         self.controller = controller
         self._was_ok = False
+        self._closing = False  # set once the person has decided about a pending change
         self.toasts = Adw.ToastOverlay()
 
         # -- pages ---
@@ -190,8 +192,49 @@ class MainWindow(Adw.ApplicationWindow):
             self.rules.load()
 
     def _on_close(self, *_args) -> bool:
-        self.controller.listeners.remove(self.on_snapshot)
+        pending = (self.controller.snapshot.status or {}).get("pending_profile", "")
+        if pending and not self._closing:
+            self.ask_before_closing(pending)
+            return True  # stay open until they choose
+        self.detach()
         return False
+
+    def detach(self) -> None:
+        """Stop following the service: a window that is gone must not be updated."""
+        if self.on_snapshot in self.controller.listeners:
+            self.controller.listeners.remove(self.on_snapshot)
+
+    def ask_before_closing(self, pending: str) -> None:
+        """Closing is easy to mistake for "done": say that the change is not kept yet."""
+        dialog = Adw.AlertDialog(
+            heading=_("Keep the new profile?"),
+            body=_(
+                "{profile} is still waiting for your confirmation. If you close without "
+                "choosing, it is undone in a few seconds."
+            ).format(profile=state.profile_title(pending)),
+        )
+        dialog.add_response("cancel", _("Cancel"))
+        dialog.add_response("undo", _("Undo it"))
+        dialog.add_response("keep", _("Keep it"))
+        dialog.set_response_appearance("keep", Adw.ResponseAppearance.SUGGESTED)
+        dialog.set_default_response("keep")
+        dialog.set_close_response("cancel")
+        dialog.connect("response", self._close_response)
+        self.close_dialog = dialog
+        dialog.present(self)
+
+    def _close_response(self, _dialog, response: str) -> None:
+        if response == "keep":
+            self.controller.confirm(self._close_after)
+        elif response == "undo":
+            self.controller.rollback(self._close_after)
+
+    def _close_after(self, _result, error) -> None:
+        if error is not None and error.code != "no_pending":  # already undone is fine
+            toast_error(self, error)
+            return
+        self._closing = True
+        GLib.idle_add(self.close)  # after the question has gone away, or it would catch the close
 
     # -- dialogs ---
 

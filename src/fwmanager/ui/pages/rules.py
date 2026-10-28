@@ -6,7 +6,7 @@ import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw  # noqa: E402
+from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.i18n import _  # noqa: E402
 from fwmanager.ui import rule_text  # noqa: E402
@@ -35,10 +35,16 @@ class RulesPage(Adw.PreferencesPage):
                 "until you apply a profile."
             ),
         )
-        self.add_btn = button(_("Add a rule"), suggested=True, icon="list-add-symbolic")
-        self.add_btn.connect("clicked", lambda *_: self._open_editor())
-        self.group.set_header_suffix(self.add_btn)
         self.add(self.group)
+        # Below the list, not beside the explanation: on narrow windows and with large text the
+        # header has no room for both.
+        self.add_btn = button(_("Add a rule"), suggested=True, icon="list-add-symbolic")
+        self.add_btn.set_halign(Gtk.Align.CENTER)
+        self.add_btn.add_css_class("pill")
+        self.add_btn.connect("clicked", lambda *_: self._open_editor())
+        actions = Adw.PreferencesGroup()
+        actions.add(self.add_btn)
+        self.add(actions)
 
     def load(self) -> None:
         self._c.load_profiles(self._profiles_loaded)

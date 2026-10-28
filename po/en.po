@@ -98,6 +98,9 @@ msgstr "Apply anyway"
 msgid "Applying…"
 msgstr "Applying…"
 
+msgid "At most {n} networks."
+msgstr "At most {n} networks."
+
 msgid "BROKEN by this profile: {p}"
 msgstr "BROKEN by this profile: {p}"
 
@@ -269,6 +272,9 @@ msgstr "Fix this"
 msgid "Forget this network"
 msgstr "Forget this network"
 
+msgid "Forgot {name}."
+msgstr "Forgot {name}."
+
 msgid "Forgotten."
 msgstr "Forgotten."
 
@@ -353,8 +359,14 @@ msgstr "It should work, but read the notes below first."
 msgid "KDE Connect"
 msgstr "KDE Connect"
 
+msgid "Keep it"
+msgstr "Keep it"
+
 msgid "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
 msgstr "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
+
+msgid "Keep the new profile?"
+msgstr "Keep the new profile?"
 
 msgid "Language"
 msgstr "Language"
@@ -782,6 +794,12 @@ msgstr "UNSAFE"
 msgid "Undid {name}"
 msgstr "Undid {name}"
 
+msgid "Undo"
+msgstr "Undo"
+
+msgid "Undo it"
+msgstr "Undo it"
+
 msgid "Undone. Pick another profile, or test it first."
 msgstr "Undone. Pick another profile, or test it first."
 
@@ -859,6 +877,9 @@ msgstr "Work"
 
 msgid "Would break something"
 msgstr "Would break something"
+
+msgid "Write at least one network, for example 192.168.1.0/24."
+msgstr "Write at least one network, for example 192.168.1.0/24."
 
 msgid "Yes, keep it"
 msgstr "Yes, keep it"
@@ -1079,6 +1100,9 @@ msgstr "{before} → {after}"
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 
+msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
+msgstr "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
+
 msgid "{profile} was undone because it was not confirmed in time."
 msgstr "{profile} was undone because it was not confirmed in time."
 
@@ -1087,3 +1111,9 @@ msgstr "{profile} will be undone in {n} s unless you confirm."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tried to reach {target}"
+
+msgid "“{text}” is not a network address. Did you mean {guess}?"
+msgstr "“{text}” is not a network address. Did you mean {guess}?"
+
+msgid "“{text}” is not a network address. Example: 192.168.1.0/24."
+msgstr "“{text}” is not a network address. Example: 192.168.1.0/24."

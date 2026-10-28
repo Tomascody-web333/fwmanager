@@ -452,3 +452,78 @@ def test_an_open_wifi_is_flagged_on_the_overview_and_networks_pages(env):
     page._current_loaded(CurrentNetwork("Casa", "Casa", "u-2", "802-11-wireless"), None)
     page.current_row.set_selected(0)
     assert not page.open_warning.get_visible()  # it has a password
+
+
+def test_forgetting_a_network_can_be_undone(env):
+    env.win.networks.load()
+    ssid, uuid, profile = env.daemon.networks[0]
+    env.win.networks.forget(ssid, uuid, profile)
+    assert env.daemon.networks == []
+    toast = env.win.networks.undo_toast
+    assert toast.get_title() == "Forgot Casa WiFi." and toast.get_button_label() == "Undo"
+    toast.emit("button-clicked")
+    assert env.daemon.networks == [(ssid, uuid, profile)]
+    assert "Casa WiFi" in texts(env.win.networks)
+
+
+# -- closing with a change still pending ---
+
+
+@pytest.mark.parametrize(
+    "response,call,closed",
+    [("keep", "confirm", True), ("undo", "rollback", True), ("cancel", None, False)],
+)
+def test_closing_with_a_pending_change_asks_first(env, response, call, closed):
+    env.daemon.pending = "casa"
+    env.controller.refresh()
+    env.win.close()
+    pump(0.2)
+    assert env.win.get_visible(), "closed without asking"
+    dialog = env.win.close_dialog
+    assert dialog.get_heading() == "Keep the new profile?" and "Home" in dialog.get_body()
+    env.daemon.calls.clear()
+    dialog.emit("response", response)
+    dialog.force_close()  # what libadwaita does right after a button's response
+    pump(0.2)
+    if call:
+        assert (call, ()) in env.daemon.calls
+    assert env.win.get_visible() is not closed
+
+
+def test_closing_with_nothing_pending_just_closes(env):
+    env.win.close()
+    pump(0.2)
+    assert not env.win.get_visible()
+
+
+def test_the_profile_editor_checks_networks_while_typing(env):
+    d = editor(env, "personalizado")
+    d.source.set_selected(2)  # Specific networks
+    d.cidrs.set_text("192.168.1.0/16")
+    assert d.cidr_problem.get_visible() and "192.168.0.0/16" in d.cidr_problem.get_title()
+    assert d.cidrs.has_css_class("error") and not d.save_btn.get_sensitive()
+    d.cidrs.set_text("192.168.0.0/16")
+    assert not d.cidr_problem.get_visible() and d.save_btn.get_sensitive()
+    d.source.set_selected(1)  # Local network: nothing to type
+    d.cidrs.set_text("rubbish")
+    assert not d.cidr_problem.get_visible() and d.save_btn.get_sensitive()
+
+
+def test_errors_from_the_service_show_inside_the_editor(env):
+    d = editor(env)
+    env.daemon.error = FwError("bad", code="store_error")
+    d.save_btn.emit("clicked")
+    assert d.error_row.get_visible() and d.error_row.get_title() == "Could not save the settings."
+
+
+def test_a_refused_setting_snaps_back_to_what_is_in_effect(env, monkeypatch):
+    env.win.settings.load()
+    assert not env.win.settings.router.get_active()
+
+    def refuse(self, *args):
+        raise FwError("disk full", code="store_error")
+
+    monkeypatch.setattr(FakeClient, "set_options", refuse)
+    env.win.settings.router.set_active(True)
+    pump(0.2)
+    assert not env.win.settings.router.get_active()  # not left showing an unsaved choice
