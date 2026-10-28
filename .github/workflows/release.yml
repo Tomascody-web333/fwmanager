@@ -1,10 +1,21 @@
-# Push a tag such as v0.1.0 (the version in pyproject.toml): this builds the .deb, checks it,
-# and publishes it with SHA256SUMS as a GitHub release.
+# Push a tag such as 1.0.0 (the version in pyproject.toml), or run it from the Actions tab with
+# that version: this builds the .deb, checks it, and publishes it with SHA256SUMS as a GitHub
+# release (creating the tag on this commit when it does not exist yet).
+#
+# With the secret APT_GPG_PRIVATE_KEY set (and APT_GPG_PASSPHRASE if the key has one), it also
+# rebuilds the APT repository from every release, signs it with that key and publishes it on
+# GitHub Pages. If that secret holds more than one key, the variable APT_GPG_KEY_ID says which
+# one signs.
 name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v[0-9]*", "[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, as in pyproject.toml (for example 1.0.0)"
+        required: true
 
 permissions:
   contents: write
@@ -12,6 +23,11 @@ permissions:
 jobs:
   deb:
     runs-on: ubuntu-24.04
+    env:
+      TAG: ${{ inputs.version || github.ref_name }}
+      HAS_APT_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY != '' }}
+    outputs:
+      apt: ${{ steps.repo.outputs.built }}
     steps:
       - uses: actions/checkout@v4
 
@@ -20,18 +36,19 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             python3-gi gir1.2-gdkpixbuf-2.0 librsvg2-common python3-pytest \
-            gir1.2-gtk-4.0 gir1.2-adw-1
+            gir1.2-gtk-4.0 gir1.2-adw-1 apt-utils
 
       - name: The tag matches the version
         run: |
           version=$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml | head -n 1)
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::tag $GITHUB_REF_NAME, but pyproject.toml says $version"
+          if [ "$version" != "${TAG#v}" ]; then
+            echo "::error::release $TAG, but pyproject.toml says $version"
             exit 1
           fi
 
       - name: Unit tests and package tests
-        run: /usr/bin/python3 -m pytest -q -p no:cacheprovider tests/unit tests/install/test_deb.py
+        # As root: some tests read a copy of /etc/ufw, which only root may read.
+        run: sudo /usr/bin/python3 -m pytest -q -p no:cacheprovider tests/unit tests/install
 
       - name: Build
         run: packaging/deb/build-deb.sh --out dist
@@ -46,7 +63,58 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version=${GITHUB_REF_NAME#v}
+          version=${TAG#v}
           sed "s/@VERSION@/$version/g" packaging/deb/release-notes.md > dist/notes.md
-          gh release create "$GITHUB_REF_NAME" dist/fwmanager.*.deb dist/SHA256SUMS \
+          gh release create "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --target "$GITHUB_SHA" \
             --title "fwmanager $version" --notes-file dist/notes.md
+
+      - name: Import the signing key
+        if: env.HAS_APT_KEY == 'true'
+        env:
+          APT_GPG_PRIVATE_KEY: ${{ secrets.APT_GPG_PRIVATE_KEY }}
+          APT_GPG_KEY_ID: ${{ vars.APT_GPG_KEY_ID }}
+        run: |
+          printf '%s\n' "$APT_GPG_PRIVATE_KEY" | gpg --batch --quiet --import
+          key=${APT_GPG_KEY_ID:-$(gpg --batch --with-colons --list-secret-keys \
+            | awk -F: '/^fpr:/ {print $10; exit}')}
+          [ -n "$key" ] || { echo "::error::no secret key in APT_GPG_PRIVATE_KEY"; exit 1; }
+          echo "Signing with $key"
+          echo "APT_KEY=$key" >> "$GITHUB_ENV"
+
+      - name: Build the APT repository (every release so far)
+        id: repo
+        if: env.HAS_APT_KEY == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+        run: |
+          mkdir -p apt-debs
+          gh release list --limit 200 --json tagName --jq '.[].tagName' | while read -r tag; do
+            gh release download "$tag" --pattern 'fwmanager*.deb' --dir apt-debs --clobber || true
+          done
+          packaging/apt/build-repo.sh apt-debs site "$APT_KEY"
+          echo "built=true" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the APT repository
+        if: steps.repo.outputs.built == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: No APT repository this time
+        if: env.HAS_APT_KEY != 'true'
+        run: echo "::notice::APT_GPG_PRIVATE_KEY is not set, so only the release was published."
+
+  pages:
+    needs: deb
+    if: needs.deb.outputs.apt == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
