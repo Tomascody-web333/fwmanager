@@ -85,6 +85,22 @@ def test_desktop_entry_is_well_formed(staged):
     text = (staged / "usr/share/applications/org.fwmanager.App.desktop").read_text()
     assert text.startswith("[Desktop Entry]") and "Exec=fwmanager" in text
     assert "Categories=" in text
+    entry = dict(ln.split("=", 1) for ln in text.splitlines() if "=" in ln)
+    # The icon and the window class are the app id, so every desktop ties window and launcher.
+    assert entry["Icon"] == entry["StartupWMClass"] == "org.fwmanager.App"
+
+
+def test_the_icon_is_installed_in_every_form_desktops_look_for(staged):
+    stage(staged)
+    hicolor = staged / "usr/share/icons/hicolor"
+    assert (hicolor / "scalable/apps/org.fwmanager.App.svg").is_file()
+    assert (hicolor / "symbolic/apps/org.fwmanager.App-symbolic.svg").is_file()
+    assert (staged / "usr/share/pixmaps/org.fwmanager.App.png").is_file()
+    for size in (16, 22, 24, 32, 48, 64, 128, 256, 512):
+        png = hicolor / f"{size}x{size}/apps/org.fwmanager.App.png"
+        head = png.read_bytes()[:24]
+        assert head[:8] == b"\x89PNG\r\n\x1a\n", png
+        assert int.from_bytes(head[16:20], "big") == int.from_bytes(head[20:24], "big") == size
 
 
 def test_installed_files_are_not_group_or_world_writable(staged):

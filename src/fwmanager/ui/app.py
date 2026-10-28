@@ -12,12 +12,10 @@ from gi.repository import Adw, Gio  # noqa: E402
 
 from fwmanager.core.config import SYSTEM_CONFIG, resolve_language  # noqa: E402
 from fwmanager.i18n import _, set_language  # noqa: E402
+from fwmanager.ui import APP_ID, state  # noqa: E402
 from fwmanager.ui import settings as us  # noqa: E402
-from fwmanager.ui import state  # noqa: E402
 from fwmanager.ui.controller import Controller  # noqa: E402
 from fwmanager.ui.window import MainWindow  # noqa: E402
-
-APP_ID = "org.fwmanager.App"
 
 
 class FwApplication(Adw.Application):

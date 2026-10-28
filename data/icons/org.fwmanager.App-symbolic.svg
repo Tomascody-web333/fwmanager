@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- fwmanager symbolic icon (one colour, recoloured by the desktop): shield with a check. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <path fill="#2e3436" fill-rule="evenodd" d="M8 1 L14 3 V8 C14 11.3 11.6 13.7 8 15 C4.4 13.7 2 11.3 2 8 V3 Z M5.2 8.1 L4 9.3 L7 12.3 L12.2 6.1 L11 5 L7 9.8 Z"/>
+</svg>

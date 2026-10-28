@@ -67,6 +67,10 @@ rm -f "$ROOT/usr/local/bin/fwmanagerd" "$ROOT/usr/local/bin/fwmanager-cli" \
 rm -rf "$LIB" "$ROOT/usr/local/libexec/fwmanager"
 rmdir "$ROOT/usr/local/libexec" 2>/dev/null || true
 rm -f "$ROOT/usr/share/polkit-1/actions/org.fwmanager.setup.policy"
+rm -f "$ROOT"/usr/share/icons/hicolor/*/apps/org.fwmanager.App.png \
+      "$ROOT/usr/share/icons/hicolor/scalable/apps/org.fwmanager.App.svg" \
+      "$ROOT/usr/share/icons/hicolor/symbolic/apps/org.fwmanager.App-symbolic.svg" \
+      "$ROOT/usr/share/pixmaps/org.fwmanager.App.png"
 rm -f "$ROOT/etc/dbus-1/system.d/org.fwmanager.Control.conf" \
       "$ROOT/etc/systemd/system/fwmanagerd.service" \
       "$ROOT/etc/NetworkManager/dispatcher.d/90-fwmanager" \
@@ -84,6 +88,11 @@ if [ "$STAGED" -eq 0 ] && [ "$CREATED_GROUP" -eq 1 ]; then
     groupdel "$GROUP" 2>/dev/null \
         || say "Could not remove group $GROUP (still in use?)." \
                "Não foi possível remover o grupo $GROUP (ainda em uso?)."
+fi
+
+if [ "$STAGED" -eq 0 ]; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor 2>/dev/null || true
+    update-desktop-database -q /usr/share/applications 2>/dev/null || true
 fi
 
 if [ "$USE_SYSTEMD" -eq 1 ]; then

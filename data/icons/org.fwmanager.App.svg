@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- fwmanager application icon: a shield with a check mark on a blue tile. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#62a0ea"/>
+      <stop offset="1" stop-color="#1c71d8"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#deddda"/>
+    </linearGradient>
+  </defs>
+  <!-- tile, with a darker edge underneath for depth -->
+  <rect x="8" y="12" width="112" height="108" rx="24" fill="#1a5fb4"/>
+  <rect x="8" y="8" width="112" height="106" rx="24" fill="url(#tile)"/>
+  <!-- shield shadow, then the shield -->
+  <path d="M64 26 L96 37 V62 C96 82 82 95 64 103 C46 95 32 82 32 62 V37 Z" fill="#000000" opacity="0.18" transform="translate(0 3)"/>
+  <path d="M64 26 L96 37 V62 C96 82 82 95 64 103 C46 95 32 82 32 62 V37 Z" fill="url(#shield)"/>
+  <!-- check mark -->
+  <path d="M49 63 L60 74 L80 51" fill="none" stroke="#1c71d8" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

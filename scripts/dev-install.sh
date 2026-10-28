@@ -140,6 +140,31 @@ if [ -f "$REPO/data/applications/org.fwmanager.App.desktop" ]; then
     install -m 644 "$REPO/data/applications/org.fwmanager.App.desktop" "$ROOT/usr/share/applications/"
 fi
 
+# The icon, in every form a desktop may ask for: SVG (GNOME, KDE...), a one-colour symbolic
+# version (panels, notifications), PNG sizes (menus and docks that take no SVG) and a copy in
+# /usr/share/pixmaps (old menus).
+HICOLOR="$ROOT/usr/share/icons/hicolor"
+install -d -m 755 "$HICOLOR/scalable/apps" "$HICOLOR/symbolic/apps" "$ROOT/usr/share/pixmaps"
+install -m 644 "$REPO/data/icons/org.fwmanager.App.svg" "$HICOLOR/scalable/apps/"
+install -m 644 "$REPO/data/icons/org.fwmanager.App-symbolic.svg" "$HICOLOR/symbolic/apps/"
+ICON_TMP=$(mktemp -d)
+"$PYTHON" -I -c 'import sys; sys.path.insert(0, sys.argv[1]); from fwmanager.icon_build import main; sys.exit(main(sys.argv[2:]))' \
+    "$REPO/src" "$REPO/data/icons/org.fwmanager.App.svg" "$ICON_TMP" org.fwmanager.App
+for png in "$ICON_TMP"/*/apps/org.fwmanager.App.png; do
+    [ -f "$png" ] || continue
+    size=$(basename "$(dirname "$(dirname "$png")")")
+    install -d -m 755 "$HICOLOR/$size/apps"
+    install -m 644 "$png" "$HICOLOR/$size/apps/"
+done
+if [ -f "$ICON_TMP/128x128/apps/org.fwmanager.App.png" ]; then
+    install -m 644 "$ICON_TMP/128x128/apps/org.fwmanager.App.png" "$ROOT/usr/share/pixmaps/"
+fi
+rm -rf "$ICON_TMP"
+if [ "$STAGED" -eq 0 ]; then  # menus pick the new entry and icon up at once
+    gtk-update-icon-cache -q -t -f "$HICOLOR" 2>/dev/null || true
+    update-desktop-database -q "$ROOT/usr/share/applications" 2>/dev/null || true
+fi
+
 if [ -n "$LANG_CHOICE" ]; then
     install -d -m 755 "$ROOT/etc/fwmanager"
     printf 'lang = "%s"\n' "$LANG_CHOICE" > "$ROOT/etc/fwmanager/config.toml"

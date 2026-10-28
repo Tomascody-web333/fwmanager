@@ -39,12 +39,31 @@ def _adw_version() -> tuple[int, int] | None:
     return Adw.get_major_version(), Adw.get_minor_version()
 
 
+def _announce_identity() -> None:
+    """Before GTK starts: the name desktops use to tie this window to its launcher and icon.
+
+    Started through ``python -c``, the program would otherwise call itself "-c", and X11
+    desktops (XFCE, MATE, Cinnamon, KDE...) would show a generic icon in the task bar.
+    """
+    from gi.repository import GLib
+
+    from fwmanager.ui import APP_ID
+
+    GLib.set_prgname(APP_ID)
+    GLib.set_application_name("fwmanager")
+
+
 def _can_open_windows() -> bool:
     """False without a graphical session (over SSH, in a text console)."""
     from gi.repository import Gdk, Gtk
 
     # PyGObject's init_check can say yes with no display at all; the display is what counts.
-    return bool(Gtk.init_check()) and Gdk.Display.get_default() is not None
+    if not (Gtk.init_check() and Gdk.Display.get_default() is not None):
+        return False
+    from fwmanager.ui import APP_ID
+
+    Gtk.Window.set_default_icon_name(APP_ID)  # title bars and task bars that show a window icon
+    return True
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -58,6 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     if problem:
         print(problem, file=sys.stderr)
         return 1
+    _announce_identity()
     if not _can_open_windows():
         print(
             _(
