@@ -419,6 +419,9 @@ msgstr ""
 msgid "MQTT"
 msgstr ""
 
+msgid "Made by {author} with help of Claude Code"
+msgstr ""
+
 msgid "Medium"
 msgstr ""
 
@@ -591,6 +594,9 @@ msgid "Remember"
 msgstr ""
 
 msgid "Remember this choice for this network"
+msgstr ""
+
+msgid "Remember {profile} for this network ({network})? [Y/n] "
 msgstr ""
 
 msgid "Remembered networks"
@@ -896,6 +902,9 @@ msgstr ""
 msgid "Warning: {name} is also managing the firewall."
 msgstr ""
 
+msgid "Warning: {text}"
+msgstr ""
+
 msgid "Web server (HTTP/HTTPS)"
 msgstr ""
 
@@ -1071,6 +1080,12 @@ msgid "list the profiles and what each one lets in"
 msgstr ""
 
 msgid "machine-readable output"
+msgstr ""
+
+msgid "n"
+msgstr ""
+
+msgid "no"
 msgstr ""
 
 msgid "none"

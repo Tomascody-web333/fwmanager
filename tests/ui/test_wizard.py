@@ -383,3 +383,10 @@ def test_no_warning_on_a_wifi_with_a_password(make):
     goto_profile(e, CurrentNetwork("Casa", "Casa WiFi", "u-7", "802-11-wireless"))
     e.wizard._choice_rows["casa"].set_active(True)
     assert not e.wizard.open_warning.get_visible()
+
+
+def test_the_last_page_has_nothing_left_to_skip(make):
+    e = make(stage="profile")
+    assert e.wizard.skip_btn.get_visible()
+    e.wizard.go("done")
+    assert not e.wizard.skip_btn.get_visible()

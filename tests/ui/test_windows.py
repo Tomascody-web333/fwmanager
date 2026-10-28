@@ -527,3 +527,7 @@ def test_a_refused_setting_snaps_back_to_what_is_in_effect(env, monkeypatch):
     env.win.settings.router.set_active(True)
     pump(0.2)
     assert not env.win.settings.router.get_active()  # not left showing an unsaved choice
+
+
+def test_settings_end_with_the_credits(env):
+    assert "Made by Tomascody-web333 with help of Claude Code" in texts(env.win.settings)

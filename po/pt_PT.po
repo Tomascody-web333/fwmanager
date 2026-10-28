@@ -419,6 +419,9 @@ msgstr "Baixo"
 msgid "MQTT"
 msgstr "MQTT"
 
+msgid "Made by {author} with help of Claude Code"
+msgstr "Feito por {author} com a ajuda do Claude Code"
+
 msgid "Medium"
 msgstr "Médio"
 
@@ -592,6 +595,9 @@ msgstr "Memorizar"
 
 msgid "Remember this choice for this network"
 msgstr "Lembrar esta escolha para esta rede"
+
+msgid "Remember {profile} for this network ({network})? [Y/n] "
+msgstr "Lembrar {profile} para esta rede ({network})? [S/n] "
 
 msgid "Remembered networks"
 msgstr "Redes memorizadas"
@@ -896,6 +902,9 @@ msgstr "Aviso"
 msgid "Warning: {name} is also managing the firewall."
 msgstr "Aviso: o {name} também está a gerir a firewall."
 
+msgid "Warning: {text}"
+msgstr "Aviso: {text}"
+
 msgid "Web server (HTTP/HTTPS)"
 msgstr "Servidor web (HTTP/HTTPS)"
 
@@ -1072,6 +1081,12 @@ msgstr "listar os perfis e o que cada um deixa entrar"
 
 msgid "machine-readable output"
 msgstr "saída para programas (JSON)"
+
+msgid "n"
+msgstr "n"
+
+msgid "no"
+msgstr "não"
 
 msgid "none"
 msgstr "nenhum"

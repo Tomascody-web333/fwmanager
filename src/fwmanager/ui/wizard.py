@@ -11,6 +11,7 @@ from gi.repository import Adw, Gtk  # noqa: E402
 from fwmanager.i18n import _  # noqa: E402
 from fwmanager.ui import privileged, relaunch, setup_state, state  # noqa: E402
 from fwmanager.ui.common import (  # noqa: E402
+    app_icon_name,
     button,
     clear,
     label_for_screen_readers,
@@ -93,6 +94,7 @@ class SetupWizard(Adw.Bin):
     def go(self, stage: str) -> None:
         self.stack.set_visible_child_name(stage)
         self._on_stage(stage)
+        self.skip_btn.set_visible(stage != "done")  # nothing left to skip
         if stage == "requirements":
             self.refresh_requirements()
         elif stage == "profile":
@@ -106,7 +108,7 @@ class SetupWizard(Adw.Bin):
 
     def _welcome_page(self, user_settings) -> Adw.StatusPage:
         page = Adw.StatusPage(
-            icon_name="security-high-symbolic",
+            icon_name=app_icon_name(),
             title=_("Welcome to fwmanager"),
             description=_(
                 "A friendly face for the ufw firewall. Setup takes about a minute and "

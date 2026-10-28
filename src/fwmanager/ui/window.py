@@ -258,10 +258,20 @@ class MainWindow(Adw.ApplicationWindow):
     def open_uninstall(self):
         from fwmanager.ui.uninstall import UninstallDialog
 
-        dialog = UninstallDialog(self._removed, **self._uninstall_options)
+        options = {"on_busy": self._uninstalling, **self._uninstall_options}
+        dialog = UninstallDialog(self._removed, **options)
         dialog.present(self)
         self.uninstall_dialog = dialog
         return dialog
+
+    def _uninstalling(self, busy: bool) -> None:
+        """While the service is being removed, its absence is expected: no error screen."""
+        if busy:
+            self.detach()
+            self.controller.stop_polling()
+        elif self.on_snapshot not in self.controller.listeners:
+            self.controller.listeners.append(self.on_snapshot)
+            self.controller.start_polling()
 
     def _removed(self) -> None:
         """fwmanager is gone from the machine: there is nothing left to show."""

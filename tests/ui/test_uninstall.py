@@ -6,6 +6,7 @@ from helpers.gtk_tools import texts
 from helpers.shot import pump
 from test_wizard import Env
 
+from fwmanager.errors import FwError
 from fwmanager.i18n import set_language
 from fwmanager.ui import privileged
 from fwmanager.ui.controller import Controller
@@ -127,3 +128,24 @@ def test_a_wizard_already_choosing_a_profile_is_not_taken_away(gtk):
         assert e.win.wizard is not None
     finally:
         e.close()
+
+
+def test_the_service_going_away_mid_uninstall_shows_no_error_screen(win):
+    pending = []
+    win._uninstall_options["run"] = lambda fn, done: pending.append((fn, done))
+    d = win.open_uninstall()
+    d.start()  # the helper has not answered yet; the service is being stopped meanwhile
+    assert win.on_snapshot not in win.controller.listeners
+    win.daemon.error = FwError("gone", code="daemon_unavailable")
+    win.controller.refresh()
+    pump(0.2)
+    assert win.stack.get_visible_child_name() == "main"  # not "service not running"
+    assert not d.header.get_show_end_title_buttons()  # no close button that does nothing
+
+
+def test_a_cancelled_uninstall_follows_the_service_again(win):
+    win.helper_results.append(privileged.HelperResult(privileged.DISMISSED))
+    d = win.open_uninstall()
+    d.uninstall_btn.emit("clicked")
+    pump(0.2)
+    assert win.on_snapshot in win.controller.listeners and d.header.get_show_end_title_buttons()

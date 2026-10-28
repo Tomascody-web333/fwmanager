@@ -31,6 +31,7 @@ class World:
         self.service, self.listed, self.held, self.ufw = service, listed, held, ufw
         self.helper_calls, self.relaunches, self.answers = [], [], []
         self.helper_result = privileged.HelperResult(0)
+        self.network = None
 
     def client(self):
         if not self.service:
@@ -53,6 +54,7 @@ class World:
             relaunch=lambda args: self.relaunches.append(args) or True,
             ask=lambda prompt: self.answers.pop(0), interactive=lambda: interactive,
             env=env or {}, euid=lambda: euid,
+            current_network=lambda: self.network,
             as_root_setup=lambda env: self.helper_calls.append(("root-setup", env)) or 0,
             as_root_uninstall=lambda: self.helper_calls.append("root-uninstall") or 0,
         )  # fmt: skip
@@ -149,3 +151,22 @@ def test_a_failed_uninstall_shows_the_manual_command(capsys):
     w.helper_result = privileged.HelperResult(1)
     assert sc.uninstall(w.deps(), yes=True) == 1
     assert "/usr/local/libexec/fwmanager/uninstall" in capsys.readouterr().err
+
+
+def test_the_chosen_profile_is_remembered_for_this_network(capsys):
+    from fwmanager.ui.netinfo import WIFI, CurrentNetwork
+
+    w = World()
+    w.daemon.networks = []
+    w.network = CurrentNetwork("Home Wi-Fi", "Home Wi-Fi", "u-1", WIFI)
+    assert sc.setup(w.deps(), profile="home", yes=True) == 0
+    assert w.daemon.networks == [("Home Wi-Fi", "u-1", "casa")]
+
+
+def test_an_open_wifi_gets_the_same_warning_as_in_the_window(capsys):
+    from fwmanager.ui.netinfo import WIFI, CurrentNetwork
+
+    w = World()
+    w.network = CurrentNetwork("Cafe", "Cafe", "u-2", WIFI, open=True)
+    sc.setup(w.deps(), profile="home", yes=True)
+    assert "no password" in capsys.readouterr().out

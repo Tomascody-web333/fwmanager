@@ -419,6 +419,9 @@ msgstr "Low"
 msgid "MQTT"
 msgstr "MQTT"
 
+msgid "Made by {author} with help of Claude Code"
+msgstr "Made by {author} with help of Claude Code"
+
 msgid "Medium"
 msgstr "Medium"
 
@@ -592,6 +595,9 @@ msgstr "Remember"
 
 msgid "Remember this choice for this network"
 msgstr "Remember this choice for this network"
+
+msgid "Remember {profile} for this network ({network})? [Y/n] "
+msgstr "Remember {profile} for this network ({network})? [Y/n] "
 
 msgid "Remembered networks"
 msgstr "Remembered networks"
@@ -896,6 +902,9 @@ msgstr "Warning"
 msgid "Warning: {name} is also managing the firewall."
 msgstr "Warning: {name} is also managing the firewall."
 
+msgid "Warning: {text}"
+msgstr "Warning: {text}"
+
 msgid "Web server (HTTP/HTTPS)"
 msgstr "Web server (HTTP/HTTPS)"
 
@@ -1072,6 +1081,12 @@ msgstr "list the profiles and what each one lets in"
 
 msgid "machine-readable output"
 msgstr "machine-readable output"
+
+msgid "n"
+msgstr "n"
+
+msgid "no"
+msgstr "no"
 
 msgid "none"
 msgstr "none"

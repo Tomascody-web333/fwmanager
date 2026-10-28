@@ -41,8 +41,15 @@ class Deps:
     interactive: Callable[[], bool] = lambda: sys.stdin.isatty()
     env: dict = field(default_factory=lambda: dict(os.environ))
     euid: Callable[[], int] = os.geteuid
+    current_network: Callable[[], object] = lambda: _current_network()
     as_root_setup: Callable[[dict], int] = setup_helper.setup
     as_root_uninstall: Callable[[], int] = setup_helper.uninstall
+
+
+def _current_network():
+    from fwmanager.ui import netinfo
+
+    return netinfo.current_network()
 
 
 def _account(deps: Deps) -> str | None:
@@ -172,6 +179,10 @@ def _choose_profile(deps: Deps, client, profile: str | None, yes: bool) -> int:
         answer = deps.ask(_("Profile [{default}]: ").format(default=state.profile_title("publico")))
         profile = answer.strip() or "publico"
     profile = resolve_profile(profile, names)
+    net = deps.current_network()
+    warning = state.open_wifi_warning(net, profile)
+    if warning:
+        print(_("Warning: {text}").format(text=warning))
     if yes:
         client.apply_profile(profile)
         client.confirm()
@@ -180,8 +191,23 @@ def _choose_profile(deps: Deps, client, profile: str | None, yes: bool) -> int:
     else:
         code = _interactive_apply(client, profile)
     if code == EXIT_OK:
+        _remember(deps, client, net, profile, yes)
         print(_("You are all set. fwmanager switches profile by itself when you change network."))
     return code
+
+
+def _remember(deps: Deps, client, net, profile: str, yes: bool) -> None:
+    """Like the window: this network gets this profile from now on (unless they say no)."""
+    if net is None:
+        return
+    if not yes and deps.interactive():
+        question = _("Remember {profile} for this network ({network})? [Y/n] ").format(
+            profile=state.profile_title(profile), network=state.network_text(net)
+        )
+        if deps.ask(question).strip().lower() in ("n", "no", _("n"), _("no")):
+            return
+    client.set_network_profile(net.ssid, net.uuid, profile)
+    print(_("Remembered."))
 
 
 UNINSTALL_POINTS = (  # the same sentences as the window's uninstall dialog

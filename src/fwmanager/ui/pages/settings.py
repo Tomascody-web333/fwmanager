@@ -11,6 +11,7 @@ from gi.repository import Adw, Gtk  # noqa: E402
 from fwmanager.i18n import N_, _  # noqa: E402
 from fwmanager.ui.common import button, toast_error  # noqa: E402
 
+AUTHOR = "Tomascody-web333"
 LANGUAGES = (("pt", "Português"), ("en", "English"))  # always shown in their own language
 LOG_LEVELS = (("", N_("Off")), ("low", N_("Low")), ("medium", N_("Medium")), ("high", N_("High")))
 
@@ -82,6 +83,17 @@ class SettingsPage(Adw.PreferencesPage):
         row.add_suffix(self.uninstall_btn)
         remove.add(row)
         self.add(remove)
+
+        credits = Adw.PreferencesGroup()
+        self.credits = Gtk.Label(
+            label=_("Made by {author} with help of Claude Code").format(author=AUTHOR),
+            wrap=True,
+            justify=Gtk.Justification.CENTER,
+        )
+        self.credits.add_css_class("dim-label")
+        self.credits.add_css_class("caption")
+        credits.add(self.credits)
+        self.add(credits)
 
     def load(self) -> None:
         self._c.options(self._loaded)

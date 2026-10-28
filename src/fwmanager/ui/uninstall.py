@@ -27,15 +27,23 @@ def _run_uninstall_helper() -> privileged.HelperResult:
 
 
 class UninstallDialog(Adw.Dialog):
-    def __init__(self, on_removed, run_helper=_run_uninstall_helper, run=run_async) -> None:
+    def __init__(
+        self,
+        on_removed,
+        run_helper=_run_uninstall_helper,
+        run=run_async,
+        on_busy=lambda busy: None,
+    ) -> None:
         super().__init__(title=_("Uninstall fwmanager"), content_width=460, content_height=520)
         self._on_removed, self._run_helper, self._run = on_removed, run_helper, run
+        self._on_busy = on_busy  # the window stops following the service, which is going away
         self.stack = Gtk.Stack(transition_type=Gtk.StackTransitionType.CROSSFADE)
         self.stack.add_named(self._ask_page(), "ask")
         self.stack.add_named(self._working_page(), "working")
         self.stack.add_named(self._done_page(), "done")
         view = Adw.ToolbarView()
-        view.add_top_bar(Adw.HeaderBar())
+        self.header = Adw.HeaderBar()
+        view.add_top_bar(self.header)
         view.set_content(self.stack)
         self.set_child(view)
 
@@ -107,14 +115,18 @@ class UninstallDialog(Adw.Dialog):
 
     def start(self) -> None:
         self.set_can_close(False)  # half-way is not a moment to walk away
+        self.header.set_show_end_title_buttons(False)
+        self._on_busy(True)
         self.stack.set_visible_child_name("working")
         self._run(self._run_helper, self._finished)
 
     def _finished(self, result, error) -> None:
         self.set_can_close(True)
+        self.header.set_show_end_title_buttons(True)
         if error is None and result is not None and result.ok:
             self.stack.set_visible_child_name("done")
             return
+        self._on_busy(False)  # still installed: follow the service again
         self.stack.set_visible_child_name("ask")
         if error is not None or result is None:
             text = _("Something went wrong: {why}").format(why=_("Internal error."))

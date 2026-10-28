@@ -17,7 +17,7 @@ PLACEHOLDER = re.compile(r"\{[^{}]*\}")
 
 # Technical names that are the same in Portuguese.
 SAME_IN_PT = {"SSH", "FTP", "MQTT", "NFS", "Syncthing", "KDE Connect", "fwmanager", "Firewall",
-              "{before} → {after}", "Wi-Fi: {name}", "Firewall: {state}", "info"}  # fmt: skip
+              "{before} → {after}", "Wi-Fi: {name}", "Firewall: {state}", "info", "n"}  # fmt: skip
 
 
 @pytest.fixture(scope="module")

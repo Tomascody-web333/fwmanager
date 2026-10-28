@@ -96,6 +96,18 @@ def button(label: str, *, suggested: bool = False, flat: bool = False, icon: str
     return btn
 
 
+def app_icon_name() -> str:
+    """The app's own icon once installed; a generic shield when run from the source tree."""
+    from gi.repository import Gdk
+
+    from fwmanager.ui import APP_ID
+
+    display = Gdk.Display.get_default()
+    if display is not None and Gtk.IconTheme.get_for_display(display).has_icon(APP_ID):
+        return APP_ID
+    return "security-high-symbolic"
+
+
 def warning_row() -> Adw.ActionRow:
     """A row for a warning sentence, hidden until it has something to say."""
     row = Adw.ActionRow(title_lines=0, visible=False)

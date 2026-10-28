@@ -322,3 +322,63 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
         sh(UNINSTALL, "--no-systemd", prefix=netns_prefix)
         if shutil.which("groupdel"):
             subprocess.run(["groupdel", "fwmanager"], capture_output=True)
+
+
+INSTALLED = (
+    "/usr/local/bin/fwmanagerd",
+    "/usr/local/bin/fwmanager-cli",
+    "/usr/local/bin/fwmanager",
+    "/usr/local/lib/fwmanager",
+    "/usr/local/libexec/fwmanager",
+    "/etc/fwmanager",
+    "/etc/dbus-1/system.d/org.fwmanager.Control.conf",
+    "/etc/systemd/system/fwmanagerd.service",
+    "/etc/NetworkManager/dispatcher.d/90-fwmanager",
+    "/usr/share/applications/org.fwmanager.App.desktop",
+    "/usr/share/polkit-1/actions/org.fwmanager.setup.policy",
+    "/usr/share/icons/hicolor/scalable/apps/org.fwmanager.App.svg",
+    "/usr/share/icons/hicolor/48x48/apps/org.fwmanager.App.png",
+    "/usr/share/pixmaps/org.fwmanager.App.png",
+    "/usr/share/locale/pt_PT/LC_MESSAGES/fwmanager.mo",
+)
+
+
+@real
+def test_english_install_then_uninstall_from_the_installed_cli(netns_prefix):
+    """What a person does: install, use the command line in English, uninstall from the app."""
+    if not shutil.which("ufw"):
+        pytest.skip("ufw is not installed")
+    if any(g.gr_name == "fwmanager" for g in grp.getgrall()):
+        pytest.skip("group fwmanager already exists on this machine")
+    env = {"PATH": "/usr/bin:/bin:/usr/sbin:/sbin", "LANG": "en_GB.UTF-8"}
+    try:
+        r = sh(INSTALL, "--user", "nobody", "--lang", "en", "--no-systemd", lang="en_GB.UTF-8")
+        assert r.returncode == 0, r.stderr
+        assert "the setup continues in its window" in r.stdout
+        for path in INSTALLED:
+            assert os.path.exists(path), path
+        cli = "/usr/local/bin/fwmanager-cli"
+        h = subprocess.run([cli, "--help"], capture_output=True, text=True, env=env, timeout=30)
+        assert "usage:" in h.stdout and "setup" in h.stdout and "uninstall" in h.stdout
+        # No service is running in this container: the CLI says so, and what to do.
+        s = subprocess.run([cli, "status"], capture_output=True, text=True, env=env, timeout=30)
+        assert s.returncode == 1 and "systemctl enable --now fwmanagerd" in s.stderr
+        # Uninstall through the app itself (the same helper the Settings button uses).
+        u = subprocess.run(
+            [*netns_prefix, cli, "uninstall", "--yes"],
+            capture_output=True, text=True, env=env, timeout=180,
+        )  # fmt: skip
+        assert u.returncode == 0, u.stdout + u.stderr
+        assert "Rules you added to ufw yourself are kept." in u.stdout
+        assert "fwmanager was removed" in u.stdout
+        for path in INSTALLED:
+            assert not os.path.exists(path), path
+        assert not any(g.gr_name == "fwmanager" for g in grp.getgrall())
+        again = subprocess.run(
+            ["sh", "-c", "command -v fwmanager-cli fwmanager fwmanagerd"],
+            capture_output=True, text=True, env=env,
+        )  # fmt: skip
+        assert again.stdout.strip() == ""  # removed once, gone for the window and the CLI alike
+    finally:
+        sh(UNINSTALL, "--no-systemd", prefix=netns_prefix)
+        subprocess.run(["groupdel", "fwmanager"], capture_output=True)

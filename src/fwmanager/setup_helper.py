@@ -26,6 +26,8 @@ SERVICE = "fwmanagerd.service"
 UNINSTALLER = Path("/usr/local/libexec/fwmanager/uninstall")
 USERNAME_RE = re.compile(r"^[a-z_][a-z0-9_-]{0,31}\$?$")
 
+# Silent when it works (the window and the CLI say it in the person's language); a failure is
+# explained on stderr.
 EXIT_OK, EXIT_FAILED, EXIT_REFUSED, EXIT_USAGE = 0, 1, 3, 64
 
 TOOLS = {
@@ -88,7 +90,6 @@ def setup(
         if result.returncode != 0:
             print(f"fwmanager-setup: {Path(argv[0]).name} failed", file=sys.stderr)
             return EXIT_FAILED
-    print(f"fwmanager-setup: {user} may now use fwmanager")
     return EXIT_OK
 
 
@@ -108,7 +109,6 @@ def uninstall(
         print("fwmanager-setup: the uninstaller failed", file=sys.stderr)
         print(result.stderr[-2000:], file=sys.stderr)
         return EXIT_FAILED
-    print("fwmanager-setup: fwmanager was removed")
     return EXIT_OK
 
 
