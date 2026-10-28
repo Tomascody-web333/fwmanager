@@ -1,3 +1,13 @@
+fwmanager (1.1.0) noble; urgency=medium
+
+  * The PPA builds for every Ubuntu release from 24.04 on that is still
+    supported, not only 24.04.
+  * The whole test suite (ufw, D-Bus, the window, a real install) runs on
+    GitHub for every change and before every release.
+  * Package scripts use deb-systemd-invoke where they can; lintian is quiet.
+
+ -- Tomascody-web333 <general@homeserverlab.org>  Wed, 28 Oct 2026 18:23:34 +0000
+
 fwmanager (1.0.0) noble; urgency=medium
 
   * First release: profiles per network for ufw, a window and a command line,

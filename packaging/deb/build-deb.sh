@@ -40,8 +40,10 @@ fi
 VERSION=$(sed -n 's/^version = "\(.*\)"$/\1/p' "$REPO/pyproject.toml" | head -n 1)
 [ -n "$VERSION" ] || die "no version in pyproject.toml"
 CHANGELOG_VERSION=$(sed -n '1s/^fwmanager (\([^)]*\)).*/\1/p' "$REPO/debian/changelog")
-[ "$CHANGELOG_VERSION" = "$VERSION" ] \
-    || die "debian/changelog says $CHANGELOG_VERSION but pyproject.toml says $VERSION"
+case "$CHANGELOG_VERSION" in
+    "$VERSION"|"$VERSION"~*) ;;  # VERSION~ubuntu24.04.1: the same release, built for one Ubuntu
+    *) die "debian/changelog says $CHANGELOG_VERSION but pyproject.toml says $VERSION" ;;
+esac
 # Reproducible: every file gets the date of the last commit (or now, outside git).
 SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -C "$REPO" log -1 --format=%ct 2>/dev/null || date +%s)}
 export SOURCE_DATE_EPOCH
@@ -136,13 +138,17 @@ install -d "$DOC"
 install -m 644 "$REPO/README.md" "$REPO/README.pt.md" "$REPO/debian/copyright" "$DOC/"
 gzip -n -9 -c "$REPO/debian/changelog" > "$DOC/changelog.gz"
 chmod 644 "$DOC/changelog.gz"
+install -d "$PKG/usr/share/lintian/overrides"
+install -m 644 "$REPO/debian/fwmanager.lintian-overrides" "$PKG/usr/share/lintian/overrides/fwmanager"
 
 # -- package metadata ---
 install -d "$PKG/DEBIAN"
 SIZE=$(du -s -k --exclude=DEBIAN "$PKG" | cut -f1)
 sed "s/@VERSION@/$VERSION/; s/@SIZE@/$SIZE/" "$HERE/control.in" > "$PKG/DEBIAN/control"
 for script in postinst prerm postrm; do
-    install -m 755 "$REPO/debian/$script" "$PKG/DEBIAN/$script"
+    # Without debhelper there is nothing to put where #DEBHELPER# stands: drop the marker.
+    sed '/^# Lines debhelper adds/d; /^#DEBHELPER#$/d' "$REPO/debian/$script" > "$PKG/DEBIAN/$script"
+    chmod 755 "$PKG/DEBIAN/$script"
 done
 (cd "$PKG" && find . -path ./DEBIAN -prune -o -type f -print | sed 's|^\./||' | LC_ALL=C sort \
     | xargs md5sum) > "$PKG/DEBIAN/md5sums"

@@ -189,10 +189,17 @@ Precisa, em **Settings → Secrets and variables → Actions**, de:
 | `APT_GPG_PASSPHRASE` | secret | a palavra-passe dela, se tiver |
 | `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
 | `APT_GPG_KEY_ID` | variable | opcional: que chave assina, se o secret tiver várias |
+| `LAUNCHPAD_SERIES` | variable | opcional: que versões do Ubuntu, por exemplo `noble=24.04 resolute=26.04` |
 
 O GitHub Pages tem de usar **Source: GitHub Actions**. Sem a chave só a release é publicada;
-sem `LAUNCHPAD_PPA` o PPA é saltado. O Launchpad constrói para o Ubuntu 24.04 (noble); para
-outras versões do Ubuntu, use **Copy packages** na página do PPA.
+sem `LAUNCHPAD_PPA` o PPA é saltado. O PPA recebe um envio por cada versão do Ubuntu a partir
+da 24.04 que o Launchpad ainda constrói (perguntado ao Launchpad de cada vez), como
+`<versão>~ubuntu<versão-do-ubuntu>.1`, para uma versão mais nova do Ubuntu receber sempre a
+construção mais nova.
+
+Cada push e pull request corre também todos os testes no GitHub (`tests.yml`): como root, com
+o ufw em namespaces de rede, as janelas num ecrã virtual e uma instalação real do pacote. Um
+teste que fosse saltado lá falha, e uma release só começa depois de todos passarem.
 
 Cada parte também corre à mão:
 

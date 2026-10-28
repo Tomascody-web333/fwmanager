@@ -182,10 +182,17 @@ It needs, in **Settings → Secrets and variables → Actions**:
 | `APT_GPG_PASSPHRASE` | secret | its passphrase, if it has one |
 | `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
 | `APT_GPG_KEY_ID` | variable | optional: which key signs, if the secret holds several |
+| `LAUNCHPAD_SERIES` | variable | optional: which Ubuntu releases, e.g. `noble=24.04 resolute=26.04` |
 
 GitHub Pages must use **Source: GitHub Actions**. Without the key only the release is
-published; without `LAUNCHPAD_PPA` the PPA is skipped. Launchpad builds for Ubuntu 24.04
-(noble); to offer a newer Ubuntu, use **Copy packages** on the PPA page.
+published; without `LAUNCHPAD_PPA` the PPA is skipped. The PPA gets one upload per Ubuntu
+release from 24.04 on that Launchpad still builds for (asked from Launchpad each time), as
+`<version>~ubuntu<release>.1`, so a newer Ubuntu always gets the newer build.
+
+Every push and pull request also runs the whole test suite on GitHub (`tests.yml`): as root,
+with ufw in network namespaces, the windows on a virtual screen and a real install of the
+package. A test that would be skipped there fails instead, and a release only starts once
+they all pass.
 
 The pieces can also run by hand:
 

@@ -1,12 +1,15 @@
 # Push a tag such as 1.0.0 (the version in pyproject.toml), or run it from the Actions tab with
-# that version: this builds the .deb, checks it, and publishes it with SHA256SUMS as a GitHub
-# release (creating the tag on this commit when it does not exist yet).
+# that version: once every test passes (tests.yml), this builds the .deb, checks it, and
+# publishes it with SHA256SUMS as a GitHub release (creating the tag on this commit when it does
+# not exist yet).
 #
 # With the secret APT_GPG_PRIVATE_KEY set (and APT_GPG_PASSPHRASE if the key has one), it also
 # rebuilds the APT repository from every release, signs it with that key and publishes it on
 # GitHub Pages. If that secret holds more than one key, the variable APT_GPG_KEY_ID says which
 # one signs. With the variable LAUNCHPAD_PPA ("launchpad-user/ppa-name") set as well, the source
-# package is signed with the same key and uploaded to that PPA, where Launchpad builds it.
+# package is signed with the same key and uploaded to that PPA, where Launchpad builds it, once
+# for every supported Ubuntu from 24.04 on (or the ones in the variable LAUNCHPAD_SERIES,
+# "noble=24.04 resolute=26.04").
 name: Release
 
 on:
@@ -22,7 +25,11 @@ permissions:
   contents: write
 
 jobs:
+  tests:
+    uses: ./.github/workflows/tests.yml
+
   deb:
+    needs: tests
     runs-on: ubuntu-24.04
     env:
       TAG: ${{ inputs.version || github.ref_name }}
@@ -36,8 +43,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            python3-gi gir1.2-gdkpixbuf-2.0 librsvg2-common python3-pytest \
-            gir1.2-gtk-4.0 gir1.2-adw-1 apt-utils
+            python3-gi gir1.2-gdkpixbuf-2.0 librsvg2-common apt-utils
 
       - name: The tag matches the version
         run: |
@@ -46,10 +52,6 @@ jobs:
             echo "::error::release $TAG, but pyproject.toml says $version"
             exit 1
           fi
-
-      - name: Unit tests and package tests
-        # As root: some tests read a copy of /etc/ufw, which only root may read.
-        run: sudo /usr/bin/python3 -m pytest -q -p no:cacheprovider tests/unit tests/install
 
       - name: Build
         run: packaging/deb/build-deb.sh --out dist
@@ -112,6 +114,7 @@ jobs:
         env:
           APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
           LAUNCHPAD_PPA: ${{ vars.LAUNCHPAD_PPA }}
+          LAUNCHPAD_SERIES: ${{ vars.LAUNCHPAD_SERIES }}
         run: |
           sudo apt-get install -y --no-install-recommends debhelper dpkg-dev dput
           packaging/ppa/upload.sh "$LAUNCHPAD_PPA" "$APT_KEY"
