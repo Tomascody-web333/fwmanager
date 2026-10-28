@@ -65,8 +65,13 @@ jobs:
         run: |
           version=${TAG#v}
           sed "s/@VERSION@/$version/g" packaging/deb/release-notes.md > dist/notes.md
-          gh release create "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --target "$GITHUB_SHA" \
-            --title "fwmanager $version" --notes-file dist/notes.md
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Made by hand already: replace its files with these, keep its text.
+            gh release upload "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --target "$GITHUB_SHA" \
+              --title "fwmanager $version" --notes-file dist/notes.md
+          fi
 
       - name: Import the signing key
         if: env.HAS_APT_KEY == 'true'
