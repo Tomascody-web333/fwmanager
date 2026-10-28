@@ -120,3 +120,21 @@ def test_errors_say_what_to_do_next(monkeypatch, capsys):
     assert cli.main(["status"]) == 1
     err = capsys.readouterr().err
     assert "not allowed" in err and "usermod -aG fwmanager" in err
+
+
+def test_profiles_are_shown_and_typed_in_the_persons_language(tmp_path):
+    from pathlib import Path
+
+    from fwmanager import i18n_build
+
+    assert [cli._profile_label(n) for n in NAMES] == ["Home", "Work", "Public", "Custom"]
+    assert [cli.command_name(n) for n in NAMES] == ["home", "work", "public", "custom"]
+    assert cli.command_name("mine") == "mine"  # a name nobody translated stays as it is
+    po = Path(__file__).resolve().parents[2] / "po"
+    i18n_build.main(["compile", str(po), str(tmp_path)])
+    set_language("pt", str(tmp_path))
+    try:
+        assert [cli.command_name(n) for n in NAMES] == [
+            "casa", "trabalho", "publico", "personalizado"]  # fmt: skip
+    finally:
+        set_language(None)

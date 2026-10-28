@@ -5,8 +5,8 @@ msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit
 msgid "%(prog)s: error: %(message)s\n"
 msgstr "%(prog)s: error: %(message)s\n"
 
-msgid "* = in use. Switch with: fwmanager-cli apply NAME"
-msgstr "* = in use. Switch with: fwmanager-cli apply NAME"
+msgid "* = in use. Switch with: fwmanager-cli apply {names}"
+msgstr "* = in use. Switch with: fwmanager-cli apply {names}"
 
 msgid "A change was undone"
 msgstr "A change was undone"

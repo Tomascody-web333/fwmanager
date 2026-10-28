@@ -192,11 +192,12 @@ def test_cli_speaks_plainly_and_understands_english_names(daemon, capsys):
     capsys.readouterr()
     assert cli_main([*bus, "status"]) == 0
     out = capsys.readouterr().out
-    assert "Firewall: on" in out and "Profile in use: Home (casa)" in out
+    assert "Firewall: on" in out and "Profile in use: Home" in out and "casa" not in out
     assert "from the local network only" in out
     assert cli_main([*bus, "profiles"]) == 0
     out = capsys.readouterr().out
-    assert "* Home (casa)" in out and "Lets nothing in." in out  # Public
+    assert "* Home:" in out and "Lets nothing in." in out  # Public
+    assert "fwmanager-cli apply home|work|public|custom" in out  # English names to type
     assert cli_main([*bus, "networks", "list"]) == 0
     assert "No networks remembered yet" in capsys.readouterr().out
     assert cli_main([*bus, "apply", "nope", "--yes"]) == 1
@@ -243,7 +244,7 @@ def test_cli_edits_what_a_profile_blocks_and_restores_it(daemon, capsys):
     assert set(p["services"]) == {"samba", "web"} and p["ping"] is False
     assert p["source_kind"] == "cidrs" and p["cidrs"] == ["192.168.1.0/24"] and p["customized"]
     out = capsys.readouterr().out
-    assert "Saved. Now Work (trabalho):" in out and "only from the networks you chose" in out
+    assert "Saved. Now Work:" in out and "only from the networks you chose" in out
     assert cli_main([*bus, "edit", "work", "--allow", "nope"]) == 1
     err = capsys.readouterr().err
     assert "Unknown service: nope" in err and "ssh" in err  # and what can be used

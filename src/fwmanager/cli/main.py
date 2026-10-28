@@ -149,8 +149,13 @@ def resolve_profile(arg: str, names: list[str]) -> str:
 
 
 def _profile_label(name: str) -> str:
-    title = state.profile_title(name)
-    return name if title == name else f"{title} ({name})"
+    """How a profile is called in the person's language: Home, Casa, Public, Público..."""
+    return state.profile_title(name)
+
+
+def command_name(name: str) -> str:
+    """What to type for it, in the same language: home / casa, public / publico."""
+    return _fold(state.profile_title(name))
 
 
 class _Tracking:
@@ -289,7 +294,8 @@ def _print_profiles(client) -> None:
         hint = state.profile_hint(name)
         print(f"{mark} {_profile_label(name)}" + (f": {hint}" if hint else ""))
         print("    " + state.describe_profile(client.get_profile(name), titles))
-    print(_("* = in use. Switch with: fwmanager-cli apply NAME"))
+    names = "|".join(command_name(n) for n in ordered)
+    print(_("* = in use. Switch with: fwmanager-cli apply {names}").format(names=names))
 
 
 def resolve_service(arg: str, titles: dict[str, str]) -> str:
@@ -340,7 +346,7 @@ def _edit_profile(client, args: argparse.Namespace) -> int:
     if client.status()["active_profile"] == args.profile:
         print(
             _("It is in use: apply it again to use the changes: fwmanager-cli apply {p}").format(
-                p=args.profile
+                p=command_name(args.profile)
             )
         )
     return EXIT_OK

@@ -3,7 +3,7 @@
 **English** · [Português](README.pt.md)
 
 A beginner-friendly graphical interface for **ufw**. It is not a firewall of its own: it only
-makes ufw easier to use. Pick a profile (`casa`, `trabalho`, `publico`), let the app switch
+makes ufw easier to use. Pick a profile (**Home**, **Work**, **Public**), let the app switch
 profile by itself when you change Wi-Fi, and rely on a safety net that undoes any change that
 cuts your connection.
 
@@ -54,7 +54,7 @@ NetworkManager dispatcher (root)  ─┘            only fixed commands
   If you do not confirm, the previous configuration is restored byte for byte.
 - **Per-network profiles**: the NetworkManager dispatcher applies the profile mapped to the
   network that just connected, then checks the gateway is still reachable; if not, it reverts.
-  A Wi-Fi or mobile network with no profile gets `publico`; a cable with no profile keeps the
+  A Wi-Fi or mobile network with no profile gets **Public**; a cable with no profile keeps the
   current one, so plugging in never locks out an SSH session.
 - **The daemon never accepts rule text.** Clients can only call fixed commands (apply a
   profile by name, confirm, roll back, read state); every argument is validated, and the
@@ -146,10 +146,10 @@ app's Uninstall button and `fwmanager-cli uninstall` run) removes the files, fwm
 switches ufw off again **only if fwmanager was the one that turned it on**, so the machine is
 never left filtering with nobody managing it. A ufw you enabled yourself stays on.
 
-> **Warning:** on first start with no saved state the daemon applies `publico` (nothing
+> **Warning:** on first start with no saved state the daemon applies **Public** (nothing
 > incoming is allowed). If you install over SSH the installer therefore leaves the service
 > stopped (override with `--allow-ssh-lockout`); start it from the machine itself, or confirm a
-> profile that allows SSH first (`fwmanager-cli apply casa`, then `confirm`).
+> profile that allows SSH first (`fwmanager-cli apply home`, then `confirm`).
 
 At boot the daemon re-applies the last confirmed profile with no timer. If `firewalld` is
 active it applies nothing and the interface explains why.
@@ -157,8 +157,8 @@ active it applies nothing and the interface explains why.
 ## Command line
 
 `fwmanager-cli` does what the window does, in a terminal: for servers, SSH sessions, older
-systems without libadwaita 1.5, or scripts. Profiles can be typed in English or Portuguese
-(`home`, `casa`, `Público`...).
+systems without libadwaita 1.5, or scripts. Profiles are typed by their English names (`home`, `work`, `public`,
+`custom`); the Portuguese ones work too.
 
 ```sh
 fwmanager-cli setup               # first-run setup, as in the window
@@ -177,8 +177,8 @@ Ctrl+C during `apply` or `test-policy` undoes the change at once. `--json` on `s
 ## Testing a policy before you trust it
 
 ```sh
-fwmanager-cli test-policy casa --static   # analyse only, changes nothing
-fwmanager-cli test-policy casa            # analyse + live test (applied for seconds, then reverted)
+fwmanager-cli test-policy home --static   # analyse only, changes nothing
+fwmanager-cli test-policy home            # analyse + live test (applied for seconds, then reverted)
 ```
 
 Exit code: `0` safe, `2` safe with warnings, `3` unsafe (would break something), `1` could not run.

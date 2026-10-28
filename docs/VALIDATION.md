@@ -27,9 +27,9 @@ Do this in a VM with a desktop session, **from its console, not over SSH**. Take
 | 2 | First-run wizard | open `fwmanager` from the menu | Wizard lists the missing items; **Fix this** shows one polkit prompt; afterwards fwmanager restarts itself and shows the profile choice |
 | 3 | Polkit denied | cancel the prompt, or use a non-admin account | A clear message and the commands to run instead; nothing changed |
 | 4 | systemd hardening | `systemctl status fwmanagerd`, `journalctl -u fwmanagerd` | Active, no “permission denied” on `/etc/ufw`, `/run`, netlink |
-| 5 | Profile switch | apply `casa`, confirm; apply `trabalho`, wait 30 s | Confirmed profile stays; the unconfirmed one is undone |
+| 5 | Profile switch | apply **Home**, confirm; apply **Work**, wait 30 s | Confirmed profile stays; the unconfirmed one is undone |
 | 6 | NetworkManager | connect to a second Wi-Fi mapped to another profile | The profile follows the network; the gateway stays reachable |
-| 7 | DHCP | `sudo dhclient -r && sudo dhclient` under `publico` | A lease is obtained |
+| 7 | DHCP | `sudo dhclient -r && sudo dhclient` under **Public** | A lease is obtained |
 | 8 | IPv6 | on a host with IPv6: `ping -6`, then **Test** | Neighbour discovery works; the test reports no breakage |
 | 9 | Policy test | **Test** on every profile | Safe, or warnings that match reality |
 | 10 | Desktop look | light/dark theme, 200 % scale, narrow window, Orca | Readable, nothing clipped, page switcher moves to the bottom |
