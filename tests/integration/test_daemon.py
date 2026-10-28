@@ -178,4 +178,52 @@ def test_cli_end_to_end(daemon, capsys):
 
 def test_cli_without_daemon(private_bus, capsys):
     assert cli_main(["--bus-address", private_bus, "status"]) == 1
-    assert "not running" in capsys.readouterr().err
+    err = capsys.readouterr().err
+    assert "not running" in err and "systemctl enable --now fwmanagerd" in err  # what to do
+
+
+def test_cli_speaks_plainly_and_understands_english_names(daemon, capsys):
+    bus = ["--bus-address", daemon.bus]
+    assert cli_main([*bus, "apply", "Home", "--yes"]) == 0  # "casa" in English
+    capsys.readouterr()
+    assert cli_main([*bus, "status"]) == 0
+    out = capsys.readouterr().out
+    assert "Firewall: on" in out and "Profile in use: Home (casa)" in out
+    assert "from the local network only" in out
+    assert cli_main([*bus, "profiles"]) == 0
+    out = capsys.readouterr().out
+    assert "* Home (casa)" in out and "Lets nothing in." in out  # Public
+    assert cli_main([*bus, "networks", "list"]) == 0
+    assert "No networks remembered yet" in capsys.readouterr().out
+    assert cli_main([*bus, "apply", "nope", "--yes"]) == 1
+    assert "fwmanager-cli profiles" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("command", [["apply", "trabalho"], ["test-policy", "trabalho"]])
+def test_ctrl_c_undoes_the_change_at_once(
+    nft, netns_prefix, private_bus, ufw_root, tmp_path, command
+):
+    import os
+    import subprocess
+    import sys
+
+    from helpers.harness import ROOT
+
+    # A long timeout: only the CLI's own rollback can explain an immediate undo.
+    d = Daemon(netns_prefix, private_bus, ufw_root, timeout=60, state_dir=tmp_path / "s")
+    try:
+        p = subprocess.Popen(
+            [*netns_prefix, sys.executable, "-m", "fwmanager.cli.main",
+             "--bus-address", private_bus, *command],
+            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+        )  # fmt: skip
+        assert wait_until(lambda: d.client.status()["pending_profile"] == "trabalho", 20)
+        p.send_signal(signal.SIGINT)
+        _out, err = p.communicate(timeout=30)
+        assert p.returncode == 130 and "Traceback" not in err, err
+        st = d.client.status()
+        assert st["pending_profile"] == "" and st["active_profile"] == "publico"
+        assert d.fp() == d.initial
+    finally:
+        d.stop()

@@ -130,7 +130,7 @@ def _describe(rule: Rule) -> str:
 def _listed(rules: list[Rule]) -> str:
     names = [_describe(r) for r in rules[:MAX_LISTED]]
     more = len(rules) - MAX_LISTED
-    return "; ".join(names) + (f" (and {more} more)" if more > 0 else "")
+    return "; ".join(names) + (f" (+{more})" if more > 0 else "")  # no words: any language
 
 
 def exposure_findings(profile: Profile) -> list[Finding]:

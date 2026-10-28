@@ -86,6 +86,15 @@ def describe_finding(code: str, fallback: str = "") -> str:
     return _(FINDINGS[code]) if code in FINDINGS else fallback or code
 
 
+# Findings whose detail is a list of rules ("10.0.0.0/8 → tcp 22"), the same in every language.
+LISTED_DETAIL = ("will_add", "will_remove")
+
+
+def finding_detail(code: str, detail: str) -> str:
+    """The part of a finding worth showing under its sentence, or an empty string."""
+    return detail if code in LISTED_DETAIL else ""
+
+
 def describe_probe(name: str) -> str:
     return _(PROBES[name]) if name in PROBES else name
 

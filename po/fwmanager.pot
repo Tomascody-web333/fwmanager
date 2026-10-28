@@ -2,6 +2,12 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: \n"
 
+msgid "%(prog)s: error: %(message)s\n"
+msgstr ""
+
+msgid "* = in use. Switch with: fwmanager-cli apply NAME"
+msgstr ""
+
 msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 msgstr ""
 
@@ -11,10 +17,10 @@ msgstr ""
 msgid "A shared network at work or school."
 msgstr ""
 
-msgid "Accept connections from"
+msgid "ACTION"
 msgstr ""
 
-msgid "Active profile: {p}"
+msgid "Accept connections from"
 msgstr ""
 
 msgid "Add"
@@ -113,10 +119,19 @@ msgstr ""
 msgid "Broken"
 msgstr ""
 
+msgid "COMMAND"
+msgstr ""
+
 msgid "Cancel"
 msgstr ""
 
+msgid "Cancelled."
+msgstr ""
+
 msgid "Cancelled. Nothing was changed."
+msgstr ""
+
+msgid "Cancelled. Previous rules restored."
 msgstr ""
 
 msgid "Change what this profile lets in"
@@ -156,6 +171,9 @@ msgid "Close {service} in every profile"
 msgstr ""
 
 msgid "Command copied"
+msgstr ""
+
+msgid "Command line for fwmanager, a friendly interface for the ufw firewall. A change is undone after 30 seconds unless you confirm it."
 msgstr ""
 
 msgid "Command to run"
@@ -242,13 +260,16 @@ msgstr ""
 msgid "Firewall"
 msgstr ""
 
-msgid "Firewall manager client"
+msgid "Firewall: {state}"
 msgstr ""
 
 msgid "Fix this"
 msgstr ""
 
 msgid "Forget this network"
+msgstr ""
+
+msgid "Forgotten."
 msgstr ""
 
 msgid "General"
@@ -332,6 +353,9 @@ msgstr ""
 msgid "KDE Connect"
 msgstr ""
 
+msgid "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
+msgstr ""
+
 msgid "Language"
 msgstr ""
 
@@ -386,6 +410,9 @@ msgstr ""
 msgid "Needs attention"
 msgstr ""
 
+msgid "NetworkManager connection UUID"
+msgstr ""
+
 msgid "Networks"
 msgstr ""
 
@@ -393,6 +420,9 @@ msgid "Networks (e.g. 192.168.1.0/24)"
 msgstr ""
 
 msgid "No blocked attempts found."
+msgstr ""
+
+msgid "No networks remembered yet. Unknown Wi-Fi networks use Public."
 msgstr ""
 
 msgid "No other firewall manager is in the way"
@@ -449,10 +479,16 @@ msgstr ""
 msgid "Open fwmanager"
 msgstr ""
 
+msgid "Open fwmanager from the applications menu to set up your account, or ask an administrator to run: sudo usermod -aG fwmanager YOUR_USER"
+msgstr ""
+
 msgid "Options"
 msgstr ""
 
 msgid "Overview"
+msgstr ""
+
+msgid "PROFILE"
 msgstr ""
 
 msgid "Pick how open this computer should be. After a switch you have 30 seconds to confirm that everything still works, otherwise it is undone."
@@ -482,10 +518,16 @@ msgstr ""
 msgid "Profile for {name}"
 msgstr ""
 
+msgid "Profile in use: {p}"
+msgstr ""
+
 msgid "Profile saved. Use it again to apply the changes."
 msgstr ""
 
 msgid "Profiles"
+msgstr ""
+
+msgid "Profiles can be named in English or Portuguese (home, casa, Público...). Exit codes: 0 done, 1 error, 2 change undone or warnings, 3 unsafe, 130 cancelled."
 msgstr ""
 
 msgid "Protected with the {profile} profile"
@@ -605,6 +647,12 @@ msgstr ""
 msgid "Save rule"
 msgstr ""
 
+msgid "Saved."
+msgstr ""
+
+msgid "See the names with: fwmanager-cli profiles"
+msgstr ""
+
 msgid "Service"
 msgstr ""
 
@@ -633,6 +681,9 @@ msgid "Something went wrong: {why}"
 msgstr ""
 
 msgid "Specific networks"
+msgstr ""
+
+msgid "Start it with: sudo systemctl enable --now fwmanagerd"
 msgstr ""
 
 msgid "Status"
@@ -764,6 +815,9 @@ msgstr ""
 msgid "Warning"
 msgstr ""
 
+msgid "Warning: {name} is also managing the firewall."
+msgstr ""
+
 msgid "Web server (HTTP/HTTPS)"
 msgstr ""
 
@@ -845,7 +899,7 @@ msgstr ""
 msgid "accepts connections from anywhere"
 msgstr ""
 
-msgid "apply a profile (auto-reverts unless confirmed)"
+msgid "argument %(argument_name)s: %(message)s"
 msgstr ""
 
 msgid "check that a profile will not break the machine"
@@ -854,13 +908,22 @@ msgstr ""
 msgid "closes {services}"
 msgstr ""
 
+msgid "commands"
+msgstr ""
+
 msgid "confirm immediately, no countdown"
 msgstr ""
 
-msgid "confirm the pending change"
+msgid "error"
+msgstr ""
+
+msgid "expected one argument"
 msgstr ""
 
 msgid "fails"
+msgstr ""
+
+msgid "forget a network"
 msgstr ""
 
 msgid "fwmanager"
@@ -887,19 +950,34 @@ msgstr ""
 msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
 msgstr ""
 
+msgid "info"
+msgstr ""
+
+msgid "invalid choice: %(value)r (choose from %(choices)s)"
+msgstr ""
+
+msgid "keep the change that is waiting for confirmation"
+msgstr ""
+
 msgid "libvirt manages its own rules (they are left untouched)."
 msgstr ""
 
-msgid "list available profiles"
+msgid "list the profiles and what each one lets in"
 msgstr ""
 
-msgid "manage the network to profile mapping"
+msgid "machine-readable output"
 msgstr ""
 
 msgid "none"
 msgstr ""
 
 msgid "not applicable"
+msgstr ""
+
+msgid "off"
+msgstr ""
+
+msgid "on"
 msgstr ""
 
 msgid "only accepts connections from the local network"
@@ -914,19 +992,34 @@ msgstr ""
 msgid "opens {services}"
 msgstr ""
 
+msgid "options"
+msgstr ""
+
+msgid "positional arguments"
+msgstr ""
+
 msgid "profile name"
 msgstr ""
 
-msgid "revert the pending change"
+msgid "show the firewall state"
 msgstr ""
 
-msgid "show the firewall state"
+msgid "show the remembered networks"
+msgstr ""
+
+msgid "show this help message and exit"
 msgstr ""
 
 msgid "starts answering ping"
 msgstr ""
 
 msgid "stops answering ping"
+msgstr ""
+
+msgid "switch to a profile (undone unless you confirm)"
+msgstr ""
+
+msgid "the following arguments are required: %s"
 msgstr ""
 
 msgid "turns mDNS off"
@@ -957,6 +1050,24 @@ msgid "ufw rejected the change."
 msgstr ""
 
 msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr ""
+
+msgid "undo the change that is waiting for confirmation"
+msgstr ""
+
+msgid "unrecognized arguments: %s"
+msgstr ""
+
+msgid "usage: "
+msgstr ""
+
+msgid "use a profile on a network"
+msgstr ""
+
+msgid "warning"
+msgstr ""
+
+msgid "which profile to use on which network"
 msgstr ""
 
 msgid "works"

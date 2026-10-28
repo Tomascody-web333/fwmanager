@@ -10,7 +10,7 @@ from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.errors import FwError  # noqa: E402
 from fwmanager.i18n import N_, _  # noqa: E402
-from fwmanager.messages import describe_finding, describe_probe  # noqa: E402
+from fwmanager.messages import describe_finding, describe_probe, finding_detail  # noqa: E402
 from fwmanager.ui import rule_text, state  # noqa: E402
 from fwmanager.ui.common import (  # noqa: E402
     SEVERITY_ICON,
@@ -213,8 +213,7 @@ class PolicyTestDialog(Adw.Dialog):
             row = Adw.ActionRow(
                 title=describe_finding(f.code, f.detail), subtitle_lines=3, title_lines=3
             )
-            if f.code in ("will_add", "will_remove"):
-                row.set_subtitle(f.detail)
+            row.set_subtitle(finding_detail(f.code, f.detail))
             icon = Gtk.Image.new_from_icon_name(SEVERITY_ICON[f.severity])
             icon.add_css_class(
                 {"error": "error", "warning": "warning", "info": "success"}[f.severity]

@@ -265,7 +265,7 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
             ["/usr/local/bin/fwmanager-cli", "--help"],
             capture_output=True, text=True, timeout=30, env=env,
         )  # fmt: skip
-        assert "Cliente do gestor de firewall" in pt.stdout, pt.stdout + pt.stderr
+        assert "Linha de comandos do fwmanager" in pt.stdout, pt.stdout + pt.stderr
         # The installed copy can clean a ufw tree (relocated, so the real /etc/ufw is untouched).
         root = tmp_path / "ufwroot"
         (root / "etc/default").mkdir(parents=True)

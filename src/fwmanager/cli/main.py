@@ -7,54 +7,136 @@ import json
 import logging
 import os
 import sys
+import unicodedata
 
+from fwmanager.cli import argparse_text
 from fwmanager.client import Client
 from fwmanager.core.config import SYSTEM_CONFIG, resolve_language
 from fwmanager.core.services import load_catalog
 from fwmanager.errors import FwError
 from fwmanager.i18n import N_, _, set_language
-from fwmanager.messages import describe_error, describe_finding, describe_probe
+from fwmanager.messages import describe_error, describe_finding, describe_probe, finding_detail
+from fwmanager.ui import state
 from fwmanager.ui.settings import settings_path
 
 EXIT_OK, EXIT_ERROR, EXIT_REVERTED = 0, 1, 2
+EXIT_INTERRUPTED = 130  # the shell's convention for Ctrl+C
+
+# What to do next, after the error itself.
+HINTS = {
+    "unknown_profile": N_("See the names with: fwmanager-cli profiles"),
+    "invalid_profile": N_("See the names with: fwmanager-cli profiles"),
+    "access_denied": N_(
+        "Open fwmanager from the applications menu to set up your account, "
+        "or ask an administrator to run: sudo usermod -aG fwmanager YOUR_USER"
+    ),
+    "daemon_unavailable": N_("Start it with: sudo systemctl enable --now fwmanagerd"),
+}
 
 
 def _parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(prog="fwmanager-cli", description=_("Firewall manager client"))
+    p = argparse.ArgumentParser(
+        prog="fwmanager-cli",
+        description=_(
+            "Command line for fwmanager, a friendly interface for the ufw firewall. "
+            "A change is undone after 30 seconds unless you confirm it."
+        ),
+        epilog=_(
+            "Profiles can be named in English or Portuguese (home, casa, Público...). "
+            "Exit codes: 0 done, 1 error, 2 change undone or warnings, 3 unsafe, 130 cancelled."
+        ),
+    )
     p.add_argument("--bus-address", help=argparse.SUPPRESS)  # development/tests only
-    sub = p.add_subparsers(dest="cmd", required=True)
-
-    sp = sub.add_parser("apply", help=_("apply a profile (auto-reverts unless confirmed)"))
-    sp.add_argument("profile", help=_("profile name"))
-    sp.add_argument("--yes", action="store_true", help=_("confirm immediately, no countdown"))
+    sub = p.add_subparsers(dest="cmd", title=_("commands"), metavar=_("COMMAND"))
 
     sp = sub.add_parser("status", help=_("show the firewall state"))
-    sp.add_argument("--json", action="store_true")
+    sp.add_argument("--json", action="store_true", help=_("machine-readable output"))
 
-    sp = sub.add_parser("dispatch", help=argparse.SUPPRESS)  # called by NetworkManager
-    sp.add_argument("iface")
-    sp.add_argument("action")
+    sub.add_parser("profiles", help=_("list the profiles and what each one lets in"))
 
-    sp = sub.add_parser("networks", help=_("manage the network to profile mapping"))
-    nsub = sp.add_subparsers(dest="net_cmd", required=True)
-    nsub.add_parser("list")
-    for name in ("set", "remove"):
-        nsp = nsub.add_parser(name)
-        nsp.add_argument("--ssid", default="")
-        nsp.add_argument("--uuid", default="")
-        if name == "set":
-            nsp.add_argument("profile")
+    sp = sub.add_parser("apply", help=_("switch to a profile (undone unless you confirm)"))
+    sp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
+    sp.add_argument("--yes", action="store_true", help=_("confirm immediately, no countdown"))
+
+    sub.add_parser("confirm", help=_("keep the change that is waiting for confirmation"))
+    sub.add_parser("rollback", help=_("undo the change that is waiting for confirmation"))
 
     sp = sub.add_parser("test-policy", help=_("check that a profile will not break the machine"))
-    sp.add_argument("profile", help=_("profile name"))
+    sp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
     sp.add_argument(
         "--static", action="store_true", help=_("only analyse the rules, change nothing")
     )
 
-    sub.add_parser("confirm", help=_("confirm the pending change"))
-    sub.add_parser("rollback", help=_("revert the pending change"))
-    sub.add_parser("profiles", help=_("list available profiles"))
+    sp = sub.add_parser("networks", help=_("which profile to use on which network"))
+    nsub = sp.add_subparsers(dest="net_cmd", required=True, metavar=_("ACTION"))
+    nsp = nsub.add_parser("list", help=_("show the remembered networks"))
+    nsp.add_argument("--json", action="store_true", help=_("machine-readable output"))
+    for name, text in (
+        ("set", _("use a profile on a network")),
+        ("remove", _("forget a network")),
+    ):
+        nsp = nsub.add_parser(name, help=text)
+        nsp.add_argument("--ssid", default="", help=_("Wi-Fi name"))
+        nsp.add_argument("--uuid", default="", help=_("NetworkManager connection UUID"))
+        if name == "set":
+            nsp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
+
     return p
+
+
+def _dispatch_parser() -> argparse.ArgumentParser:
+    """``fwmanager-cli dispatch IFACE ACTION``: run by NetworkManager, never by people.
+
+    Kept out of the main parser so it shows up in no help text or error message.
+    """
+    p = argparse.ArgumentParser(prog="fwmanager-cli dispatch")
+    p.add_argument("--bus-address")
+    p.add_argument("cmd", choices=["dispatch"])
+    p.add_argument("iface")
+    p.add_argument("action")
+    return p
+
+
+def _is_dispatch(argv: list[str]) -> bool:
+    words = [a for i, a in enumerate(argv) if i == 0 or argv[i - 1] != "--bus-address"]
+    positional = [a for a in words if not a.startswith("-")]
+    return positional[:1] == ["dispatch"]
+
+
+def _fold(text: str) -> str:
+    """Case and accents do not matter: "Público" == "publico"."""
+    decomposed = unicodedata.normalize("NFKD", text.strip().casefold())
+    return "".join(c for c in decomposed if not unicodedata.combining(c))
+
+
+def resolve_profile(arg: str, names: list[str]) -> str:
+    """Map what a person typed to a profile name; unknown input is passed on unchanged."""
+    wanted = _fold(arg)
+    for name in names:
+        english = state.PROFILE_TITLES.get(name, name)
+        if wanted in {_fold(name), _fold(english), _fold(state.profile_title(name))}:
+            return name
+    return arg
+
+
+def _profile_label(name: str) -> str:
+    title = state.profile_title(name)
+    return name if title == name else f"{title} ({name})"
+
+
+class _Tracking:
+    """The client, remembering whether this command started a change (so Ctrl+C can undo it)."""
+
+    def __init__(self, client: Client) -> None:
+        self._client = client
+        self.started = False
+
+    def apply_profile(self, name: str) -> None:
+        self.started = True  # set first: the request is sent even if we are interrupted
+        self._client.apply_profile(name)
+
+    def __getattr__(self, attr):
+        return getattr(self._client, attr)
 
 
 def _interactive_apply(client: Client, name: str) -> int:
@@ -109,6 +191,7 @@ def _interactive_apply(client: Client, name: str) -> int:
 
 EXIT_WARNINGS, EXIT_UNSAFE = 2, 3
 VERDICT_TEXT = {"safe": N_("SAFE"), "warnings": N_("SAFE WITH WARNINGS"), "unsafe": N_("UNSAFE")}
+SEVERITY_TEXT = {"error": N_("error"), "warning": N_("warning"), "info": N_("info")}
 
 
 def _test_policy(client: Client, name: str, static_only: bool) -> int:
@@ -116,9 +199,13 @@ def _test_policy(client: Client, name: str, static_only: bool) -> int:
     from fwmanager.policytest import run_policy_test
 
     outcome = run_policy_test(client, name, load_catalog(), os.environ, static_only)
-    print(_("Policy check for {p}:").format(p=name))
+    print(_("Policy check for {p}:").format(p=_profile_label(name)))
     for f in outcome.findings:
-        print(f"  [{f.severity}] {describe_finding(f.code, f.detail)}")
+        severity = _(SEVERITY_TEXT.get(f.severity, f.severity))
+        print(f"  [{severity}] {describe_finding(f.code, f.detail)}")
+        detail = finding_detail(f.code, f.detail)
+        if detail:
+            print(f"      {detail}")
     if not outcome.findings:
         print("  " + _("No problems found in the rules."))
     if any(f.severity == ERROR for f in outcome.findings):
@@ -137,23 +224,78 @@ def _test_policy(client: Client, name: str, static_only: bool) -> int:
     return {"safe": EXIT_OK, "warnings": EXIT_WARNINGS, "unsafe": EXIT_UNSAFE}[outcome.verdict]
 
 
-def run(args: argparse.Namespace) -> int:
+def _print_status(client, as_json: bool) -> None:
+    st = client.status()
+    if as_json:
+        print(json.dumps(st))
+        return
+    print(_("Firewall: {state}").format(state=_("on") if st["firewall_active"] else _("off")))
+    active = st["active_profile"]
+    if active:
+        print(_("Profile in use: {p}").format(p=_profile_label(active)))
+        titles = dict(client.list_services())
+        print("  " + state.describe_profile(client.get_profile(active), titles))
+    else:
+        print(_("Profile in use: {p}").format(p=_("none")))
+    if st["pending_profile"]:
+        print(
+            _("Waiting for confirmation of {p} ({n}s left)").format(
+                p=_profile_label(st["pending_profile"]), n=st["seconds_left"]
+            )
+        )
+        print("  " + _("Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"))
+    for name in st["blocking_conflicts"]:
+        print(_("Warning: {name} is also managing the firewall.").format(name=name))
+
+
+def _print_profiles(client) -> None:
+    active = client.status()["active_profile"]
+    titles = dict(client.list_services())
+    names = client.list_profiles()
+    ordered = [n for n in state.PROFILE_ORDER if n in names] + sorted(
+        n for n in names if n not in state.PROFILE_ORDER
+    )
+    for name in ordered:
+        mark = "*" if name == active else " "
+        hint = state.profile_hint(name)
+        print(f"{mark} {_profile_label(name)}" + (f": {hint}" if hint else ""))
+        print("    " + state.describe_profile(client.get_profile(name), titles))
+    print(_("* = in use. Switch with: fwmanager-cli apply NAME"))
+
+
+def _print_networks(client, as_json: bool) -> None:
+    nets = client.list_networks()
+    if as_json:
+        print(json.dumps([{"ssid": s, "uuid": u, "profile": p} for s, u, p in nets]))
+        return
+    if not nets:
+        print(_("No networks remembered yet. Unknown Wi-Fi networks use Public."))
+        return
+    for ssid, uuid, profile in nets:
+        name = ssid or _("Connection {id}").format(id=uuid[:8])
+        print(f"{name}  →  {_profile_label(profile)}")
+
+
+def run(args: argparse.Namespace, client: _Tracking | None = None) -> int:
     if args.cmd == "dispatch":
         from fwmanager.cli import dispatch
 
         return dispatch.run(args.iface, args.bus_address) if args.action == "up" else EXIT_OK
 
-    client = Client(args.bus_address)
+    client = client or _Tracking(Client(args.bus_address))
+    if getattr(args, "profile", None):
+        args.profile = resolve_profile(args.profile, client.list_profiles())
     if args.cmd == "test-policy":
         return _test_policy(client, args.profile, args.static)
     if args.cmd == "networks":
         if args.net_cmd == "list":
-            for ssid, uuid, profile in client.list_networks():
-                print(f"{profile}\t{ssid}\t{uuid}")
+            _print_networks(client, args.json)
         elif args.net_cmd == "set":
             client.set_network_profile(args.ssid, args.uuid, args.profile)
+            print(_("Saved."))
         else:
             client.remove_network(args.ssid, args.uuid)
+            print(_("Forgotten."))
         return EXIT_OK
     if args.cmd == "apply":
         if args.yes:
@@ -169,30 +311,48 @@ def run(args: argparse.Namespace) -> int:
         client.rollback()
         print(_("Previous rules restored."))
     elif args.cmd == "profiles":
-        print("\n".join(client.list_profiles()))
+        _print_profiles(client)
     elif args.cmd == "status":
-        st = client.status()
-        if args.json:
-            print(json.dumps(st))
-        else:
-            print(_("Active profile: {p}").format(p=st["active_profile"] or _("none")))
-            if st["pending_profile"]:
-                print(
-                    _("Waiting for confirmation of {p} ({n}s left)").format(
-                        p=st["pending_profile"], n=st["seconds_left"]
-                    )
-                )
+        _print_status(client, args.json)
     return EXIT_OK
+
+
+def _cancelled(client: _Tracking | None) -> int:
+    """Ctrl+C: a change this command started is undone now, not 30 seconds later."""
+    print("", file=sys.stderr)
+    if client is not None and client.started:
+        try:
+            client.rollback()
+            print(_("Cancelled. Previous rules restored."), file=sys.stderr)
+        except FwError:
+            print(_("Cancelled."), file=sys.stderr)  # it was already undone or confirmed
+    else:
+        print(_("Cancelled."), file=sys.stderr)
+    return EXIT_INTERRUPTED
 
 
 def main(argv: list[str] | None = None) -> int:
     logging.basicConfig(level=logging.WARNING, format="%(message)s")
     set_language(resolve_language(settings_path(), SYSTEM_CONFIG))
-    args = _parser().parse_args(argv)
+    argparse_text.install()
+    argv = sys.argv[1:] if argv is None else argv
+    parser = _dispatch_parser() if _is_dispatch(argv) else _parser()
+    args = parser.parse_args(argv)
+    if args.cmd is None:
+        parser.print_help()
+        return 2
+    client = None
     try:
-        return run(args)
+        if args.cmd != "dispatch":
+            client = _Tracking(Client(args.bus_address))
+        return run(args, client)
+    except KeyboardInterrupt:
+        return _cancelled(client)
     except FwError as exc:
         print(_("Error: {msg}").format(msg=describe_error(exc)), file=sys.stderr)
+        hint = HINTS.get(exc.code)
+        if hint:
+            print(_(hint), file=sys.stderr)
         return EXIT_ERROR
 
 
