@@ -275,7 +275,8 @@ def test_real_install_and_uninstall_roundtrip(netns_prefix, tmp_path):
                 [f"/usr/local/bin/{exe}", "--help"],
                 capture_output=True, text=True, timeout=30, env=env,
             )  # fmt: skip
-            assert h.returncode == 0 and "usage" in h.stdout.lower(), h.stderr
+            out = h.stdout.lower()  # installed with --lang pt: argparse speaks Portuguese too
+            assert h.returncode == 0 and ("usage:" in out or "uso:" in out), h.stderr
         # The installed catalogue is used: Portuguese help via /etc/fwmanager/config.toml.
         pt = subprocess.run(
             ["/usr/local/bin/fwmanager-cli", "--help"],
