@@ -5,9 +5,11 @@ from __future__ import annotations
 import gettext
 import os
 
+from fwmanager import paths
+
 DOMAIN = "fwmanager"
 
-DEFAULT_LOCALEDIR = "/usr/share/locale"
+DEFAULT_LOCALEDIR = paths.LOCALEDIR
 
 _translation: gettext.NullTranslations = gettext.NullTranslations()
 _language = "en"

@@ -5,8 +5,10 @@ from __future__ import annotations
 import subprocess
 from dataclasses import dataclass
 
+from fwmanager import paths
+
 PKEXEC = "/usr/bin/pkexec"
-HELPER = "/usr/local/libexec/fwmanager/fwmanager-setup"
+HELPER = paths.SETUP_HELPER
 
 # pkexec: 126 = the person dismissed the password dialog, 127 = not authorised / wrong password
 DISMISSED, NOT_AUTHORISED = 126, 127

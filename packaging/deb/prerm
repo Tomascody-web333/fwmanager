@@ -1,0 +1,19 @@
+#!/bin/sh
+# Runs before the files go away. On removal, fwmanager's changes to ufw are undone first: its
+# rules, its block in before.rules, the original default policies and, if fwmanager is the one
+# that switched ufw on, ufw itself. The rules people added to ufw themselves are kept.
+set -e
+
+if [ "$1" = remove ]; then
+    if [ -d /run/systemd/system ]; then
+        systemctl disable --now fwmanagerd.service >/dev/null 2>&1 || true
+    fi
+    if command -v ufw >/dev/null 2>&1; then
+        fwmanagerd --cleanup >/dev/null \
+            || echo "fwmanager: could not clean ufw; check 'ufw status' and /etc/ufw/before.rules" >&2
+    fi
+fi
+# Python makes compiled copies (__pycache__) the first time the programs run; dpkg does not
+# know them, so they go here, or dpkg would leave the folders behind.
+find /usr/lib/fwmanager -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
+exit 0
