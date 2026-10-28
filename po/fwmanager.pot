@@ -56,6 +56,9 @@ msgstr ""
 msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr ""
 
+msgid "An administrator password is asked once."
+msgstr ""
+
 msgid "Announces itself, but does not answer ping."
 msgstr ""
 
@@ -180,6 +183,9 @@ msgid "Command line for fwmanager, a friendly interface for the ufw firewall. A 
 msgstr ""
 
 msgid "Command to run"
+msgstr ""
+
+msgid "Confirm with the administrator password when asked."
 msgstr ""
 
 msgid "Confirmed {name}"
@@ -497,6 +503,9 @@ msgstr ""
 msgid "Options"
 msgstr ""
 
+msgid "Or run this in a terminal:"
+msgstr ""
+
 msgid "Overview"
 msgstr ""
 
@@ -590,6 +599,12 @@ msgstr ""
 msgid "Removed a rule"
 msgstr ""
 
+msgid "Removes the app, the command line and the service, and leaves your firewall as it was before fwmanager."
+msgstr ""
+
+msgid "Removing fwmanager…"
+msgstr ""
+
 msgid "Renewing the IPv4 address (DHCP) would fail."
 msgstr ""
 
@@ -633,6 +648,9 @@ msgid "Rules that will be added."
 msgstr ""
 
 msgid "Rules that will be removed."
+msgstr ""
+
+msgid "Rules you added to ufw yourself are kept."
 msgstr ""
 
 msgid "Run this in a terminal, then press “Check again”:"
@@ -743,6 +761,9 @@ msgstr ""
 msgid "The most recent ones, newest first. Turn logging on in Settings."
 msgstr ""
 
+msgid "The password window is not available. Use the command below."
+msgstr ""
+
 msgid "The password window is not available. Use the commands shown instead."
 msgstr ""
 
@@ -765,6 +786,9 @@ msgid "The setup step failed. Try the commands shown instead."
 msgstr ""
 
 msgid "The strictest: cafés, airports, hotels."
+msgstr ""
+
+msgid "The window, the command line and the background service are removed, for every account on this computer."
 msgstr ""
 
 msgid "There is no change waiting for confirmation."
@@ -801,6 +825,18 @@ msgid "Undo it"
 msgstr ""
 
 msgid "Undone. Pick another profile, or test it first."
+msgstr ""
+
+msgid "Uninstall"
+msgstr ""
+
+msgid "Uninstall fwmanager"
+msgstr ""
+
+msgid "Uninstalling failed. Use the command below to see why."
+msgstr ""
+
+msgid "Uninstall…"
 msgstr ""
 
 msgid "Unknown profile."
@@ -846,6 +882,9 @@ msgid "What do you want to do?"
 msgstr ""
 
 msgid "What fwmanager did"
+msgstr ""
+
+msgid "What happens"
 msgstr ""
 
 msgid "What was checked"
@@ -906,6 +945,12 @@ msgid "Your account is not allowed to use fwmanager"
 msgstr ""
 
 msgid "Your connection, before and after"
+msgstr ""
+
+msgid "Your firewall is back to how it was before fwmanager. Thank you!"
+msgstr ""
+
+msgid "Your firewall is left the way it was before fwmanager."
 msgstr ""
 
 msgid "Your own settings."
@@ -969,6 +1014,12 @@ msgid "fwmanager needs libadwaita 1.5 or newer, but this system has {found}. Use
 msgstr ""
 
 msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
+msgstr ""
+
+msgid "fwmanager was removed"
+msgstr ""
+
+msgid "fwmanager's own rules and its ping/mDNS settings are removed."
 msgstr ""
 
 msgid "info"
@@ -1064,6 +1115,9 @@ msgstr ""
 msgid "ufw is off and will be turned on."
 msgstr ""
 
+msgid "ufw is switched off only if fwmanager was the one that switched it on."
+msgstr ""
+
 msgid "ufw refused one of the rules."
 msgstr ""
 
@@ -1071,6 +1125,9 @@ msgid "ufw rejected the change."
 msgstr ""
 
 msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr ""
+
+msgid "ufw's original default settings are put back."
 msgstr ""
 
 msgid "undo the change that is waiting for confirmation"

@@ -56,6 +56,9 @@ msgstr "Allowed. fwmanager has to be restarted to notice it."
 msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 msgstr "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
 
+msgid "An administrator password is asked once."
+msgstr "An administrator password is asked once."
+
 msgid "Announces itself, but does not answer ping."
 msgstr "Announces itself, but does not answer ping."
 
@@ -181,6 +184,9 @@ msgstr "Command line for fwmanager, a friendly interface for the ufw firewall. A
 
 msgid "Command to run"
 msgstr "Command to run"
+
+msgid "Confirm with the administrator password when asked."
+msgstr "Confirm with the administrator password when asked."
 
 msgid "Confirmed {name}"
 msgstr "Confirmed {name}"
@@ -497,6 +503,9 @@ msgstr "Open fwmanager from the applications menu to set up your account, or ask
 msgid "Options"
 msgstr "Options"
 
+msgid "Or run this in a terminal:"
+msgstr "Or run this in a terminal:"
+
 msgid "Overview"
 msgstr "Overview"
 
@@ -590,6 +599,12 @@ msgstr "Remove this rule"
 msgid "Removed a rule"
 msgstr "Removed a rule"
 
+msgid "Removes the app, the command line and the service, and leaves your firewall as it was before fwmanager."
+msgstr "Removes the app, the command line and the service, and leaves your firewall as it was before fwmanager."
+
+msgid "Removing fwmanager…"
+msgstr "Removing fwmanager…"
+
 msgid "Renewing the IPv4 address (DHCP) would fail."
 msgstr "Renewing the IPv4 address (DHCP) would fail."
 
@@ -634,6 +649,9 @@ msgstr "Rules that will be added."
 
 msgid "Rules that will be removed."
 msgstr "Rules that will be removed."
+
+msgid "Rules you added to ufw yourself are kept."
+msgstr "Rules you added to ufw yourself are kept."
 
 msgid "Run this in a terminal, then press “Check again”:"
 msgstr "Run this in a terminal, then press “Check again”:"
@@ -743,6 +761,9 @@ msgstr "The local network"
 msgid "The most recent ones, newest first. Turn logging on in Settings."
 msgstr "The most recent ones, newest first. Turn logging on in Settings."
 
+msgid "The password window is not available. Use the command below."
+msgstr "The password window is not available. Use the command below."
+
 msgid "The password window is not available. Use the commands shown instead."
 msgstr "The password window is not available. Use the commands shown instead."
 
@@ -766,6 +787,9 @@ msgstr "The setup step failed. Try the commands shown instead."
 
 msgid "The strictest: cafés, airports, hotels."
 msgstr "The strictest: cafés, airports, hotels."
+
+msgid "The window, the command line and the background service are removed, for every account on this computer."
+msgstr "The window, the command line and the background service are removed, for every account on this computer."
 
 msgid "There is no change waiting for confirmation."
 msgstr "There is no change waiting for confirmation."
@@ -802,6 +826,18 @@ msgstr "Undo it"
 
 msgid "Undone. Pick another profile, or test it first."
 msgstr "Undone. Pick another profile, or test it first."
+
+msgid "Uninstall"
+msgstr "Uninstall"
+
+msgid "Uninstall fwmanager"
+msgstr "Uninstall fwmanager"
+
+msgid "Uninstalling failed. Use the command below to see why."
+msgstr "Uninstalling failed. Use the command below to see why."
+
+msgid "Uninstall…"
+msgstr "Uninstall…"
 
 msgid "Unknown profile."
 msgstr "Unknown profile."
@@ -847,6 +883,9 @@ msgstr "What do you want to do?"
 
 msgid "What fwmanager did"
 msgstr "What fwmanager did"
+
+msgid "What happens"
+msgstr "What happens"
 
 msgid "What was checked"
 msgstr "What was checked"
@@ -907,6 +946,12 @@ msgstr "Your account is not allowed to use fwmanager"
 
 msgid "Your connection, before and after"
 msgstr "Your connection, before and after"
+
+msgid "Your firewall is back to how it was before fwmanager. Thank you!"
+msgstr "Your firewall is back to how it was before fwmanager. Thank you!"
+
+msgid "Your firewall is left the way it was before fwmanager."
+msgstr "Your firewall is left the way it was before fwmanager."
 
 msgid "Your own settings."
 msgstr "Your own settings."
@@ -970,6 +1015,12 @@ msgstr "fwmanager needs libadwaita 1.5 or newer, but this system has {found}. Us
 
 msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
 msgstr "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
+
+msgid "fwmanager was removed"
+msgstr "fwmanager was removed"
+
+msgid "fwmanager's own rules and its ping/mDNS settings are removed."
+msgstr "fwmanager's own rules and its ping/mDNS settings are removed."
 
 msgid "info"
 msgstr "info"
@@ -1064,6 +1115,9 @@ msgstr "ufw is not installed. Install it first (for example: sudo apt install uf
 msgid "ufw is off and will be turned on."
 msgstr "ufw is off and will be turned on."
 
+msgid "ufw is switched off only if fwmanager was the one that switched it on."
+msgstr "ufw is switched off only if fwmanager was the one that switched it on."
+
 msgid "ufw refused one of the rules."
 msgstr "ufw refused one of the rules."
 
@@ -1072,6 +1126,9 @@ msgstr "ufw rejected the change."
 
 msgid "ufw's configuration was edited in a way fwmanager cannot work with."
 msgstr "ufw's configuration was edited in a way fwmanager cannot work with."
+
+msgid "ufw's original default settings are put back."
+msgstr "ufw's original default settings are put back."
 
 msgid "undo the change that is waiting for confirmation"
 msgstr "undo the change that is waiting for confirmation"

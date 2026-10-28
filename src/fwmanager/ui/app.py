@@ -30,6 +30,7 @@ class FwApplication(Adw.Application):
         self.window: MainWindow | None = None
         self.user_settings = us.UserSettings()
         self._wizard_options: dict = {}  # tests inject fakes for the helper and the relaunch
+        self._uninstall_options: dict = {}
 
     # -- language ---
 
@@ -76,6 +77,7 @@ class FwApplication(Adw.Application):
             self.set_notifications,
             self.set_setup_stage,
             self._wizard_options,
+            self._uninstall_options,
         )
         self.window.present()
         if old is not None:

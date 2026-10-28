@@ -9,14 +9,16 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.i18n import N_, _  # noqa: E402
-from fwmanager.ui.common import toast_error  # noqa: E402
+from fwmanager.ui.common import button, toast_error  # noqa: E402
 
 LANGUAGES = (("pt", "Português"), ("en", "English"))  # always shown in their own language
 LOG_LEVELS = (("", N_("Off")), ("low", N_("Low")), ("medium", N_("Medium")), ("high", N_("High")))
 
 
 class SettingsPage(Adw.PreferencesPage):
-    def __init__(self, controller, user_settings, on_language, on_notifications) -> None:
+    def __init__(
+        self, controller, user_settings, on_language, on_notifications, on_uninstall=None
+    ) -> None:
         super().__init__(title=_("Settings"), icon_name="emblem-system-symbolic")
         self._c = controller
         self._loading = True
@@ -63,6 +65,23 @@ class SettingsPage(Adw.PreferencesPage):
         firewall.add(self.log_level)
         firewall.add(self.router)
         self.add(firewall)
+
+        remove = Adw.PreferencesGroup(title=_("Uninstall"))
+        row = Adw.ActionRow(
+            title=_("Uninstall fwmanager"),
+            subtitle=_(
+                "Removes the app, the command line and the service, and leaves your "
+                "firewall as it was before fwmanager."
+            ),
+            subtitle_lines=0,
+        )
+        self.uninstall_btn = button(_("Uninstall…"))
+        self.uninstall_btn.add_css_class("destructive-action")
+        if on_uninstall is not None:
+            self.uninstall_btn.connect("clicked", lambda *_: on_uninstall())
+        row.add_suffix(self.uninstall_btn)
+        remove.add(row)
+        self.add(remove)
 
     def load(self) -> None:
         self._c.options(self._loaded)
