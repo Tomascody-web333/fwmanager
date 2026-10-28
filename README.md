@@ -25,6 +25,9 @@ echo "deb [signed-by=/etc/apt/keyrings/fwmanager.asc] https://tomascody-web333.g
 sudo apt update && sudo apt install fwmanager
 ```
 
+The repository is signed by the key `413E F57C A7FE 5D37 6108  0D61 D519 2575 2DA1 7E4A`
+(HomeServer-LAB, also on keyserver.ubuntu.com and Launchpad).
+
 Or download `fwmanager.<version>.deb` and `SHA256SUMS` from the
 [Releases](https://github.com/Tomascody-web333/fwmanager/releases) page, into the same folder:
 
