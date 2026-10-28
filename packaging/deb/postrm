@@ -1,0 +1,37 @@
+#!/bin/sh
+# Runs after the files are gone. "remove" keeps the saved profiles and network choices (a
+# reinstall picks them up); "purge" deletes them and the group the package created.
+set -e
+
+GROUP=fwmanager
+STATE=/var/lib/fwmanager
+
+# Compiled copies Python made after prerm (the uninstall helper may still be running).
+if [ -d /usr/lib/fwmanager ] && { [ "$1" = remove ] || [ "$1" = purge ]; }; then
+    find /usr/lib/fwmanager -name __pycache__ -type d -prune -exec rm -rf {} + 2>/dev/null || true
+    find /usr/lib/fwmanager -depth -type d -empty -delete 2>/dev/null || true
+fi
+
+case "$1" in
+    remove)
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload || true
+        fi
+        ;;
+    purge)
+        created=0; added_root=0
+        [ -f "$STATE/.package-created-group" ] && created=1
+        [ -f "$STATE/.package-added-root" ] && added_root=1
+        rm -rf "$STATE" /etc/fwmanager
+        if [ "$created" -eq 1 ]; then
+            groupdel "$GROUP" 2>/dev/null || true
+        elif [ "$added_root" -eq 1 ]; then
+            gpasswd -d root "$GROUP" >/dev/null 2>&1 || true
+        fi
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload || true
+            systemctl reset-failed fwmanagerd.service >/dev/null 2>&1 || true
+        fi
+        ;;
+esac
+exit 0

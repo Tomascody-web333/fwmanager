@@ -14,12 +14,13 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk  # noqa: E402
 
+from fwmanager import paths  # noqa: E402
 from fwmanager.i18n import _  # noqa: E402
 from fwmanager.ui import privileged  # noqa: E402
 from fwmanager.ui.common import button, show_warning, warning_row  # noqa: E402
 from fwmanager.ui.worker import run_async  # noqa: E402
 
-MANUAL_COMMAND = "sudo /usr/local/libexec/fwmanager/uninstall"
+MANUAL_COMMAND = paths.UNINSTALL_COMMAND
 
 
 def _run_uninstall_helper() -> privileged.HelperResult:

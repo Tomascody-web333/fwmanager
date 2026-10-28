@@ -13,7 +13,7 @@ import sys
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
-from fwmanager import setup_helper
+from fwmanager import paths, setup_helper
 from fwmanager.client import Client
 from fwmanager.errors import FwError
 from fwmanager.i18n import N_, _
@@ -239,6 +239,6 @@ def uninstall(deps: Deps, yes: bool = False) -> int:
         print(_("An administrator password is asked once."))
     result = _run_helper(deps, "uninstall", None)
     if not result.ok:
-        return _helper_failed(result, "sudo /usr/local/libexec/fwmanager/uninstall")
+        return _helper_failed(result, paths.UNINSTALL_COMMAND)
     print(_("fwmanager was removed"))
     return EXIT_OK

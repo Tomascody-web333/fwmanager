@@ -1,0 +1,29 @@
+#!/bin/sh
+# Runs after the files are in place. The service is not started here: the first-run setup
+# (in the window, or `fwmanager-cli setup`) starts it, once someone has chosen a profile. That
+# way installing over SSH cannot lock anyone out.
+set -e
+
+GROUP=fwmanager
+STATE=/var/lib/fwmanager
+
+if [ "$1" = configure ]; then
+    install -d -m 700 "$STATE"
+    if ! getent group "$GROUP" >/dev/null; then
+        groupadd --system "$GROUP"
+        touch "$STATE/.package-created-group"  # so purge removes only what it created
+    fi
+    # The NetworkManager dispatcher runs as root and talks to the service like any client.
+    if ! id -nG root | tr ' ' '\n' | grep -qx "$GROUP"; then
+        usermod -aG "$GROUP" root
+        touch "$STATE/.package-added-root"
+    fi
+    # Let the system bus read our policy now, not at the next boot.
+    dbus-send --system --type=method_call --dest=org.freedesktop.DBus \
+        / org.freedesktop.DBus.ReloadConfig >/dev/null 2>&1 || true
+    if [ -d /run/systemd/system ]; then
+        systemctl daemon-reload || true
+        systemctl try-restart fwmanagerd.service || true  # an upgrade runs the new code
+    fi
+fi
+exit 0

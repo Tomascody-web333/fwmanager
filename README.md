@@ -14,13 +14,20 @@ cuts your connection.
 
 ## Quick start
 
+Download `fwmanager.<version>.deb` and `SHA256SUMS` from the
+[Releases](https://github.com/Tomascody-web333/fwmanager/releases) page, into the same folder:
+
 ```sh
-sudo apt install ufw python3-gi gir1.2-gtk-4.0 gir1.2-adw-1   # Ubuntu 24.04 / Debian 13
-sudo scripts/dev-install.sh                                   # installs and stops there
-fwmanager                                                     # everything else is set up in the window
+sha256sum -c SHA256SUMS                        # optional: "OK" means the file is intact
+sudo apt install ./fwmanager.<version>.deb      # also installs ufw and what the window needs
+fwmanager                                      # or open it from the app menu
 ```
 
-Installing only copies files. The first time you open **fwmanager** a short wizard checks the
+No signing key or extra repository is needed. To update, download the new `.deb` and run the
+same `apt install`; your profiles and network choices are kept.
+
+Installing only copies files: the service is not started yet, so installing over SSH cannot
+lock you out. The first time you open **fwmanager** a short wizard checks the
 system (service running, your account allowed, ufw installed, no other firewall manager in the
 way) and fixes what is missing with **one** administrator password prompt (polkit). After that
 it never asks again, and you choose how this computer should behave on the current network.
@@ -35,7 +42,9 @@ use first, the other has nothing left to ask.
 `fwmanager-cli uninstall`. Either one removes the window, the command line and the service, and
 leaves the firewall as it was before fwmanager (its own rules and settings removed, ufw's
 defaults restored, ufw switched off only if fwmanager had switched it on, your own ufw rules
-kept). It asks for an administrator password every time.
+kept). It asks for an administrator password every time. It is the same as
+`sudo apt purge fwmanager`. `sudo apt remove fwmanager` also undoes fwmanager's changes to ufw,
+but keeps your profiles and network choices for a later reinstall.
 
 The interface needs GTK 4 and libadwaita 1.5 or newer (Ubuntu 24.04, Fedora 40 or later);
 `fwmanager-cli` works on older systems.
@@ -125,6 +134,21 @@ English; the interface translates its status and error codes.
 Translations live in `po/*.po`; the `.mo` files are compiled by `dev-install.sh` (no gettext
 tools needed). After changing user-visible text run `python3 scripts/update-po.py`, translate the
 new entries, and `python3 scripts/update-po.py --check` (also run by the tests) must pass.
+
+## Building the .deb
+
+```sh
+packaging/deb/build-deb.sh          # writes dist/fwmanager.<version>.deb and dist/SHA256SUMS
+```
+
+It needs `dpkg-deb` and PyGObject with GdkPixbuf (for the PNG icons); no root and no signing
+key. Pushing a tag such as `v0.1.0` (matching the version in `pyproject.toml`) makes GitHub
+Actions build both files and attach them to a new release.
+
+The package installs under `/usr` (`/usr/bin`, `/usr/lib/fwmanager`,
+`/usr/libexec/fwmanager`), keeps its translations in `/usr/share/fwmanager/locale` (minimal
+Ubuntu images skip `/usr/share/locale`), creates the `fwmanager` group and does not start the
+service: the first-run setup does.
 
 ## Dev install (VM/container only)
 

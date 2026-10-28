@@ -21,9 +21,11 @@ import sys
 from collections.abc import Callable, Mapping
 from pathlib import Path
 
+from fwmanager import paths
+
 GROUP = "fwmanager"
 SERVICE = "fwmanagerd.service"
-UNINSTALLER = Path("/usr/local/libexec/fwmanager/uninstall")
+UNINSTALLER = Path(paths.UNINSTALLER)
 USERNAME_RE = re.compile(r"^[a-z_][a-z0-9_-]{0,31}\$?$")
 
 # Silent when it works (the window and the CLI say it in the person's language); a failure is
