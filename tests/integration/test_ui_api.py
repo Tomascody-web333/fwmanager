@@ -140,3 +140,9 @@ def test_recent_blocked_is_a_safe_list(daemon):
     items = daemon.client.get_recent_blocked(20)
     assert isinstance(items, list) and all(len(i) == 6 for i in items)
     assert len(daemon.client.get_recent_blocked(4_000_000_000)) <= 500  # clamped, not an error
+
+
+def test_recent_allowed_is_a_safe_list_too(daemon):
+    items = daemon.client.get_recent_allowed(20)
+    assert isinstance(items, list) and all(len(i) == 6 for i in items)
+    assert len(daemon.client.get_recent_allowed(4_000_000_000)) <= 500

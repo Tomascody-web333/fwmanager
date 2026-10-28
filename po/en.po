@@ -8,6 +8,9 @@ msgstr "%(prog)s: error: %(message)s\n"
 msgid "* = in use. Switch with: fwmanager-cli apply NAME"
 msgstr "* = in use. Switch with: fwmanager-cli apply NAME"
 
+msgid "A change was undone"
+msgstr "A change was undone"
+
 msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 msgstr "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 
@@ -56,8 +59,8 @@ msgstr "Allowed services are reachable from any network."
 msgid "Allowed. fwmanager has to be restarted to notice it."
 msgstr "Allowed. fwmanager has to be restarted to notice it."
 
-msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
-msgstr "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
+msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
+msgstr "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
 
 msgid "An administrator password is asked once."
 msgstr "An administrator password is asked once."
@@ -173,6 +176,9 @@ msgstr "Choose a profile below to turn it on."
 msgid "Choose the details below."
 msgstr "Choose the details below."
 
+msgid "Choose what fwmanager tells you about while it is open."
+msgstr "Choose what fwmanager tells you about while it is open."
+
 msgid "Close"
 msgstr "Close"
 
@@ -203,11 +209,17 @@ msgstr "Confirmed."
 msgid "Connecting to the service…"
 msgstr "Connecting to the service…"
 
+msgid "Connection attempts blocked"
+msgstr "Connection attempts blocked"
+
 msgid "Connection {id}"
 msgstr "Connection {id}"
 
 msgid "Connections could hang (destination unreachable)."
 msgstr "Connections could hang (destination unreachable)."
+
+msgid "Connections let in"
+msgstr "Connections let in"
 
 msgid "Continue"
 msgstr "Continue"
@@ -277,6 +289,9 @@ msgstr "Firewall: {state}"
 
 msgid "Fix this"
 msgstr "Fix this"
+
+msgid "For example when you join another network."
+msgstr "For example when you join another network."
 
 msgid "Forget this network"
 msgstr "Forget this network"
@@ -476,6 +491,9 @@ msgstr "No, undo it"
 msgid "Not authorised. Ask an administrator, or use the command below."
 msgstr "Not authorised. Ask an administrator, or use the command below."
 
+msgid "Not confirmed in time, so it was undone."
+msgstr "Not confirmed in time, so it was undone."
+
 msgid "Not connected"
 msgstr "Not connected"
 
@@ -496,6 +514,9 @@ msgstr "Nothing yet."
 
 msgid "Notifications"
 msgstr "Notifications"
+
+msgid "Now using the {profile} profile."
+msgstr "Now using the {profile} profile."
 
 msgid "Off"
 msgstr "Off"
@@ -557,6 +578,12 @@ msgstr "Profile"
 msgid "Profile [{default}]: "
 msgstr "Profile [{default}]: "
 
+msgid "Profile changed"
+msgstr "Profile changed"
+
+msgid "Profile changed by itself"
+msgstr "Profile changed by itself"
+
 msgid "Profile for {name}"
 msgstr "Profile for {name}"
 
@@ -587,8 +614,11 @@ msgstr "Reach the IPv6 gateway"
 msgid "Ready"
 msgstr "Ready"
 
-msgid "Record blocked attempts"
-msgstr "Record blocked attempts"
+msgid "Record connections"
+msgstr "Record connections"
+
+msgid "Recording turned on at {level}, so there is something to notify about."
+msgstr "Recording turned on at {level}, so there is something to notify about."
 
 msgid "Refresh"
 msgstr "Refresh"
@@ -731,8 +761,8 @@ msgstr "Service started"
 msgid "Settings"
 msgstr "Settings"
 
-msgid "Shown in the Log page. Higher levels record more."
-msgstr "Shown in the Log page. Higher levels record more."
+msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
+msgstr "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
 
 msgid "Skip setup"
 msgstr "Skip setup"
@@ -766,9 +796,6 @@ msgstr "Switch to this profile now"
 
 msgid "Syncthing"
 msgstr "Syncthing"
-
-msgid "Tell me when a change was undone automatically."
-msgstr "Tell me when a change was undone automatically."
 
 msgid "Test"
 msgstr "Test"
@@ -853,6 +880,12 @@ msgstr "Too many saved networks."
 
 msgid "Try again"
 msgstr "Try again"
+
+msgid "Turns on recording at Low if it is off."
+msgstr "Turns on recording at Low if it is off."
+
+msgid "Turns on recording at Medium if it is lower. Can be frequent."
+msgstr "Turns on recording at Medium if it is lower. Can be frequent."
 
 msgid "Type yes to uninstall: "
 msgstr "Type yes to uninstall: "
@@ -1274,6 +1307,12 @@ msgstr "{before} → {after}"
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 
+msgid "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr "{n} attempts were blocked. The latest: {src} to port {port}."
+
+msgid "{n} connections were let in. The latest: {src} to port {port}."
+msgstr "{n} connections were let in. The latest: {src} to port {port}."
+
 msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 msgstr "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 
@@ -1285,6 +1324,12 @@ msgstr "{profile} will be undone in {n} s unless you confirm."
 
 msgid "{p} is back to its defaults."
 msgstr "{p} is back to its defaults."
+
+msgid "{src} connected to port {port}."
+msgstr "{src} connected to port {port}."
+
+msgid "{src} tried to reach port {port}."
+msgstr "{src} tried to reach port {port}."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tried to reach {target}"

@@ -116,3 +116,33 @@ def test_limit_is_clamped(tmp_path, no_journal):
     log.write_text("\n".join(LINE for _ in range(700)) + "\n")
     assert len(bl.read_recent(10_000, log)) == 500
     assert len(bl.read_recent(0, log)) == 1
+
+
+ALLOW = (
+    "2026-10-27T17:40:01+00:00 host kernel: [UFW ALLOW] IN=wlan0 OUT= SRC=192.168.1.20 "
+    "DST=192.168.1.5 PROTO=TCP SPT=40000 DPT=22"
+)
+
+
+def test_allowed_connections_are_read_separately(tmp_path, no_journal):
+    log = tmp_path / "ufw.log"
+    log.write_text(LINE + "\n" + ALLOW + "\n")
+    assert [b.src for b in bl.read_recent(10, log, kind="allow")] == ["192.168.1.20"]
+    assert [b.src for b in bl.read_recent(10, log)] == ["203.0.113.9"]  # block by default
+    fake = ALLOW.replace("kernel:", "mallory:")
+    log.write_text(fake + "\n")
+    assert bl.read_recent(10, log, kind="allow") == []  # same protection as for BLOCK
+
+
+def test_the_journal_is_asked_for_the_right_tag(tmp_path, monkeypatch):
+    monkeypatch.setattr(bl, "JOURNALCTL", (str(tmp_path),))
+    seen = []
+
+    def run(argv, **kw):
+        seen.append(argv[-1])
+        return subprocess.CompletedProcess(argv, 0, ALLOW, "")
+
+    assert bl.read_recent(5, tmp_path / "x", run, kind="allow")[0].dport == "22"
+    assert seen == ["UFW ALLOW"]
+    with pytest.raises(ValueError):
+        bl.read_recent(5, tmp_path / "x", run, kind="all")

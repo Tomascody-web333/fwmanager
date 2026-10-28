@@ -93,7 +93,7 @@ def env(gtk, tmp_path):
     app = Adw.Application(application_id="org.fwmanager.TestRules")
     app.register()
     win = MainWindow(
-        app, controller, us.UserSettings(setup_stage="done"), lambda c: None, lambda b: None
+        app, controller, us.UserSettings(setup_stage="done"), lambda c: None, lambda k, b: None
     )
     win.present()
     pump(0.3)

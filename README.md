@@ -80,7 +80,11 @@ wizard appears (see above); it can be skipped and is never shown again once fini
 - **Networks**: which profile for which Wi-Fi.
 - **Rules**: plain-language sentences (below).
 - **Log**: what the service did, and recent blocked attempts.
-- **Settings**.
+- **Settings**: language; **notifications**, one switch per kind (a change undone, the profile
+  changing by itself on another network, blocked attempts, connections let in — the last two
+  turn ufw's recording on at the level they need and are summed up at most once a minute);
+  recording level; router mode (also filter traffic this computer passes on to a hotspot, VMs
+  or Docker); and Uninstall.
 
 Ctrl+1..5 jump between pages, and the page switcher moves to the bottom on narrow windows.
 

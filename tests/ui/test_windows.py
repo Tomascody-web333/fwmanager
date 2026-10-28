@@ -41,7 +41,7 @@ def env(gtk, daemon, tmp_path):
         controller,
         us.UserSettings(setup_stage="done"),
         changes["lang"].append,
-        changes["notifications"].append,
+        lambda kind, on: changes["notifications"].append((kind, on)),
     )
     win.present()
     pump(0.3)
@@ -383,7 +383,7 @@ def test_language_and_notification_switches_call_back(env):
     assert env.win.settings.language.get_selected() == 1  # English is the current language
     env.win.settings.language.set_selected(0)  # Português
     env.win.settings.notifications.set_active(False)
-    assert env.changes["lang"] == ["pt"] and env.changes["notifications"] == [False]
+    assert env.changes["lang"] == ["pt"] and env.changes["notifications"] == [("reverted", False)]
 
 
 # -- slow applies ---

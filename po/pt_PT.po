@@ -8,6 +8,9 @@ msgstr "%(prog)s: erro: %(message)s\n"
 msgid "* = in use. Switch with: fwmanager-cli apply NAME"
 msgstr "* = em uso. Para mudar: fwmanager-cli apply NOME"
 
+msgid "A change was undone"
+msgstr "Uma alteração foi desfeita"
+
 msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 msgstr "Uma cara amigável para a firewall ufw. A configuração demora cerca de um minuto e não precisa de terminal."
 
@@ -56,8 +59,8 @@ msgstr "Os serviços permitidos estão acessíveis a partir de qualquer rede."
 msgid "Allowed. fwmanager has to be restarted to notice it."
 msgstr "Permitido. É preciso reiniciar o fwmanager para o notar."
 
-msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
-msgstr "Filtra também o tráfego que passa por este computador. Pode interferir com o Docker e as máquinas virtuais."
+msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
+msgstr "Filtra também o tráfego que este computador encaminha para outros dispositivos: hotspot Wi-Fi, máquinas virtuais, Docker. Deixe desligado num computador normal; ligá-lo pode cortar-lhes a rede."
 
 msgid "An administrator password is asked once."
 msgstr "A palavra-passe de administrador é pedida uma vez."
@@ -173,6 +176,9 @@ msgstr "Escolha um perfil abaixo para a ligar."
 msgid "Choose the details below."
 msgstr "Escolha os detalhes abaixo."
 
+msgid "Choose what fwmanager tells you about while it is open."
+msgstr "Escolha sobre o que o fwmanager o avisa enquanto está aberto."
+
 msgid "Close"
 msgstr "Fechar"
 
@@ -203,11 +209,17 @@ msgstr "Confirmado."
 msgid "Connecting to the service…"
 msgstr "A ligar ao serviço…"
 
+msgid "Connection attempts blocked"
+msgstr "Tentativas de ligação bloqueadas"
+
 msgid "Connection {id}"
 msgstr "Ligação {id}"
 
 msgid "Connections could hang (destination unreachable)."
 msgstr "As ligações podem ficar penduradas (destino inalcançável)."
+
+msgid "Connections let in"
+msgstr "Ligações permitidas"
 
 msgid "Continue"
 msgstr "Continuar"
@@ -277,6 +289,9 @@ msgstr "Firewall: {state}"
 
 msgid "Fix this"
 msgstr "Corrigir"
+
+msgid "For example when you join another network."
+msgstr "Por exemplo, quando se liga a outra rede."
 
 msgid "Forget this network"
 msgstr "Esquecer esta rede"
@@ -476,6 +491,9 @@ msgstr "Não, desfazer"
 msgid "Not authorised. Ask an administrator, or use the command below."
 msgstr "Sem autorização. Peça a um administrador ou use o comando abaixo."
 
+msgid "Not confirmed in time, so it was undone."
+msgstr "Não foi confirmada a tempo e foi desfeita."
+
 msgid "Not connected"
 msgstr "Sem ligação"
 
@@ -496,6 +514,9 @@ msgstr "Ainda nada."
 
 msgid "Notifications"
 msgstr "Notificações"
+
+msgid "Now using the {profile} profile."
+msgstr "Agora a usar o perfil {profile}."
 
 msgid "Off"
 msgstr "Desligado"
@@ -557,6 +578,12 @@ msgstr "Perfil"
 msgid "Profile [{default}]: "
 msgstr "Perfil [{default}]: "
 
+msgid "Profile changed"
+msgstr "Perfil alterado"
+
+msgid "Profile changed by itself"
+msgstr "O perfil mudou sozinho"
+
 msgid "Profile for {name}"
 msgstr "Perfil para {name}"
 
@@ -587,8 +614,11 @@ msgstr "Alcançar o gateway IPv6"
 msgid "Ready"
 msgstr "Pronto"
 
-msgid "Record blocked attempts"
-msgstr "Registar tentativas bloqueadas"
+msgid "Record connections"
+msgstr "Registar ligações"
+
+msgid "Recording turned on at {level}, so there is something to notify about."
+msgstr "O registo foi ligado em {level}, para haver algo de que avisar."
 
 msgid "Refresh"
 msgstr "Atualizar"
@@ -731,8 +761,8 @@ msgstr "Serviço iniciado"
 msgid "Settings"
 msgstr "Definições"
 
-msgid "Shown in the Log page. Higher levels record more."
-msgstr "Aparece na página Registo. Níveis mais altos registam mais."
+msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
+msgstr "Aparece na página Registo. Baixo regista as tentativas bloqueadas; Médio e Alto também as ligações permitidas."
 
 msgid "Skip setup"
 msgstr "Saltar a configuração"
@@ -766,9 +796,6 @@ msgstr "Mudar já para este perfil"
 
 msgid "Syncthing"
 msgstr "Syncthing"
-
-msgid "Tell me when a change was undone automatically."
-msgstr "Avisar-me quando uma alteração for desfeita automaticamente."
 
 msgid "Test"
 msgstr "Testar"
@@ -853,6 +880,12 @@ msgstr "Demasiadas redes guardadas."
 
 msgid "Try again"
 msgstr "Tentar de novo"
+
+msgid "Turns on recording at Low if it is off."
+msgstr "Liga o registo em Baixo se estiver desligado."
+
+msgid "Turns on recording at Medium if it is lower. Can be frequent."
+msgstr "Liga o registo em Médio se estiver mais baixo. Pode ser frequente."
 
 msgid "Type yes to uninstall: "
 msgstr "Escreva sim para desinstalar: "
@@ -1274,6 +1307,12 @@ msgstr "{before} → {after}"
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} está a gerir a firewall. Desligue-o primeiro e depois volte a abrir o fwmanager:"
 
+msgid "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr "{n} tentativas foram bloqueadas. A mais recente: {src} para a porta {port}."
+
+msgid "{n} connections were let in. The latest: {src} to port {port}."
+msgstr "{n} ligações foram permitidas. A mais recente: {src} para a porta {port}."
+
 msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 msgstr "O perfil {profile} ainda aguarda a sua confirmação. Se fechar sem escolher, é desfeito dentro de poucos segundos."
 
@@ -1285,6 +1324,12 @@ msgstr "A mudança para {profile} será desfeita dentro de {n} s se não confirm
 
 msgid "{p} is back to its defaults."
 msgstr "{p} voltou às predefinições."
+
+msgid "{src} connected to port {port}."
+msgstr "{src} ligou-se à porta {port}."
+
+msgid "{src} tried to reach port {port}."
+msgstr "{src} tentou chegar à porta {port}."
 
 msgid "{src} tried to reach {target}"
 msgstr "{src} tentou aceder a {target}"

@@ -22,8 +22,12 @@ JOURNALCTL = ("/usr/bin/journalctl", "/bin/journalctl")
 
 _FIELD = re.compile(r"\b(IN|SRC|DST|PROTO|DPT)=(\S*)")
 _TIME = re.compile(r"^(\d{4}-\d{2}-\d{2}T[\d:.+-]+|[A-Z][a-z]{2}\s+\d+\s+[\d:]{8})")
+# ufw's tags: BLOCK for refused packets, ALLOW for connections let in (logging medium and up).
+TAGS = {"block": "UFW BLOCK", "allow": "UFW ALLOW"}
 # What the kernel's lines look like in syslog: "host kernel: [ 1234.5] [UFW BLOCK] ...".
-_FROM_KERNEL = re.compile(r"(^|\s)kernel: (\[\s*\d+\.\d+\]\s*)?\[UFW BLOCK\]")
+_FROM_KERNEL = {
+    kind: re.compile(rf"(^|\s)kernel: (\[\s*\d+\.\d+\]\s*)?\[{tag}\]") for kind, tag in TAGS.items()
+}
 SAFE = re.compile(r"^[A-Za-z0-9_.:%/-]{0,64}$")
 
 
@@ -37,8 +41,8 @@ class Blocked:
     dport: str
 
 
-def parse_line(line: str) -> Blocked | None:
-    if "[UFW BLOCK]" not in line:
+def parse_line(line: str, kind: str = "block") -> Blocked | None:
+    if f"[{TAGS[kind]}]" not in line:
         return None
     fields = dict(_FIELD.findall(line))
     if not fields.get("SRC"):
@@ -50,13 +54,15 @@ def parse_line(line: str) -> Blocked | None:
     return Blocked(when.group(1) if when else "", *values)
 
 
-def parse_lines(text: str, limit: int, kernel_only: bool = False) -> list[Blocked]:
+def parse_lines(
+    text: str, limit: int, kernel_only: bool = False, kind: str = "block"
+) -> list[Blocked]:
     """Newest first. ``kernel_only`` drops lines another program wrote (syslog files)."""
     out = []
     for line in reversed(text.splitlines()[-MAX_LINES:]):
-        if kernel_only and not _FROM_KERNEL.search(line):
+        if kernel_only and not _FROM_KERNEL[kind].search(line):
             continue
-        item = parse_line(line)
+        item = parse_line(line, kind)
         if item:
             out.append(item)
             if len(out) >= limit:
@@ -78,7 +84,7 @@ def _tail(path: Path) -> str | None:
     return "\n".join(lines[-MAX_LINES:])
 
 
-def _journal(run: Callable) -> str | None:
+def _journal(run: Callable, kind: str = "block") -> str | None:
     """Kernel messages only (``-k``): nobody but the kernel can write those."""
     journalctl = next((p for p in JOURNALCTL if Path(p).exists()), None)
     if journalctl is None:
@@ -86,7 +92,7 @@ def _journal(run: Callable) -> str | None:
     try:
         proc = run(
             [journalctl, "-k", "-n", str(MAX_LINES), "--no-pager", "-o", "short-iso",
-             "--grep", "UFW BLOCK"],
+             "--grep", TAGS[kind]],
             capture_output=True, text=True, timeout=10, check=False,
         )  # fmt: skip
     except (OSError, subprocess.TimeoutExpired):
@@ -98,10 +104,16 @@ def read_recent(
     limit: int = 50,
     log_path: Path = UFW_LOG,
     run: Callable = subprocess.run,
+    kind: str = "block",
 ) -> list[Blocked]:
-    """Prefer the kernel journal; fall back to /var/log/ufw.log where there is none."""
+    """Prefer the kernel journal; fall back to /var/log/ufw.log where there is none.
+
+    ``kind`` is ``block`` (refused packets) or ``allow`` (connections let in).
+    """
+    if kind not in TAGS:
+        raise ValueError(kind)
     limit = max(1, min(int(limit), 500))
-    found = parse_lines(_journal(run) or "", limit, kernel_only=True)
+    found = parse_lines(_journal(run, kind) or "", limit, kernel_only=True, kind=kind)
     if found:
         return found
-    return parse_lines(_tail(log_path) or "", limit, kernel_only=True)
+    return parse_lines(_tail(log_path) or "", limit, kernel_only=True, kind=kind)

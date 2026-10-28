@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
-
 import gi
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Adw, Gio  # noqa: E402
+from gi.repository import Adw, Gio, GLib  # noqa: E402
 
 from fwmanager.core.config import SYSTEM_CONFIG, resolve_language  # noqa: E402
 from fwmanager.i18n import _, set_language  # noqa: E402
-from fwmanager.ui import APP_ID, state  # noqa: E402
+from fwmanager.ui import APP_ID, state, traffic  # noqa: E402
 from fwmanager.ui import settings as us  # noqa: E402
 from fwmanager.ui.controller import Controller  # noqa: E402
 from fwmanager.ui.window import MainWindow  # noqa: E402
+
+TRAFFIC_POLL_SECONDS = 20
 
 
 class FwApplication(Adw.Application):
@@ -30,6 +30,8 @@ class FwApplication(Adw.Application):
         self.window: MainWindow | None = None
         self.user_settings = us.UserSettings()
         self._wizard_options: dict = {}  # tests inject fakes for the helper and the relaunch
+        self.traffic = traffic.TrafficWatcher(self._traffic_notification)
+        self.sent: list[tuple[str, str]] = []
         self._uninstall_options: dict = {}
 
     # -- language ---
@@ -52,9 +54,12 @@ class FwApplication(Adw.Application):
         self.user_settings = self.user_settings.with_stage(stage)
         us.save(self.user_settings, self._settings_path)
 
-    def set_notifications(self, enabled: bool) -> None:
-        self.user_settings = replace(self.user_settings, notifications=enabled)
+    def set_notifications(self, kind: str, enabled: bool) -> None:
+        """One kind of notification on or off (``reverted``, ``switched``, ``blocked``...)."""
+        self.user_settings = self.user_settings.with_notify(kind, enabled)
         us.save(self.user_settings, self._settings_path)
+        if not enabled and kind in traffic.TITLES:
+            self.traffic.forget(kind)
 
     # -- life cycle ---
 
@@ -66,6 +71,8 @@ class FwApplication(Adw.Application):
         self.controller = self._factory()
         self.controller.signal_listeners.append(self._on_daemon_signal)
         self._build_window()
+        self.poll_traffic()
+        GLib.timeout_add_seconds(TRAFFIC_POLL_SECONDS, lambda: self.poll_traffic() or True)
 
     def _build_window(self) -> None:
         old = self.window
@@ -84,13 +91,45 @@ class FwApplication(Adw.Application):
             old.detach()  # destroying it does not unsubscribe it from the controller
             old.destroy()
 
+    def _notify(self, kind: str, title: str, body: str) -> None:
+        """One desktop notification; a newer one of the same kind replaces the older."""
+        note = Gio.Notification.new(title)
+        note.set_icon(Gio.ThemedIcon.new(APP_ID))
+        note.set_body(body)
+        self.send_notification(kind, note)
+        self.sent.append((kind, body))  # what went out, for the tests
+
     def _on_daemon_signal(self, name: str, args: tuple) -> None:
-        if name == "Reverted" and self.user_settings.notifications:
-            note = Gio.Notification.new(_("fwmanager"))
-            note.set_icon(Gio.ThemedIcon.new(APP_ID))
-            note.set_body(
-                _("{profile} was undone because it was not confirmed in time.").format(
+        if name == "Reverted":
+            self.controller.own_change = ""
+            if self.user_settings.wants("reverted"):
+                body = _("{profile} was undone because it was not confirmed in time.")
+                self._notify("reverted", _("fwmanager"), body.format(
+                    profile=state.profile_title(args[0])
+                ))  # fmt: skip
+        elif name == "Confirmed":
+            own = self.controller.own_change == args[0]
+            self.controller.own_change = ""
+            if not own and self.user_settings.wants("switched"):  # e.g. a network came up
+                body = _("Now using the {profile} profile.").format(
                     profile=state.profile_title(args[0])
                 )
-            )
-            self.send_notification("reverted", note)
+                self._notify("switched", _("Profile changed"), body)
+
+    # -- traffic ---
+
+    def poll_traffic(self) -> None:
+        """Ask the service for new log entries of each kind someone wants to hear about."""
+        if self.controller is None:
+            return
+        for kind, fetch in (
+            ("blocked", self.controller.blocked),
+            ("allowed", self.controller.allowed),
+        ):
+            if self.user_settings.wants(kind):
+                fetch(
+                    lambda result, error, k=kind: error is None and self.traffic.update(k, result)
+                )
+
+    def _traffic_notification(self, kind: str, items: list) -> None:
+        self._notify(kind, _(traffic.TITLES[kind]), traffic.describe(kind, items))

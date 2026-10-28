@@ -117,6 +117,9 @@ class Client:
     def get_recent_blocked(self, limit: int = 50) -> list[tuple[str, ...]]:
         return self._call("GetRecentBlocked", GLib.Variant("(u)", (limit,)), "(a(ssssss))")[0]
 
+    def get_recent_allowed(self, limit: int = 50) -> list[tuple[str, ...]]:
+        return self._call("GetRecentAllowed", GLib.Variant("(u)", (limit,)), "(a(ssssss))")[0]
+
     @staticmethod
     def _params(params: dict) -> dict:
         return {

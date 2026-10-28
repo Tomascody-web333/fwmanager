@@ -34,7 +34,7 @@ def focused(gtk):
     app = Adw.Application(application_id="org.fwmanager.TestKeys")
     app.register()
     win = MainWindow(
-        app, controller, us.UserSettings(setup_stage="done"), lambda c: None, lambda b: None
+        app, controller, us.UserSettings(setup_stage="done"), lambda c: None, lambda k, b: None
     )
     win.present()
     pump(0.6)

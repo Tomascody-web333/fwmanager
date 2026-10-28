@@ -42,6 +42,7 @@ class FakeDaemon:
         self.options = {"router_mode": False, "log_level": ""}
         self.events = [(1_790_000_000, "startup", "ok"), (1_790_000_050, "confirmed", "casa")]
         self.blocked = [("2026-10-27T17:32:01", "wlan0", "203.0.113.9", "192.168.1.5", "TCP", "22")]
+        self.allowed = []
         self.findings = []
         self.rules = []  # (id, template, params)
         self.calls = []
@@ -160,6 +161,10 @@ class FakeClient:
     def get_recent_blocked(self, limit=50):
         self._call("get_recent_blocked", limit)
         return list(self.d.blocked)
+
+    def get_recent_allowed(self, limit=50):
+        self._call("get_recent_allowed", limit)
+        return list(self.d.allowed)
 
     def list_rules(self):
         self._call("list_rules")

@@ -45,7 +45,7 @@ class Env:
         app.register()
         self.win = MainWindow(
             app, self.controller, us.UserSettings(setup_stage=stage),
-            self.languages.append, lambda b: None, self.stages.append,
+            self.languages.append, lambda k, b: None, self.stages.append,
             dict(user="ana", run_helper=self._helper, do_relaunch=self._relaunch,
                  group_info=lambda: self.group, ufw_present=lambda: ufw, run=run_sync),
         )  # fmt: skip

@@ -9,11 +9,23 @@ gi.require_version("Adw", "1")
 from gi.repository import Adw, Gtk  # noqa: E402
 
 from fwmanager.i18n import N_, _  # noqa: E402
-from fwmanager.ui.common import button, toast_error  # noqa: E402
+from fwmanager.ui.common import button, toast, toast_error  # noqa: E402
 
 AUTHOR = "Tomascody-web333"
 LANGUAGES = (("pt", "Português"), ("en", "English"))  # always shown in their own language
 LOG_LEVELS = (("", N_("Off")), ("low", N_("Low")), ("medium", N_("Medium")), ("high", N_("High")))
+NOTIFY_ROWS = (
+    ("reverted", N_("A change was undone"), N_("Not confirmed in time, so it was undone.")),
+    ("switched", N_("Profile changed by itself"), N_("For example when you join another network.")),
+    ("blocked", N_("Blocked connection attempts"), N_("Turns on recording at Low if it is off.")),
+    (
+        "allowed",
+        N_("Connections let in"),
+        N_("Turns on recording at Medium if it is lower. Can be frequent."),
+    ),
+)
+# The recording level a kind of traffic notification needs (ufw only logs what it is asked to).
+NEEDS_LEVEL = {"blocked": "low", "allowed": "medium"}
 
 
 class SettingsPage(Adw.PreferencesPage):
@@ -38,28 +50,43 @@ class SettingsPage(Adw.PreferencesPage):
         self.language.connect(
             "notify::selected", lambda r, _p: on_language(codes[r.get_selected()])
         )
-        self.notifications = Adw.SwitchRow(
-            title=_("Notifications"),
-            subtitle=_("Tell me when a change was undone automatically."),
-            active=user_settings.notifications,
-        )
-        self.notifications.connect("notify::active", lambda r, _p: on_notifications(r.get_active()))
         general.add(self.language)
-        general.add(self.notifications)
         self.add(general)
+
+        # -- notifications: one switch per kind of event ---
+        notes = Adw.PreferencesGroup(
+            title=_("Notifications"),
+            description=_("Choose what fwmanager tells you about while it is open."),
+        )
+        self.notify_rows: dict[str, Adw.SwitchRow] = {}
+        for kind, title, subtitle in NOTIFY_ROWS:
+            row = Adw.SwitchRow(
+                title=_(title), subtitle=_(subtitle), active=user_settings.wants(kind)
+            )
+            row.connect("notify::active", lambda r, _p, k=kind: self._notify_changed(k, r))
+            self.notify_rows[kind] = row
+            notes.add(row)
+        self._on_notifications = on_notifications
+        self.notifications = self.notify_rows["reverted"]  # the original switch
+        self.add(notes)
 
         firewall = Adw.PreferencesGroup(title=_("Firewall"))
         self.log_level = Adw.ComboRow(
-            title=_("Record blocked attempts"),
-            subtitle=_("Shown in the Log page. Higher levels record more."),
+            title=_("Record connections"),
+            subtitle=_(
+                "Shown in the Log page. Low records blocked attempts; Medium and High also "
+                "the connections that were let in."
+            ),
             model=Gtk.StringList.new([_(label) for _v, label in LOG_LEVELS]),
         )
         self.router = Adw.SwitchRow(
             title=_("Router mode"),
             subtitle=_(
-                "Also filter traffic passing through this computer. "
-                "May interfere with Docker and virtual machines."
+                "Also filter traffic this computer passes on to other devices: Wi-Fi "
+                "hotspot, virtual machines, Docker. Leave it off on an ordinary computer; "
+                "turning it on can cut those off."
             ),
+            subtitle_lines=0,
         )
         self.log_level.connect("notify::selected", lambda *_: self._save())
         self.router.connect("notify::active", lambda *_: self._save())
@@ -107,6 +134,17 @@ class SettingsPage(Adw.PreferencesPage):
         levels = [v for v, _l in LOG_LEVELS]
         self.log_level.set_selected(levels.index(result["log_level"]))
         self._loading = False
+
+    def _notify_changed(self, kind: str, row: Adw.SwitchRow) -> None:
+        self._on_notifications(kind, row.get_active())
+        if not row.get_active() or kind not in NEEDS_LEVEL or self._loading:
+            return
+        levels = [v for v, _l in LOG_LEVELS]
+        needed = levels.index(NEEDS_LEVEL[kind])
+        if self.log_level.get_selected() < needed:
+            self.log_level.set_selected(needed)  # saved to the service like any other change
+            toast(self, _("Recording turned on at {level}, so there is something to notify about.")
+                  .format(level=_(LOG_LEVELS[needed][1])))  # fmt: skip
 
     def _save(self) -> None:
         if self._loading:

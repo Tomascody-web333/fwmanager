@@ -8,6 +8,9 @@ msgstr ""
 msgid "* = in use. Switch with: fwmanager-cli apply NAME"
 msgstr ""
 
+msgid "A change was undone"
+msgstr ""
+
 msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
 msgstr ""
 
@@ -56,7 +59,7 @@ msgstr ""
 msgid "Allowed. fwmanager has to be restarted to notice it."
 msgstr ""
 
-msgid "Also filter traffic passing through this computer. May interfere with Docker and virtual machines."
+msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
 msgstr ""
 
 msgid "An administrator password is asked once."
@@ -173,6 +176,9 @@ msgstr ""
 msgid "Choose the details below."
 msgstr ""
 
+msgid "Choose what fwmanager tells you about while it is open."
+msgstr ""
+
 msgid "Close"
 msgstr ""
 
@@ -203,10 +209,16 @@ msgstr ""
 msgid "Connecting to the service…"
 msgstr ""
 
+msgid "Connection attempts blocked"
+msgstr ""
+
 msgid "Connection {id}"
 msgstr ""
 
 msgid "Connections could hang (destination unreachable)."
+msgstr ""
+
+msgid "Connections let in"
 msgstr ""
 
 msgid "Continue"
@@ -276,6 +288,9 @@ msgid "Firewall: {state}"
 msgstr ""
 
 msgid "Fix this"
+msgstr ""
+
+msgid "For example when you join another network."
 msgstr ""
 
 msgid "Forget this network"
@@ -476,6 +491,9 @@ msgstr ""
 msgid "Not authorised. Ask an administrator, or use the command below."
 msgstr ""
 
+msgid "Not confirmed in time, so it was undone."
+msgstr ""
+
 msgid "Not connected"
 msgstr ""
 
@@ -495,6 +513,9 @@ msgid "Nothing yet."
 msgstr ""
 
 msgid "Notifications"
+msgstr ""
+
+msgid "Now using the {profile} profile."
 msgstr ""
 
 msgid "Off"
@@ -557,6 +578,12 @@ msgstr ""
 msgid "Profile [{default}]: "
 msgstr ""
 
+msgid "Profile changed"
+msgstr ""
+
+msgid "Profile changed by itself"
+msgstr ""
+
 msgid "Profile for {name}"
 msgstr ""
 
@@ -587,7 +614,10 @@ msgstr ""
 msgid "Ready"
 msgstr ""
 
-msgid "Record blocked attempts"
+msgid "Record connections"
+msgstr ""
+
+msgid "Recording turned on at {level}, so there is something to notify about."
 msgstr ""
 
 msgid "Refresh"
@@ -731,7 +761,7 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-msgid "Shown in the Log page. Higher levels record more."
+msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
 msgstr ""
 
 msgid "Skip setup"
@@ -765,9 +795,6 @@ msgid "Switch to this profile now"
 msgstr ""
 
 msgid "Syncthing"
-msgstr ""
-
-msgid "Tell me when a change was undone automatically."
 msgstr ""
 
 msgid "Test"
@@ -852,6 +879,12 @@ msgid "Too many saved networks."
 msgstr ""
 
 msgid "Try again"
+msgstr ""
+
+msgid "Turns on recording at Low if it is off."
+msgstr ""
+
+msgid "Turns on recording at Medium if it is lower. Can be frequent."
 msgstr ""
 
 msgid "Type yes to uninstall: "
@@ -1274,6 +1307,12 @@ msgstr ""
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr ""
 
+msgid "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr ""
+
+msgid "{n} connections were let in. The latest: {src} to port {port}."
+msgstr ""
+
 msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 msgstr ""
 
@@ -1284,6 +1323,12 @@ msgid "{profile} will be undone in {n} s unless you confirm."
 msgstr ""
 
 msgid "{p} is back to its defaults."
+msgstr ""
+
+msgid "{src} connected to port {port}."
+msgstr ""
+
+msgid "{src} tried to reach port {port}."
 msgstr ""
 
 msgid "{src} tried to reach {target}"

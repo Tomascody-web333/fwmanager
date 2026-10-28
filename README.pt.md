@@ -83,7 +83,11 @@ aparecer depois de concluído. Cinco páginas:
 - **Redes**: que perfil para que Wi-Fi.
 - **Regras**: frases em linguagem simples (abaixo).
 - **Registo**: o que o serviço fez e as tentativas bloqueadas recentes.
-- **Definições**.
+- **Definições**: idioma; **notificações**, um interruptor por tipo (uma alteração desfeita, o
+  perfil a mudar sozinho noutra rede, tentativas bloqueadas, ligações permitidas — estas duas
+  ligam o registo do ufw no nível de que precisam e são resumidas no máximo uma vez por
+  minuto); nível de registo; modo router (filtra também o tráfego que este computador
+  encaminha para um hotspot, máquinas virtuais ou Docker); e Desinstalar.
 
 Ctrl+1..5 saltam entre páginas e o seletor de páginas passa para baixo em janelas estreitas.
 

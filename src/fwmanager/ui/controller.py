@@ -47,6 +47,7 @@ class Controller:
         self._ticks = 0
         self._timer = 0
         self.applying = ""  # the profile being applied right now (ufw can take a few seconds)
+        self.own_change = ""  # last profile applied from this window: its Confirmed is no news
         self.snapshot = Snapshot(state.DAEMON_DOWN)
         self.listeners: list[Callable[[Snapshot], None]] = []
         self.signal_listeners: list[Callable[[str, tuple], None]] = []
@@ -143,6 +144,7 @@ class Controller:
 
     def apply(self, name: str, done: Done | None = None) -> None:
         self.applying = name
+        self.own_change = name
         self._publish(self.snapshot)  # pages show "Applying…" at once
 
         def finished(result, error) -> None:
@@ -209,6 +211,10 @@ class Controller:
 
     def blocked(self, done: Done, limit: int = 100) -> None:
         self._op(lambda c: c.get_recent_blocked(limit), done)
+
+    def allowed(self, done: Done, limit: int = 100) -> None:
+        """Connections ufw let in (only recorded at logging level medium or high)."""
+        self._op(lambda c: c.get_recent_allowed(limit), done)
 
     def current_network(self, done: Done, bus_address: str | None = None) -> None:
         self._run(lambda: netinfo.current_network(bus_address), done)

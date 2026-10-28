@@ -119,6 +119,7 @@ def test_no_method_accepts_rule_text(daemon):
         "SetOptions",
         "GetEvents",
         "GetRecentBlocked",
+        "GetRecentAllowed",
         "ListRules",
         "PreviewRule",
         "AddRule",

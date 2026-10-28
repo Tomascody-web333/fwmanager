@@ -58,6 +58,10 @@ INTROSPECTION_XML = f"""
       <arg type="u" name="limit" direction="in"/>
       <arg type="a(ssssss)" name="packets" direction="out"/>
     </method>
+    <method name="GetRecentAllowed">
+      <arg type="u" name="limit" direction="in"/>
+      <arg type="a(ssssss)" name="packets" direction="out"/>
+    </method>
     <method name="ListRules">
       <arg type="a(ssa{{sv}})" name="rules" direction="out"/>
     </method>

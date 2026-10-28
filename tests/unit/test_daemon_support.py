@@ -68,6 +68,7 @@ def test_interface_is_fixed_command_set():
         "SetOptions",
         "GetEvents",
         "GetRecentBlocked",
+        "GetRecentAllowed",
         "ListRules",
         "PreviewRule",
         "AddRule",

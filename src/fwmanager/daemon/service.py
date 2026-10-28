@@ -217,8 +217,9 @@ class ControlService:
             return None
         if method == "GetEvents":
             return GLib.Variant("(a(tss))", (list(self._events),))
-        if method == "GetRecentBlocked":
-            items = blocklog.read_recent(args[0])
+        if method in ("GetRecentBlocked", "GetRecentAllowed"):
+            kind = "block" if method == "GetRecentBlocked" else "allow"
+            items = blocklog.read_recent(args[0], kind=kind)
             return GLib.Variant(
                 "(a(ssssss))",
                 ([(b.when, b.iface, b.src, b.dst, b.proto, b.dport) for b in items],),
