@@ -28,7 +28,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
             python3-gi gir1.2-gdkpixbuf-2.0 librsvg2-common python3-pytest \
-            gir1.2-gtk-4.0 gir1.2-adw-1
+            gir1.2-gtk-4.0 gir1.2-adw-1 apt-utils
 
       - name: The tag matches the version
         run: |
@@ -39,7 +39,8 @@ jobs:
           fi
 
       - name: Unit tests and package tests
-        run: /usr/bin/python3 -m pytest -q -p no:cacheprovider tests/unit tests/install/test_deb.py
+        # As root: some tests read a copy of /etc/ufw, which only root may read.
+        run: sudo /usr/bin/python3 -m pytest -q -p no:cacheprovider tests/unit tests/install
 
       - name: Build
         run: packaging/deb/build-deb.sh --out dist
