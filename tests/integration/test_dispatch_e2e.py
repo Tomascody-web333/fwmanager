@@ -48,32 +48,32 @@ def active(env):
 
 
 def test_mapped_network_switches_profile_and_persists(env, netns_prefix):
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     r = dispatch_cli(env, netns_prefix, UUID)
     assert r.returncode == 0, r.stderr
-    assert active(env) == "casa" and env.client.status()["pending_profile"] == ""
+    assert active(env) == "home" and env.client.status()["pending_profile"] == ""
     assert "confirmed" in r.stderr
-    assert json.loads((env.state_dir / "state.json").read_text())["profile"] == "casa"
+    assert json.loads((env.state_dir / "state.json").read_text())["profile"] == "home"
 
 
 def test_unknown_network_gets_publico(env, netns_prefix):
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     dispatch_cli(env, netns_prefix, UUID)
     r = dispatch_cli(env, netns_prefix, OTHER)  # a network nobody mapped
     assert r.returncode == 0, r.stderr
-    assert active(env) == "publico"
+    assert active(env) == "public"
 
 
 def test_switching_back_and_forth(env, netns_prefix):
-    env.client.set_network_profile("", UUID, "casa")
-    env.client.set_network_profile("", OTHER, "trabalho")
-    for uuid, expected in ((UUID, "casa"), (OTHER, "trabalho"), (UUID, "casa")):
+    env.client.set_network_profile("", UUID, "home")
+    env.client.set_network_profile("", OTHER, "work")
+    for uuid, expected in ((UUID, "home"), (OTHER, "work"), (UUID, "home")):
         assert dispatch_cli(env, netns_prefix, uuid).returncode == 0
         assert active(env) == expected
 
 
 def test_same_profile_is_a_noop(env, netns_prefix):
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     dispatch_cli(env, netns_prefix, UUID)
     r = dispatch_cli(env, netns_prefix, UUID)
     assert r.returncode == 0 and "already active" in r.stderr
@@ -81,16 +81,16 @@ def test_same_profile_is_a_noop(env, netns_prefix):
 
 @pytest.mark.parametrize("action", ["down", "vpn-up", "dhcp4-change", "connectivity-change"])
 def test_other_actions_are_ignored(env, netns_prefix, action):
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     r = dispatch_cli(env, netns_prefix, UUID, action=action)
-    assert r.returncode == 0 and active(env) == "publico"
+    assert r.returncode == 0 and active(env) == "public"
 
 
 def test_unverifiable_gateway_still_confirms(env, netns_prefix):
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     r = dispatch_cli(env, netns_prefix, UUID, gateway="10.255.255.1")  # unroutable here
     assert r.returncode == 0, r.stderr
-    assert "cannot verify" in r.stderr and active(env) == "casa"
+    assert "cannot verify" in r.stderr and active(env) == "home"
 
 
 def test_malicious_environment_is_ignored(env, netns_prefix):
@@ -103,14 +103,14 @@ def test_malicious_environment_is_ignored(env, netns_prefix):
         env={"CONNECTION_UUID": 'x"; flush ruleset', "IP4_GATEWAY": "1.1.1.1; reboot"},
     )
     assert r.returncode == 0, r.stderr
-    assert active(env) == "publico"
+    assert active(env) == "public"
     bad_iface = run_cli_in_ns(netns_prefix, env.bus, "dispatch", "lo;reboot", "up")
     assert bad_iface.returncode == 1
 
 
 def test_lost_connectivity_rolls_back_for_real(env):
     """Real daemon + real ufw, with a pinger that sees the gateway die after the change."""
-    env.client.set_network_profile("", UUID, "casa")
+    env.client.set_network_profile("", UUID, "home")
     before = env.fp()
 
     def ping(addr, iface, timeout):

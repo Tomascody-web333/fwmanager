@@ -31,22 +31,22 @@ def test_traffic_notifications_turn_recording_on_when_needed(env):  # noqa: F811
 
 def test_a_profile_switched_by_the_network_is_announced(make_app):  # noqa: F811
     app = make_app(user_lang="en")
-    app.daemon.signal_cb("Confirmed", ("casa",))  # e.g. the NetworkManager hook confirmed it
+    app.daemon.signal_cb("Confirmed", ("home",))  # e.g. the NetworkManager hook confirmed it
     assert app.sent == [("switched", "Now using the Home profile.")]
 
 
 def test_your_own_switch_is_not_announced(make_app):  # noqa: F811
     app = make_app(user_lang="en")
-    app.controller.apply("trabalho")
-    app.daemon.signal_cb("Confirmed", ("trabalho",))
+    app.controller.apply("work")
+    app.daemon.signal_cb("Confirmed", ("work",))
     assert app.sent == []
 
 
 def test_switched_off_means_silent(make_app):  # noqa: F811
     app = make_app(user_lang="en")
     app.set_notifications("switched", False)
-    app.daemon.signal_cb("Confirmed", ("casa",))
-    app.daemon.signal_cb("Reverted", ("trabalho",))
+    app.daemon.signal_cb("Confirmed", ("home",))
+    app.daemon.signal_cb("Reverted", ("work",))
     assert app.sent == [("reverted", "Work was undone because it was not confirmed in time.")]
 
 

@@ -157,8 +157,10 @@ active it applies nothing and the interface explains why.
 ## Command line
 
 `fwmanager-cli` does what the window does, in a terminal: for servers, SSH sessions, older
-systems without libadwaita 1.5, or scripts. Profiles are typed by their English names (`home`, `work`, `public`,
-`custom`); the Portuguese ones work too.
+systems without libadwaita 1.5, or scripts. Profiles are typed by their English names (`home`,
+`work`, `public`, `custom`); the Portuguese ones work too. Those English names are also the
+ones used inside: in `--json` output and in the comments of ufw rules (`fwmanager:home`).
+Older installs, which used Portuguese names, switch to them by themselves.
 
 ```sh
 fwmanager-cli setup               # first-run setup, as in the window

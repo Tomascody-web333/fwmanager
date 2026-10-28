@@ -68,13 +68,13 @@ def test_already_set_up_elsewhere_is_not_done_twice(capsys):
 
 def test_a_fresh_machine_asks_once_then_carries_on_with_the_new_group(capsys):
     w = World(service=False, listed=False, held=False)
-    assert sc.setup(w.deps(), profile="casa", yes=True) == 0
+    assert sc.setup(w.deps(), profile="home", yes=True) == 0
     assert w.helper_calls == ["setup"]  # one password, for everything
-    assert w.relaunches == [["setup", "--profile", "casa", "--yes"]]  # continues in a new process
+    assert w.relaunches == [["setup", "--profile", "home", "--yes"]]  # continues in a new process
     w.held = True  # ...which has the group
-    assert sc.setup(w.deps(), profile="casa", yes=True) == 0
+    assert sc.setup(w.deps(), profile="home", yes=True) == 0
     assert w.helper_calls == ["setup"]  # not asked again
-    assert w.daemon.active == "casa" and w.daemon.configured
+    assert w.daemon.active == "home" and w.daemon.configured
     assert "You are all set" in capsys.readouterr().out
     assert sc.setup(w.deps()) == 0 and w.helper_calls == ["setup"]  # and now it is just done
 
@@ -85,7 +85,7 @@ def test_the_profile_is_asked_in_the_terminal(capsys):
     assert sc.setup(w.deps(), yes=True) == 0
     out = capsys.readouterr().out
     assert "How should this computer behave on this network?" in out and "Lets nothing in." in out
-    assert w.daemon.active == "casa"
+    assert w.daemon.active == "home"
 
 
 def test_without_a_terminal_it_needs_the_profile_given(capsys):
@@ -115,7 +115,7 @@ def test_a_helper_that_did_not_finish_changes_nothing(capsys, code, exit_code, m
 def test_under_sudo_the_person_who_typed_it_is_set_up():
     w = World(listed=False)
     uid = str(os.getuid() if os.getuid() else 65534)
-    sc.setup(w.deps(euid=0, env={"SUDO_UID": uid}), profile="casa", yes=True)
+    sc.setup(w.deps(euid=0, env={"SUDO_UID": uid}), profile="home", yes=True)
     assert w.helper_calls[0] == ("root-setup", {"PKEXEC_UID": uid})
 
 
@@ -160,7 +160,7 @@ def test_the_chosen_profile_is_remembered_for_this_network(capsys):
     w.daemon.networks = []
     w.network = CurrentNetwork("Home Wi-Fi", "Home Wi-Fi", "u-1", WIFI)
     assert sc.setup(w.deps(), profile="home", yes=True) == 0
-    assert w.daemon.networks == [("Home Wi-Fi", "u-1", "casa")]
+    assert w.daemon.networks == [("Home Wi-Fi", "u-1", "home")]
 
 
 def test_an_open_wifi_gets_the_same_warning_as_in_the_window(capsys):

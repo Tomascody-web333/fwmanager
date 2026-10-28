@@ -58,7 +58,7 @@ def test_the_real_bus_refuses_what_the_default_policy_denies(sysbus):
 def test_group_member_gets_through(daemon):
     r = busctl(daemon.bus, MEMBER, "ListProfiles")
     assert r.returncode == 0, r.stderr
-    assert "casa" in r.stdout
+    assert "home" in r.stdout
 
 
 def test_other_accounts_are_stopped_by_the_bus_itself(daemon):
@@ -119,7 +119,7 @@ def on(name, args):
     got.append(name)
     if name == "Applied": loop.quit()
 c.subscribe(on)
-c.apply_profile("casa")
+c.apply_profile("home")
 GLib.timeout_add_seconds(15, loop.quit)
 loop.run()
 c.rollback()
@@ -142,7 +142,7 @@ def test_unprivileged_members_can_use_the_whole_api(daemon):
     """Not only reads: a member can apply, and the daemon's own checks accept the uid."""
     r = busctl(daemon.bus, MEMBER, "GetStatus")
     assert r.returncode == 0 and "active_profile" in r.stdout
-    r = busctl(daemon.bus, MEMBER, "ApplyProfile", "s", "trabalho")
+    r = busctl(daemon.bus, MEMBER, "ApplyProfile", "s", "work")
     assert r.returncode == 0, r.stderr
     r = busctl(daemon.bus, MEMBER, "Rollback")
     assert r.returncode == 0, r.stderr

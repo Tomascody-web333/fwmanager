@@ -19,17 +19,17 @@ def default_profiles():
                 "source_kind": kind, "cidrs": [], "customized": False}  # fmt: skip
 
     return {
-        "casa": p("casa", ["ssh", "samba", "ipp"], True, True, "lan"),
-        "trabalho": p("trabalho", ["ssh"], True, False, "lan"),
-        "publico": p("publico", [], False, False, "any"),
-        "personalizado": p("personalizado", ["ssh"], False, False, "lan"),
+        "home": p("home", ["ssh", "samba", "ipp"], True, True, "lan"),
+        "work": p("work", ["ssh"], True, False, "lan"),
+        "public": p("public", [], False, False, "any"),
+        "custom": p("custom", ["ssh"], False, False, "lan"),
     }
 
 
 class FakeDaemon:
     def __init__(self):
         self.profiles = default_profiles()
-        self.active = "publico"
+        self.active = "public"
         self.pending = ""
         self.seconds = 30
         self.ufw_installed = True
@@ -38,9 +38,9 @@ class FakeDaemon:
         self.conflicts = []
         self.warnings = []
         self.startup = "ok"
-        self.networks = [("Casa WiFi", "123e4567-e89b-12d3-a456-426614174000", "casa")]
+        self.networks = [("Casa WiFi", "123e4567-e89b-12d3-a456-426614174000", "home")]
         self.options = {"router_mode": False, "log_level": ""}
-        self.events = [(1_790_000_000, "startup", "ok"), (1_790_000_050, "confirmed", "casa")]
+        self.events = [(1_790_000_000, "startup", "ok"), (1_790_000_050, "confirmed", "home")]
         self.blocked = [("2026-10-27T17:32:01", "wlan0", "203.0.113.9", "192.168.1.5", "TCP", "22")]
         self.allowed = []
         self.findings = []

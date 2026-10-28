@@ -25,7 +25,7 @@ from fwmanager.ui.pages.settings import LANGUAGES  # noqa: E402
 from fwmanager.ui.worker import run_async  # noqa: E402
 
 STAGES = ("welcome", "requirements", "profile", "done")
-CHOICES = ("casa", "trabalho", "publico")  # the three everyday profiles
+CHOICES = ("home", "work", "public")  # the three everyday profiles
 STATE_ICON = {
     setup_state.OK: ("emblem-ok-symbolic", "success"),
     setup_state.MISSING: ("dialog-warning-symbolic", "warning"),
@@ -293,7 +293,7 @@ class SetupWizard(Adw.Bin):
             check.connect("toggled", lambda *_: self._update_open_warning())
             self._choice_rows[name] = check
             self.network_group.add(row)
-        self._choice_rows["publico"].set_active(True)  # the safe default
+        self._choice_rows["public"].set_active(True)  # the safe default
         self.open_warning = warning_row()
         self.network_group.add(self.open_warning)
         self.remember = Adw.SwitchRow(

@@ -13,18 +13,18 @@ NOT_IN_GROUP = "not_in_group"
 UFW_MISSING = "ufw_missing"
 CONFLICT = "conflict"
 
-PROFILE_ORDER = ("casa", "trabalho", "publico", "personalizado")
+PROFILE_ORDER = ("home", "work", "public", "custom")
 PROFILE_TITLES = {
-    "casa": N_("Home"),
-    "trabalho": N_("Work"),
-    "publico": N_("Public"),
-    "personalizado": N_("Custom"),
+    "home": N_("Home"),
+    "work": N_("Work"),
+    "public": N_("Public"),
+    "custom": N_("Custom"),
 }
 PROFILE_HINTS = {
-    "casa": N_("A network you trust, such as your own Wi-Fi."),
-    "trabalho": N_("A shared network at work or school."),
-    "publico": N_("The strictest: cafés, airports, hotels."),
-    "personalizado": N_("Your own settings."),
+    "home": N_("A network you trust, such as your own Wi-Fi."),
+    "work": N_("A shared network at work or school."),
+    "public": N_("The strictest: cafés, airports, hotels."),
+    "custom": N_("Your own settings."),
 }
 SOURCE_TITLES = {
     "any": N_("Anywhere"),
@@ -164,7 +164,7 @@ def network_text(net) -> str:
 
 def open_wifi_warning(net, profile: str) -> str:
     """Empty unless ``profile`` would let strangers in on a Wi-Fi anyone nearby can join."""
-    if net is None or not net.is_wifi or not net.open or profile == "publico":
+    if net is None or not net.is_wifi or not net.open or profile == "public":
         return ""
     return _(
         "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could "

@@ -32,9 +32,9 @@ def files_of(backend):
 
 def test_publico_is_active_closed_and_marked(backend, netns_prefix):
     assert not backend.is_active()
-    backend.apply(DEFAULT_PROFILES["publico"])
+    backend.apply(DEFAULT_PROFILES["public"])
     assert backend.is_active()
-    assert backend.active_profile() == "publico"
+    assert backend.active_profile() == "public"
     assert managed(backend) == {}
     rules = "\n".join(iptables_save(netns_prefix))
     assert ":INPUT DROP" in rules
@@ -46,9 +46,9 @@ def test_publico_is_active_closed_and_marked(backend, netns_prefix):
 
 
 def test_casa_opens_its_services_and_keeps_ping(backend, netns_prefix):
-    backend.apply(DEFAULT_PROFILES["casa"])
+    backend.apply(DEFAULT_PROFILES["home"])
     got = managed(backend)
-    assert got and set(got.values()) == {"casa"}
+    assert got and set(got.values()) == {"home"}
     assert {r.source for r in got} >= {"192.168.0.0/16", "10.0.0.0/8"}
     rules = "\n".join(iptables_save(netns_prefix))
     assert "--dports 22,139,445,631,1714:1764,22000" in rules
@@ -58,22 +58,22 @@ def test_casa_opens_its_services_and_keeps_ping(backend, netns_prefix):
 def test_switching_profiles_replaces_only_our_rules(backend):
     backend.ufw.run(["--force", "enable"])
     backend.ufw.run(["allow", "8080/tcp", "comment", "mine"])  # the user's own rule
-    backend.apply(DEFAULT_PROFILES["casa"])
-    backend.apply(DEFAULT_PROFILES["trabalho"])
-    assert set(managed(backend).values()) == {"trabalho"}
+    backend.apply(DEFAULT_PROFILES["home"])
+    backend.apply(DEFAULT_PROFILES["work"])
+    assert set(managed(backend).values()) == {"work"}
     assert all(r.ports == ("22",) for r in managed(backend))
-    backend.apply(DEFAULT_PROFILES["publico"])
+    backend.apply(DEFAULT_PROFILES["public"])
     assert managed(backend) == {}
     added = backend.ufw.run(["show", "added"])
     assert "8080" in added and "comment 'mine'" in added  # untouched through every switch
 
 
 def test_reapplying_the_same_profile_changes_nothing(backend):
-    backend.apply(DEFAULT_PROFILES["casa"])
+    backend.apply(DEFAULT_PROFILES["home"])
     before = files_of(backend)
-    plan = backend.plan(DEFAULT_PROFILES["casa"])
+    plan = backend.plan(DEFAULT_PROFILES["home"])
     assert plan.add == [] and plan.remove == []
-    backend.apply(DEFAULT_PROFILES["casa"])
+    backend.apply(DEFAULT_PROFILES["home"])
     assert files_of(backend) == before
 
 
@@ -83,7 +83,7 @@ def test_identical_user_rule_is_not_duplicated_nor_deleted(backend):
     ssh_any = Profile("personal", services=("ssh",), source=Source("any"))
     backend.apply(ssh_any)
     assert managed(backend) == {}  # the user's rule already does the job
-    backend.apply(DEFAULT_PROFILES["publico"])
+    backend.apply(DEFAULT_PROFILES["public"])
     assert "22/tcp" in backend.ufw.run(["show", "added"])  # still there
 
 
@@ -92,7 +92,7 @@ def test_snapshot_restore_from_inactive_is_exact(backend, netns_prefix):
     ipt_before = iptables_save(netns_prefix)
     snap = backend.snapshot()
     assert not snap.was_active
-    backend.apply(DEFAULT_PROFILES["casa"])
+    backend.apply(DEFAULT_PROFILES["home"])
     assert backend.is_active() and files_of(backend) != files_before
     backend.restore(snap)
     assert not backend.is_active()
@@ -105,23 +105,23 @@ def test_snapshot_restore_from_inactive_is_exact(backend, netns_prefix):
 
 
 def test_snapshot_restore_from_active_is_exact(backend, netns_prefix):
-    backend.apply(DEFAULT_PROFILES["trabalho"])
+    backend.apply(DEFAULT_PROFILES["work"])
     files_before = files_of(backend)
     ipt_before = iptables_save(netns_prefix)
     snap = backend.snapshot()
     assert snap.was_active
-    backend.apply(DEFAULT_PROFILES["publico"], Options(router_mode=True))
+    backend.apply(DEFAULT_PROFILES["public"], Options(router_mode=True))
     assert files_of(backend) != files_before
     backend.restore(snap)
-    assert backend.is_active() and backend.active_profile() == "trabalho"
+    assert backend.is_active() and backend.active_profile() == "work"
     assert files_of(backend) == files_before
     assert iptables_save(netns_prefix) == ipt_before
 
 
 def test_router_mode_toggles_forwarding(backend):
-    backend.apply(DEFAULT_PROFILES["publico"])
+    backend.apply(DEFAULT_PROFILES["public"])
     assert 'DEFAULT_FORWARD_POLICY="ACCEPT"' in backend.ufw.default_file.read_text()
-    backend.apply(DEFAULT_PROFILES["publico"], Options(router_mode=True))
+    backend.apply(DEFAULT_PROFILES["public"], Options(router_mode=True))
     assert 'DEFAULT_FORWARD_POLICY="DROP"' in backend.ufw.default_file.read_text()
 
 
@@ -130,12 +130,12 @@ def test_unrecognised_before_rules_refuses_and_changes_nothing(backend):
     path.write_text(path.read_text().replace(ufw_files.ANCHOR_V4, "# anchor removed"))
     files_before = files_of(backend)
     with pytest.raises(ufw_files.UfwUnsupported):
-        backend.apply(DEFAULT_PROFILES["casa"])
+        backend.apply(DEFAULT_PROFILES["home"])
     assert files_of(backend) == files_before and not backend.is_active()
 
 
 def test_ipv6_rules_are_skipped_without_kernel_ipv6(backend):
-    plan = backend.plan(DEFAULT_PROFILES["casa"])
+    plan = backend.plan(DEFAULT_PROFILES["home"])
     assert plan.skipped_v6 == (not backend.ufw.ipv6_enabled())
     assert not any(r.is_v6 for r in plan.add) or backend.ufw.ipv6_enabled()
 
@@ -144,7 +144,7 @@ def test_remove_everything_restores_pristine_files(backend):
     pristine = files_of(backend)
     backend.ufw.run(["--force", "enable"])
     backend.ufw.run(["allow", "8080/tcp", "comment", "mine"])
-    backend.apply(DEFAULT_PROFILES["casa"])
+    backend.apply(DEFAULT_PROFILES["home"])
     backend.remove_everything()
     assert managed(backend) == {}
     assert ufw_files.active_marker(backend.ufw.config_dir) is None
@@ -155,9 +155,9 @@ def test_remove_everything_restores_pristine_files(backend):
 
 
 def test_logging_option(backend):
-    backend.apply(DEFAULT_PROFILES["publico"], Options(log_level="high"))
+    backend.apply(DEFAULT_PROFILES["public"], Options(log_level="high"))
     assert "LOGLEVEL=high" in (backend.ufw.config_dir / "ufw.conf").read_text()
-    backend.apply(DEFAULT_PROFILES["publico"])  # None: leave it alone
+    backend.apply(DEFAULT_PROFILES["public"])  # None: leave it alone
     assert "LOGLEVEL=high" in (backend.ufw.config_dir / "ufw.conf").read_text()
 
 
@@ -173,3 +173,18 @@ def test_missing_ufw_binary():
 def test_ufw_errors_are_reported(backend):
     with pytest.raises(UfwError):
         backend.ufw.run(["allow", "not-a-port-spec"])
+
+
+def test_rules_from_the_old_portuguese_ids_are_renamed_on_apply(backend):
+    # Before, home was "casa": its rules carried fwmanager:casa and the block profile=casa.
+    backend.apply(DEFAULT_PROFILES["home"])
+    rules = list(managed(backend))
+    for rule in rules:
+        backend.ufw.run(rule.delete_argv())
+        backend.ufw.run(rule.add_argv("casa"))
+    before = backend.ufw.config_dir / "before.rules"
+    before.write_text(before.read_text().replace("profile=home", "profile=casa"))
+    assert set(managed(backend).values()) == {"casa"}
+    assert backend.active_profile() == "home"  # the old marker reads as the new id
+    backend.apply(DEFAULT_PROFILES["home"])
+    assert managed(backend) == dict.fromkeys(rules, "home")

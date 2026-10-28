@@ -35,29 +35,29 @@ def mgr(backend, store):
 
 def test_boot_time_enable_is_recorded(mgr, store):
     assert not store.ufw_enabled_by_us()
-    mgr.apply(DEFAULT_PROFILES["publico"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["public"], require_confirm=False)
     assert store.ufw_enabled_by_us()
 
 
 def test_confirmed_enable_is_recorded_but_a_reverted_one_is_not(mgr, store):
-    mgr.apply(DEFAULT_PROFILES["casa"], timeout=2)
+    mgr.apply(DEFAULT_PROFILES["home"], timeout=2)
     assert not store.ufw_enabled_by_us()  # still pending
     pump(6)  # times out and reverts: ufw is off again, nothing to remember
     assert not store.ufw_enabled_by_us()
-    mgr.apply(DEFAULT_PROFILES["casa"], timeout=30)
+    mgr.apply(DEFAULT_PROFILES["home"], timeout=30)
     mgr.confirm()
     assert store.ufw_enabled_by_us()
 
 
 def test_users_own_enabled_ufw_is_not_claimed(backend, mgr, store, netns_prefix):
     ufw_cmd(backend.ufw.rootdir, netns_prefix, "--force", "enable")
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     assert not store.ufw_enabled_by_us()
 
 
 def test_cleanup_turns_ufw_off_when_we_turned_it_on(backend, mgr, store, netns_prefix):
     pristine = fingerprint(backend.ufw.rootdir, netns_prefix)[0]
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     assert backend.is_active()
     assert cleanup(backend, store) == "disabled"
     assert not backend.is_active() and not store.ufw_enabled_by_us()
@@ -73,7 +73,7 @@ def test_cleanup_leaves_a_users_ufw_running_and_their_rules(backend, mgr, store,
     root = backend.ufw.rootdir
     ufw_cmd(root, netns_prefix, "--force", "enable")
     ufw_cmd(root, netns_prefix, "allow", "8080/tcp", "comment", "mine")
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     assert cleanup(backend, store) == "cleaned"
     assert backend.is_active()  # theirs to keep
     assert backend.listing().managed == {}
@@ -88,7 +88,7 @@ def test_cleanup_on_a_machine_fwmanager_never_touched(backend, store, netns_pref
 
 
 def test_cleanup_command_line(backend, mgr, store, tmp_path, capsys):
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     wrapper = str(backend.ufw._binary)
     code = daemon_main(
         [
@@ -128,7 +128,7 @@ def read_default(backend, key):
 def test_the_original_defaults_come_back_on_uninstall(tracked, store):
     # ufw's own defaults: incoming DROP, forward DROP. fwmanager sets forward to ACCEPT.
     assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "DROP"
-    tracked.apply(DEFAULT_PROFILES["casa"])
+    tracked.apply(DEFAULT_PROFILES["home"])
     assert read_default(tracked, "DEFAULT_FORWARD_POLICY") == "ACCEPT"
     assert store.load_original_defaults() == {
         "incoming": "deny",
@@ -144,15 +144,15 @@ def test_the_original_defaults_come_back_on_uninstall(tracked, store):
 def test_defaults_are_remembered_only_once(tracked, store):
     from fwmanager.core.backend import Options
 
-    tracked.apply(DEFAULT_PROFILES["casa"])
+    tracked.apply(DEFAULT_PROFILES["home"])
     first = store.load_original_defaults()
-    tracked.apply(DEFAULT_PROFILES["publico"], Options(router_mode=True))  # routed changes again
-    tracked.apply(DEFAULT_PROFILES["trabalho"])
+    tracked.apply(DEFAULT_PROFILES["public"], Options(router_mode=True))  # routed changes again
+    tracked.apply(DEFAULT_PROFILES["work"])
     assert store.load_original_defaults() == first  # still the user's, not ours
 
 
 def test_a_policy_the_user_changed_since_is_left_alone(tracked, store):
-    tracked.apply(DEFAULT_PROFILES["casa"])
+    tracked.apply(DEFAULT_PROFILES["home"])
     tracked.ufw.run(["default", "reject", "incoming"])  # the user's own later choice
     cleanup(tracked, store)
     assert read_default(tracked, "DEFAULT_INPUT_POLICY") == "REJECT"
@@ -163,7 +163,7 @@ def test_nothing_is_recorded_when_nothing_changes(tracked, store):
     from fwmanager.core.backend import Options
 
     tracked.ufw.run(["default", "allow", "routed"])  # user already has what we would set
-    tracked.apply(DEFAULT_PROFILES["casa"], Options())
+    tracked.apply(DEFAULT_PROFILES["home"], Options())
     assert store.load_original_defaults() == {}
     assert not (store._dir / "ufw-original-defaults.json").exists()
 

@@ -61,7 +61,7 @@ def test_the_lab_itself_works_without_a_firewall(lab, nft, netns_prefix):
 
 
 def test_public_lets_nothing_in(lab, host):
-    assert host.client.status()["active_profile"] == "publico"  # first boot
+    assert host.client.status()["active_profile"] == "public"  # first boot
     assert ssh(lab, B_LAN, A_LAN) == "fail"
     assert ssh(lab, B_OUT, A_OUT) == "fail"
     assert lab.tcp(B_LAN, A_LAN, 80) == "fail"
@@ -69,55 +69,55 @@ def test_public_lets_nothing_in(lab, host):
 
 
 def test_home_lets_ssh_in_from_the_local_network_only(lab, host):
-    use(host, "casa")
+    use(host, "home")
     assert ssh(lab, B_LAN, A_LAN) == "ok"  # a neighbour on the local network
     assert ssh(lab, B_OUT, A_OUT) == "fail"  # the same neighbour from an outside address
-    assert lab.tcp(B_LAN, A_LAN, 80) == "fail"  # web is not part of "casa"
+    assert lab.tcp(B_LAN, A_LAN, 80) == "fail"  # web is not part of "home"
     assert lab.ping(A_LAN) == "True"  # casa answers ping
 
 
 def test_work_opens_ssh_but_hides_from_mdns_and_still_answers_ping(lab, host):
-    use(host, "trabalho")
+    use(host, "work")
     assert ssh(lab, B_LAN, A_LAN) == "ok" and ssh(lab, B_OUT, A_OUT) == "fail"
     assert lab.ping(A_LAN) == "True"
 
 
 def test_switching_back_to_public_closes_what_home_opened(lab, host):
-    use(host, "casa")
+    use(host, "home")
     assert ssh(lab, B_LAN, A_LAN) == "ok"
-    use(host, "publico")
+    use(host, "public")
     assert ssh(lab, B_LAN, A_LAN) == "fail"
     assert lab.ping(A_LAN) == "False"
 
 
 def test_a_rule_opens_exactly_what_its_sentence_says(lab, host):
-    host.client.add_rule("allow_only_in", {"service": "web", "profiles": ["casa"]})
-    use(host, "casa")
+    host.client.add_rule("allow_only_in", {"service": "web", "profiles": ["home"]})
+    use(host, "home")
     assert lab.tcp(B_LAN, A_LAN, 80) == "ok" and lab.tcp(B_OUT, A_OUT, 80) == "fail"
-    use(host, "trabalho")
+    use(host, "work")
     assert lab.tcp(B_LAN, A_LAN, 80) == "fail"  # "only in casa"
     host.client.add_rule("restrict_source", {"scope": "cidrs", "cidrs": [f"{B_OUT}/32"],
-                                             "profiles": ["trabalho"]})  # fmt: skip
-    use(host, "trabalho")
+                                             "profiles": ["work"]})  # fmt: skip
+    use(host, "work")
     assert ssh(lab, B_OUT, A_OUT) == "ok" and ssh(lab, B_LAN, A_LAN) == "fail"  # only that address
 
 
 def test_a_hide_rule_silences_ping(lab, host):
-    use(host, "casa")
+    use(host, "home")
     assert lab.ping(A_LAN) == "True"
-    host.client.add_rule("hide", {"profiles": ["casa"]})
-    use(host, "casa")
+    host.client.add_rule("hide", {"profiles": ["home"]})
+    use(host, "home")
     assert lab.ping(A_LAN) == "False" and ssh(lab, B_LAN, A_LAN) == "ok"
 
 
 def test_connections_already_open_survive_a_profile_change(lab, host):
-    use(host, "casa")
+    use(host, "home")
     proc = subprocess.Popen(
         [*lab.b, sys.executable, "-c", LONG_CONNECTION, B_LAN, A_LAN, "22", "4"],
         stdout=subprocess.PIPE, text=True,
     )  # fmt: skip
     assert proc.stdout.readline().strip() == "round 0 ok"
-    use(host, "publico")  # SSH is now closed for *new* connections...
+    use(host, "public")  # SSH is now closed for *new* connections...
     assert ssh(lab, B_LAN, A_LAN) == "fail"
     assert proc.stdout.readline().strip() == "round 1 ok"  # ...but this one carries on
     proc.wait(10)
@@ -129,9 +129,9 @@ def test_an_unconfirmed_change_really_reopens_the_door(
     d = Daemon(netns_prefix, private_bus, ufw_root, timeout=3, state_dir=tmp_path / "state")
     lab.listen_on_a(22)
     try:
-        use(d, "casa")
+        use(d, "home")
         assert ssh(lab, B_LAN, A_LAN) == "ok"
-        d.client.apply_profile("publico")  # nobody confirms
+        d.client.apply_profile("public")  # nobody confirms
         assert ssh(lab, B_LAN, A_LAN) == "fail"
         assert wait_until(lambda: ssh(lab, B_LAN, A_LAN) == "ok", 20)  # the timer put casa back
     finally:
@@ -155,7 +155,7 @@ def gateway(lab):
 def test_live_policy_test_reaches_the_real_gateway_before_and_after(
     lab, host, gateway, netns_prefix
 ):
-    r = run_cli_in_ns(netns_prefix, host.bus, "test-policy", "casa")
+    r = run_cli_in_ns(netns_prefix, host.bus, "test-policy", "home")
     assert r.returncode in (0, 2), r.stdout + r.stderr
     assert "Reach the IPv4 gateway: ok -> ok" in r.stdout
     assert "UNSAFE" not in r.stdout
@@ -168,7 +168,7 @@ def test_live_policy_test_catches_a_profile_that_cuts_the_connection(
 
     The static analysis would refuse this configuration outright; the live test is the second
     line of defence. The damaged file is only on disk (the kernel still has good rules), so the
-    "before" measurement is healthy; applying "casa" reloads ufw, the gateway goes silent, and the
+    "before" measurement is healthy; applying "home" reloads ufw, the gateway goes silent, and the
     test must notice and report the profile as unsafe.
     """
     from fwmanager import policytest as pt
@@ -195,7 +195,7 @@ def test_live_policy_test_catches_a_profile_that_cuts_the_connection(
         return [pt.Probe("gateway_v4", {"True": True, "False": False}.get(r.stdout.strip()))]
 
     try:
-        result = pt.run_live_test(host.client, "casa", probes)
+        result = pt.run_live_test(host.client, "home", probes)
         assert result.before[0].ok is True  # healthy before the change
         assert result.after[0].ok is False  # silent after it
         assert result.regressions == ["gateway_v4"] and result.verdict == "unsafe"

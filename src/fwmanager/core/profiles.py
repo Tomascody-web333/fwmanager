@@ -9,6 +9,15 @@ from fwmanager.errors import ValidationError
 
 SOURCE_KINDS = ("any", "lan", "cidrs")
 
+# Earlier versions gave the built-in profiles Portuguese ids. Saved state, network choices,
+# rules and ufw comments that still use them are read as the English ids they became.
+LEGACY_NAMES = {"casa": "home", "trabalho": "work", "publico": "public", "personalizado": "custom"}
+
+
+def current_name(name):
+    """The id a profile has now: legacy Portuguese ids map to English, anything else is kept."""
+    return LEGACY_NAMES.get(name, name) if isinstance(name, str) else name
+
 
 @dataclass(frozen=True)
 class Source:
@@ -47,21 +56,21 @@ DEFAULT_PROFILES: dict[str, Profile] = {
     p.name: p
     for p in (
         Profile(
-            "casa",
+            "home",
             services=("ssh", "samba", "kdeconnect", "syncthing", "ipp"),
             ping=True,
             mdns=True,
             source=Source("lan"),
         ),
         Profile(
-            "trabalho",
+            "work",
             services=("ssh",),
             ping=True,
             mdns=False,
             source=Source("lan"),
         ),
         # Most restrictive: nothing incoming beyond the mandatory exceptions.
-        Profile("publico"),
-        Profile("personalizado", services=("ssh",), source=Source("lan")),
+        Profile("public"),
+        Profile("custom", services=("ssh",), source=Source("lan")),
     )
 }

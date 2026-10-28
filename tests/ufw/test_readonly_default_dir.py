@@ -35,7 +35,7 @@ SCRIPT = textwrap.dedent(
     b = UfwBackend(Ufw(wrapper, rootdir=root), load_builtin())
     before = (root / "etc/default/ufw").read_bytes()
     snap = b.snapshot()
-    b.apply(DEFAULT_PROFILES["casa"], Options())  # sets deny incoming in /etc/default/ufw
+    b.apply(DEFAULT_PROFILES["home"], Options())  # sets deny incoming in /etc/default/ufw
     assert (root / "etc/default/ufw").read_bytes() != before, "nothing was written"
     b.restore(snap)
     assert (root / "etc/default/ufw").read_bytes() == before, "not restored"

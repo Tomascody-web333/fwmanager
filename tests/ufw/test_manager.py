@@ -43,29 +43,29 @@ def pump(seconds):
 
 
 def test_apply_and_status(mgr):
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     st = mgr.status()
-    assert st["firewall_active"] and st["active_profile"] == "casa"
+    assert st["firewall_active"] and st["active_profile"] == "home"
     assert st["pending_profile"] is None
 
 
 def test_confirm_cancels_the_timer(mgr):
-    mgr.apply(DEFAULT_PROFILES["publico"], timeout=3)
-    assert mgr.pending_profile() == "publico" and 1 <= mgr.seconds_left() <= 3
+    mgr.apply(DEFAULT_PROFILES["public"], timeout=3)
+    assert mgr.pending_profile() == "public" and 1 <= mgr.seconds_left() <= 3
     mgr.confirm()
     pump(4.5)
-    assert mgr.status()["active_profile"] == "publico" and mgr.pending_profile() is None
+    assert mgr.status()["active_profile"] == "public" and mgr.pending_profile() is None
 
 
 def test_timeout_restores_the_exact_previous_state(mgr, fp):
-    mgr.apply(DEFAULT_PROFILES["casa"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["home"], require_confirm=False)
     before = fp()
-    mgr.apply(DEFAULT_PROFILES["publico"], timeout=2)
+    mgr.apply(DEFAULT_PROFILES["public"], timeout=2)
     assert fp() != before
     pump(6)
     assert mgr.pending_profile() is None
     assert fp() == before
-    assert mgr.status()["active_profile"] == "casa"
+    assert mgr.status()["active_profile"] == "home"
 
 
 def test_timeout_from_a_clean_machine_turns_ufw_back_off(mgr, backend, fp):
@@ -73,26 +73,26 @@ def test_timeout_from_a_clean_machine_turns_ufw_back_off(mgr, backend, fp):
     assert not backend.is_active()
     reverted = []
     mgr.on_revert = reverted.append
-    mgr.apply(DEFAULT_PROFILES["publico"], timeout=2)
+    mgr.apply(DEFAULT_PROFILES["public"], timeout=2)
     assert backend.is_active()
     pump(6)
-    assert not backend.is_active() and fp()[0] == before[0] and reverted == ["publico"]
+    assert not backend.is_active() and fp()[0] == before[0] and reverted == ["public"]
 
 
 def test_manual_rollback(mgr, fp):
-    mgr.apply(DEFAULT_PROFILES["trabalho"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["work"], require_confirm=False)
     before = fp()
-    mgr.apply(DEFAULT_PROFILES["casa"])
+    mgr.apply(DEFAULT_PROFILES["home"])
     mgr.rollback()
     assert fp() == before
 
 
 def test_second_apply_rejected_with_a_single_timer(mgr, fp):
     sched = mgr._sched
-    mgr.apply(DEFAULT_PROFILES["casa"], timeout=30)
+    mgr.apply(DEFAULT_PROFILES["home"], timeout=30)
     after_first = fp()
     with pytest.raises(PendingError) as exc:
-        mgr.apply(DEFAULT_PROFILES["publico"], timeout=30)
+        mgr.apply(DEFAULT_PROFILES["public"], timeout=30)
     assert exc.value.code == "apply_pending" and sched.scheduled == 1
     assert fp() == after_first
     mgr.rollback()
@@ -107,7 +107,7 @@ def test_confirm_or_rollback_without_pending(mgr):
 
 def test_apply_that_fails_midway_is_undone(mgr, backend, fp, monkeypatch):
     """ufw is not atomic: if the 2nd rule fails, the 1st must not stay behind."""
-    mgr.apply(DEFAULT_PROFILES["trabalho"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["work"], require_confirm=False)
     before = fp()
     real_run = backend.ufw.run
     seen = {"allow": 0}
@@ -121,7 +121,7 @@ def test_apply_that_fails_midway_is_undone(mgr, backend, fp, monkeypatch):
 
     monkeypatch.setattr(backend.ufw, "run", flaky)
     with pytest.raises(UfwError):
-        mgr.apply(DEFAULT_PROFILES["casa"])
+        mgr.apply(DEFAULT_PROFILES["home"])
     monkeypatch.undo()
     assert seen["allow"] == 2  # it really did get past the first rule
     assert mgr.pending_profile() is None
@@ -131,7 +131,7 @@ def test_apply_that_fails_midway_is_undone(mgr, backend, fp, monkeypatch):
 def test_users_own_rules_survive_every_path(mgr, backend, netns_prefix):
     ufw_cmd(backend.ufw.rootdir, netns_prefix, "--force", "enable")
     ufw_cmd(backend.ufw.rootdir, netns_prefix, "allow", "8080/tcp", "comment", "mine")
-    mgr.apply(DEFAULT_PROFILES["casa"], timeout=2)
+    mgr.apply(DEFAULT_PROFILES["home"], timeout=2)
     mgr.rollback()
-    mgr.apply(DEFAULT_PROFILES["publico"], require_confirm=False)
+    mgr.apply(DEFAULT_PROFILES["public"], require_confirm=False)
     assert "8080/tcp" in backend.ufw.run(["show", "added"])

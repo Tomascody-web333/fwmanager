@@ -176,8 +176,8 @@ def _choose_profile(deps: Deps, client, profile: str | None, yes: bool) -> int:
         for name in [n for n in state.PROFILE_ORDER if n in names]:
             print(f"  {_profile_label(name)}: {state.profile_hint(name)}")
             print("      " + state.describe_profile(client.get_profile(name), titles))
-        answer = deps.ask(_("Profile [{default}]: ").format(default=state.profile_title("publico")))
-        profile = answer.strip() or "publico"
+        answer = deps.ask(_("Profile [{default}]: ").format(default=state.profile_title("public")))
+        profile = answer.strip() or "public"
     profile = resolve_profile(profile, names)
     net = deps.current_network()
     warning = state.open_wifi_warning(net, profile)

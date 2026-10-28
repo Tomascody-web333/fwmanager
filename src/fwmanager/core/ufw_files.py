@@ -13,6 +13,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
+from fwmanager.core.profiles import current_name
 from fwmanager.core.validate import validate_name
 from fwmanager.errors import FwError, StoreError
 
@@ -95,7 +96,7 @@ def strip_block(text: str) -> str:
 
 def read_profile_marker(text: str) -> str | None:
     m = BLOCK_RE.search(text)
-    return m.group(1) if m else None
+    return current_name(m.group(1)) if m else None
 
 
 def insert_block(text: str, block: str, anchor: str) -> str:

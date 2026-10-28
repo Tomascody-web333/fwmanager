@@ -16,21 +16,21 @@ pytestmark = pytest.mark.integration
 
 def test_first_boot_then_apply_confirm_status(daemon):
     c = daemon.client
-    assert set(c.list_profiles()) == {"casa", "trabalho", "publico", "personalizado"}
-    assert c.status()["active_profile"] == "publico"  # first boot
+    assert set(c.list_profiles()) == {"home", "work", "public", "custom"}
+    assert c.status()["active_profile"] == "public"  # first boot
     assert c.status()["configured"] is False  # nobody has chosen anything yet: setup to do
-    c.apply_profile("casa")
+    c.apply_profile("home")
     st = c.status()
-    assert st["pending_profile"] == "casa" and st["seconds_left"] >= 1
+    assert st["pending_profile"] == "home" and st["seconds_left"] >= 1
     assert st["configured"] is False  # not until it is confirmed
     c.confirm()
     st = c.status()
-    assert st["active_profile"] == "casa" and st["pending_profile"] == ""
+    assert st["active_profile"] == "home" and st["pending_profile"] == ""
     assert st["configured"] is True  # done once, in any client, done for all of them
 
 
 def test_timeout_reverts_via_daemon(daemon):
-    daemon.client.apply_profile("casa")
+    daemon.client.apply_profile("home")
     assert daemon.fp() != daemon.initial
     assert wait_until(lambda: daemon.fp() == daemon.initial, 15)
     assert daemon.client.status()["pending_profile"] == ""
@@ -39,21 +39,21 @@ def test_timeout_reverts_via_daemon(daemon):
 def test_reverted_signal_delivered(daemon):
     got = []
     daemon.client.subscribe(lambda name, args: got.append((name, args)))
-    daemon.client.apply_profile("casa")
+    daemon.client.apply_profile("home")
     ctx = GLib.MainContext.default()
     end = time.monotonic() + 15
     while time.monotonic() < end and not any(n == "Reverted" for n, _ in got):
         ctx.iteration(False)
         time.sleep(0.02)
-    assert ("Applied", ("casa", 3)) in got
-    assert ("Reverted", ("casa",)) in got
+    assert ("Applied", ("home", 3)) in got
+    assert ("Reverted", ("home",)) in got
 
 
 def test_second_apply_rejected(daemon):
     c = daemon.client
-    c.apply_profile("casa")
+    c.apply_profile("home")
     with pytest.raises(FwError) as exc:
-        c.apply_profile("trabalho")
+        c.apply_profile("work")
     assert exc.value.code == "apply_pending"
     c.rollback()
 
@@ -83,7 +83,7 @@ def test_unknown_profile(daemon):
 
 
 def test_wrong_argument_types_rejected_by_bus(daemon):
-    for sig, val in (("(u)", 5), ("(as)", ["casa"]), ("()", None)):
+    for sig, val in (("(u)", 5), ("(as)", ["home"]), ("()", None)):
         with pytest.raises(GLib.Error):
             daemon.client._conn.call_sync(
                 "org.fwmanager.Control",
@@ -132,7 +132,7 @@ def test_no_method_accepts_rule_text(daemon):
 
 
 @pytest.mark.parametrize(
-    "method,args", [("GetStatus", []), ("ApplyProfile", ["s", "casa"]), ("Rollback", [])]
+    "method,args", [("GetStatus", []), ("ApplyProfile", ["s", "home"]), ("Rollback", [])]
 )
 def test_user_outside_group_is_refused(daemon, method, args):
     r = busctl_as(65534, daemon.bus, method, *args)  # "nobody" is not in group root
@@ -151,8 +151,8 @@ def test_sigterm_with_pending_change_restores_previous_state(
 ):
     d = Daemon(netns_prefix, private_bus, ufw_root, timeout=60)
     try:
-        before = d.fp()  # first boot already applied "publico"
-        d.client.apply_profile("casa")
+        before = d.fp()  # first boot already applied "public"
+        d.client.apply_profile("home")
         assert d.fp() != before
         d.proc.send_signal(signal.SIGTERM)
         d.proc.wait(30)
@@ -163,18 +163,18 @@ def test_sigterm_with_pending_change_restores_previous_state(
 
 
 def test_daemon_log_has_no_rule_content(daemon):
-    daemon.client.apply_profile("casa")
+    daemon.client.apply_profile("home")
     daemon.client.rollback()
     log = daemon.stop()
     assert "uid" in log and "ApplyProfile" in log
-    assert "192.168" not in log and "1714" not in log and "fwmanager:casa" not in log
+    assert "192.168" not in log and "1714" not in log and "fwmanager:home" not in log
 
 
 def test_cli_end_to_end(daemon, capsys):
     bus = ["--bus-address", daemon.bus]
-    assert cli_main([*bus, "apply", "casa", "--yes"]) == 0
+    assert cli_main([*bus, "apply", "home", "--yes"]) == 0
     assert cli_main([*bus, "status", "--json"]) == 0
-    assert json.loads(capsys.readouterr().out.splitlines()[-1])["active_profile"] == "casa"
+    assert json.loads(capsys.readouterr().out.splitlines()[-1])["active_profile"] == "home"
     assert cli_main([*bus, "confirm"]) == 1  # nothing pending any more
     assert cli_main([*bus, "apply", "naoexiste", "--yes"]) == 1
     assert cli_main([*bus, "profiles"]) == 0
@@ -188,11 +188,11 @@ def test_cli_without_daemon(private_bus, capsys):
 
 def test_cli_speaks_plainly_and_understands_english_names(daemon, capsys):
     bus = ["--bus-address", daemon.bus]
-    assert cli_main([*bus, "apply", "Home", "--yes"]) == 0  # "casa" in English
+    assert cli_main([*bus, "apply", "Home", "--yes"]) == 0  # "home" in English
     capsys.readouterr()
     assert cli_main([*bus, "status"]) == 0
     out = capsys.readouterr().out
-    assert "Firewall: on" in out and "Profile in use: Home" in out and "casa" not in out
+    assert "Firewall: on" in out and "Profile in use: Home" in out and "home" not in out
     assert "from the local network only" in out
     assert cli_main([*bus, "profiles"]) == 0
     out = capsys.readouterr().out
@@ -204,7 +204,7 @@ def test_cli_speaks_plainly_and_understands_english_names(daemon, capsys):
     assert "fwmanager-cli profiles" in capsys.readouterr().err
 
 
-@pytest.mark.parametrize("command", [["apply", "trabalho"], ["test-policy", "trabalho"]])
+@pytest.mark.parametrize("command", [["apply", "work"], ["test-policy", "work"]])
 def test_ctrl_c_undoes_the_change_at_once(
     nft, netns_prefix, private_bus, ufw_root, tmp_path, command
 ):
@@ -223,12 +223,12 @@ def test_ctrl_c_undoes_the_change_at_once(
             stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
             env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
         )  # fmt: skip
-        assert wait_until(lambda: d.client.status()["pending_profile"] == "trabalho", 20)
+        assert wait_until(lambda: d.client.status()["pending_profile"] == "work", 20)
         p.send_signal(signal.SIGINT)
         _out, err = p.communicate(timeout=30)
         assert p.returncode == 130 and "Traceback" not in err, err
         st = d.client.status()
-        assert st["pending_profile"] == "" and st["active_profile"] == "publico"
+        assert st["pending_profile"] == "" and st["active_profile"] == "public"
         assert d.fp() == d.initial
     finally:
         d.stop()
@@ -237,10 +237,10 @@ def test_ctrl_c_undoes_the_change_at_once(
 def test_cli_edits_what_a_profile_blocks_and_restores_it(daemon, capsys):
     bus = ["--bus-address", daemon.bus]
     c = daemon.client
-    before = c.get_profile("trabalho")
+    before = c.get_profile("work")
     assert cli_main([*bus, "edit", "work", "--allow", "samba", "web", "--block", "ssh",
                      "--ping", "off", "--from", "192.168.1.0/24"]) == 0  # fmt: skip
-    p = c.get_profile("trabalho")
+    p = c.get_profile("work")
     assert set(p["services"]) == {"samba", "web"} and p["ping"] is False
     assert p["source_kind"] == "cidrs" and p["cidrs"] == ["192.168.1.0/24"] and p["customized"]
     out = capsys.readouterr().out
@@ -251,5 +251,5 @@ def test_cli_edits_what_a_profile_blocks_and_restores_it(daemon, capsys):
     assert cli_main([*bus, "edit", "work", "--from", "192.168.1.0/16"]) == 1
     assert "Did you mean 192.168.0.0/16?" in capsys.readouterr().err
     assert cli_main([*bus, "reset", "work"]) == 0
-    assert c.get_profile("trabalho") == before
+    assert c.get_profile("work") == before
     assert "back to its defaults" in capsys.readouterr().out

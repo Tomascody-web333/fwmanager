@@ -95,7 +95,7 @@ def test_tab_moves_through_the_controls(focused):
 
 
 def test_closing_with_a_pending_change_and_pressing_enter_keeps_it(focused):
-    focused.daemon.pending = "casa"
+    focused.daemon.pending = "home"
     focused.controller.refresh()
     pump(0.2)
     focused.win.close()
@@ -108,11 +108,11 @@ def test_closing_with_a_pending_change_and_pressing_enter_keeps_it(focused):
 
 
 def test_escape_on_that_question_keeps_the_window_open(focused):
-    focused.daemon.pending = "casa"
+    focused.daemon.pending = "home"
     focused.controller.refresh()
     pump(0.2)
     focused.win.close()
     pump(0.4)
     focused.press("Escape")
     pump(0.3)
-    assert focused.win.get_visible() and focused.daemon.pending == "casa"
+    assert focused.win.get_visible() and focused.daemon.pending == "home"

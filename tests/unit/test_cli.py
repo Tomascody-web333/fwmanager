@@ -51,14 +51,14 @@ def test_dispatch_is_recognised_before_the_main_parser(argv, expected):
     assert cli._is_dispatch(argv) is expected
 
 
-NAMES = ["casa", "trabalho", "publico", "personalizado"]
+NAMES = ["home", "work", "public", "custom"]
 
 
 @pytest.mark.parametrize(
     "typed,name",
-    [("casa", "casa"), ("CASA", "casa"), ("home", "casa"), ("Home", "casa"),
-     ("work", "trabalho"), ("public", "publico"), ("Público", "publico"),
-     ("PUBLICO", "publico"), ("custom", "personalizado"), (" casa ", "casa"),
+    [("home", "home"), ("CASA", "home"), ("home", "home"), ("Home", "home"),
+     ("work", "work"), ("public", "public"), ("Público", "public"),
+     ("PUBLICO", "public"), ("custom", "custom"), (" casa ", "home"),
      ("nope", "nope"), ("", "")],
 )  # fmt: skip
 def test_profiles_can_be_typed_in_either_language(typed, name):
@@ -68,8 +68,8 @@ def test_profiles_can_be_typed_in_either_language(typed, name):
 def test_portuguese_titles_are_understood_in_portuguese():
     set_language("pt")
     try:
-        assert cli.resolve_profile("Trabalho", NAMES) == "trabalho"
-        assert cli.resolve_profile("Personalizado", NAMES) == "personalizado"
+        assert cli.resolve_profile("Trabalho", NAMES) == "work"
+        assert cli.resolve_profile("Personalizado", NAMES) == "custom"
     finally:
         set_language(None)
 
@@ -91,9 +91,9 @@ class Recorder:
 def test_ctrl_c_undoes_a_change_this_command_started(capsys):
     client = cli._Tracking(Recorder())
     with pytest.raises(KeyboardInterrupt):
-        client.apply_profile("casa")
+        client.apply_profile("home")
     assert cli._cancelled(client) == 130
-    assert client._client.calls == [("apply", "casa"), ("rollback",)]
+    assert client._client.calls == [("apply", "home"), ("rollback",)]
     assert "Previous rules restored" in capsys.readouterr().err
 
 
@@ -106,7 +106,7 @@ def test_ctrl_c_never_undoes_someone_elses_change(capsys):
 def test_ctrl_c_after_the_change_was_already_undone(capsys):
     client = cli._Tracking(Recorder(FwError("x", code="no_pending")))
     with pytest.raises(KeyboardInterrupt):
-        client.apply_profile("casa")
+        client.apply_profile("home")
     assert cli._cancelled(client) == 130
     assert capsys.readouterr().err.strip() == "Cancelled."
 
@@ -136,5 +136,13 @@ def test_profiles_are_shown_and_typed_in_the_persons_language(tmp_path):
     try:
         assert [cli.command_name(n) for n in NAMES] == [
             "casa", "trabalho", "publico", "personalizado"]  # fmt: skip
+        assert cli.resolve_profile("home", NAMES) == "home"  # English still works in Portuguese
     finally:
         set_language(None)
+
+
+def test_old_portuguese_ids_and_names_still_resolve_in_english():
+    # Profile ids were Portuguese before; scripts typing them keep working in any language.
+    for typed, name in (("casa", "home"), ("Trabalho", "work"), ("PÚBLICO", "public"),
+                        ("publico", "public"), ("personalizado", "custom")):  # fmt: skip
+        assert cli.resolve_profile(typed, NAMES) == name

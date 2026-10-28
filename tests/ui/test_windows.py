@@ -68,10 +68,10 @@ def test_home_lists_the_profiles_and_the_active_one(env):
     assert "Protected with the Public profile" in t
     assert "Lets nothing in. Hidden on the network." in t  # what that means, in plain words
     rows = {r.name_: r for r in env.win.home._profile_rows}
-    assert rows["publico"].check.get_opacity() == 1 and rows["casa"].check.get_opacity() == 0
+    assert rows["public"].check.get_opacity() == 1 and rows["home"].check.get_opacity() == 0
     # The profile in use offers no button to switch to itself.
-    assert not rows["publico"].apply_btn.get_visible() and rows["publico"].in_use.get_visible()
-    assert rows["casa"].apply_btn.get_visible() and not rows["casa"].in_use.get_visible()
+    assert not rows["public"].apply_btn.get_visible() and rows["public"].in_use.get_visible()
+    assert rows["home"].apply_btn.get_visible() and not rows["home"].in_use.get_visible()
 
 
 def test_the_status_says_when_the_firewall_is_off(env):
@@ -82,10 +82,10 @@ def test_the_status_says_when_the_firewall_is_off(env):
 
 
 def test_apply_goes_to_the_daemon_and_shows_the_pending_card(env):
-    row = {r.name_: r for r in env.win.home._profile_rows}["casa"]
+    row = {r.name_: r for r in env.win.home._profile_rows}["home"]
     row.apply_btn.emit("clicked")
     pump(0.1)
-    assert ("apply_profile", ("casa",)) in env.daemon.calls
+    assert ("apply_profile", ("home",)) in env.daemon.calls
     assert env.win.home.pending_group.get_visible()
     assert "Home will be undone in 30 s" in env.win.home.pending_row.get_subtitle()
     # While something is pending nothing else can be applied or tested.
@@ -93,12 +93,12 @@ def test_apply_goes_to_the_daemon_and_shows_the_pending_card(env):
 
 
 def test_confirm_and_undo_buttons(env):
-    env.daemon.pending = "casa"
+    env.daemon.pending = "home"
     env.controller.refresh()
     env.win.home.confirm_btn.emit("clicked")
-    assert ("confirm", ()) in env.daemon.calls and env.daemon.active == "casa"
+    assert ("confirm", ()) in env.daemon.calls and env.daemon.active == "home"
     assert not env.win.home.pending_group.get_visible()
-    env.daemon.pending = "trabalho"
+    env.daemon.pending = "work"
     env.controller.refresh()
     env.win.home.undo_btn.emit("clicked")
     assert ("rollback", ()) in env.daemon.calls and not env.win.home.pending_group.get_visible()
@@ -164,14 +164,14 @@ def outcome(verdict, findings=(), live=None):
     from fwmanager.core.policy_check import Finding
     from fwmanager.policytest import PolicyOutcome
 
-    return PolicyOutcome("casa", [Finding(*f) for f in findings], live, verdict)
+    return PolicyOutcome("home", [Finding(*f) for f in findings], live, verdict)
 
 
 def open_dialog(env, result):
     from fwmanager.ui.dialogs import PolicyTestDialog
 
     applied = []
-    dialog = PolicyTestDialog(env.controller, "casa", applied.append)
+    dialog = PolicyTestDialog(env.controller, "home", applied.append)
     dialog.present(env.win)
     dialog.show_outcome(result)
     pump(0.2)
@@ -185,7 +185,7 @@ def test_safe_verdict_allows_applying(env):
     assert "Safe to use" in t and "Your SSH session and new SSH connections stay allowed." in t
     assert d.apply_btn.get_sensitive() and d.apply_btn.get_label() == "Apply"
     d.apply_btn.emit("clicked")
-    assert d.applied == ["casa"]
+    assert d.applied == ["home"]
 
 
 def test_warnings_allow_applying_anyway(env):
@@ -222,12 +222,12 @@ def test_dialog_runs_the_real_check_through_the_controller(env, monkeypatch):
     from fwmanager.ui.dialogs import PolicyTestDialog
 
     monkeypatch.setattr(pt, "run_probes", lambda: [pt.Probe("loopback_v4", True)])
-    d = PolicyTestDialog(env.controller, "trabalho", lambda n: None)
+    d = PolicyTestDialog(env.controller, "work", lambda n: None)
     d.present(env.win)
     d.start()
     pump(0.3)
     assert d.outcome is not None and d.outcome.verdict == "safe"
-    assert ("apply_profile", ("trabalho",)) in env.daemon.calls  # the live test applied it...
+    assert ("apply_profile", ("work",)) in env.daemon.calls  # the live test applied it...
     assert ("rollback", ()) in env.daemon.calls and env.daemon.pending == ""  # ...and undid it
     assert d.stack.get_visible_child_name() == "result"
 
@@ -236,16 +236,16 @@ def test_test_button_opens_the_dialog(env, monkeypatch):
     from fwmanager import policytest as pt
 
     monkeypatch.setattr(pt, "run_probes", lambda: [pt.Probe("loopback_v4", True)])
-    row = {r.name_: r for r in env.win.home._profile_rows}["trabalho"]
+    row = {r.name_: r for r in env.win.home._profile_rows}["work"]
     row.test_btn.emit("clicked")
     pump(0.4)
-    assert ("check_profile", ("trabalho",)) in env.daemon.calls
+    assert ("check_profile", ("work",)) in env.daemon.calls
 
 
 # -- profile editor ---
 
 
-def editor(env, name="trabalho"):
+def editor(env, name="work"):
     from fwmanager.ui.dialogs import ProfileEditor
 
     saved = []
@@ -276,7 +276,7 @@ def test_editor_saves_what_was_changed(env):
     pump(0.1)
     call = [c for c in env.daemon.calls if c[0] == "set_profile"][-1][1]
     assert call == (
-        "trabalho", ["ssh", "web"], True, True, "cidrs", ["10.1.0.0/16", "192.168.5.0/24"]
+        "work", ["ssh", "web"], True, True, "cidrs", ["10.1.0.0/16", "192.168.5.0/24"]
     )  # fmt: skip
     assert d.saved == [1]
 
@@ -289,16 +289,16 @@ def test_editor_errors_stay_in_the_dialog(env):
 
 
 def test_editor_reset(env):
-    env.daemon.profiles["trabalho"]["customized"] = True
+    env.daemon.profiles["work"]["customized"] = True
     d = editor(env)
     d.reset_btn.emit("clicked")
-    assert ("reset_profile", ("trabalho",)) in env.daemon.calls and d.saved == [1]
+    assert ("reset_profile", ("work",)) in env.daemon.calls and d.saved == [1]
 
 
 def test_profiles_are_edited_from_the_overview(env):
-    env.daemon.profiles["casa"]["customized"] = True
+    env.daemon.profiles["home"]["customized"] = True
     env.win.home.load()
-    row = {r.name_: r for r in env.win.home._profile_rows}["casa"]
+    row = {r.name_: r for r in env.win.home._profile_rows}["home"]
     assert "You edited this profile." in row.get_subtitle()
     row.edit_btn.emit("clicked")
     pump(0.2)
@@ -317,7 +317,7 @@ def test_networks_page_lists_and_changes_remembered_networks(env):
     row = env.win.networks._rows[0]
     drop = find(row, lambda w: w.__class__.__name__ == "DropDown")[0]
     drop.set_selected(1)  # Work
-    assert ("set_network_profile", ("Casa WiFi", uuid, "trabalho")) in env.daemon.calls
+    assert ("set_network_profile", ("Casa WiFi", uuid, "work")) in env.daemon.calls
     remove = find(row, lambda w: w.__class__.__name__ == "Button")[0]
     remove.emit("clicked")
     assert ("remove_network", ("Casa WiFi", uuid)) in env.daemon.calls
@@ -332,7 +332,7 @@ def test_networks_page_remembers_the_current_network(env):
     assert env.win.networks.current_group.get_visible()
     env.win.networks.current_row.set_selected(2)  # Public
     env.win.networks.remember_btn.emit("clicked")
-    assert ("set_network_profile", ("Café", "u-1", "publico")) in env.daemon.calls
+    assert ("set_network_profile", ("Café", "u-1", "public")) in env.daemon.calls
 
 
 def test_networks_page_preselects_the_remembered_profile(env):
@@ -350,7 +350,7 @@ def test_networks_page_adds_a_network_by_name(env):
     env.win.networks.ssid_entry.set_text("Biblioteca")
     env.win.networks.add_profile.set_selected(2)
     env.win.networks.add_btn.emit("clicked")
-    assert ("set_network_profile", ("Biblioteca", "", "publico")) in env.daemon.calls
+    assert ("set_network_profile", ("Biblioteca", "", "public")) in env.daemon.calls
     env.win.networks.ssid_entry.set_text("   ")
     env.win.networks.add_btn.emit("clicked")
     assert len([c for c in env.daemon.calls if c[0] == "set_network_profile"]) == 1
@@ -421,15 +421,15 @@ def test_applying_shows_progress_until_the_service_answers(gtk):
         finish_all()
         finish_all()  # the pages load after the first status
         rows = {r.name_: r for r in win.home._profile_rows}
-        rows["casa"].apply_btn.emit("clicked")
+        rows["home"].apply_btn.emit("clicked")
         pump(0.1)
-        assert rows["casa"].applying.get_visible() and not rows["casa"].apply_btn.get_visible()
-        assert "Applying…" in texts(rows["casa"])
-        assert not rows["trabalho"].apply_btn.get_sensitive()  # one change at a time
-        assert not rows["trabalho"].test_btn.get_sensitive()
+        assert rows["home"].applying.get_visible() and not rows["home"].apply_btn.get_visible()
+        assert "Applying…" in texts(rows["home"])
+        assert not rows["work"].apply_btn.get_sensitive()  # one change at a time
+        assert not rows["work"].test_btn.get_sensitive()
         finish_all()
         finish_all()
-        assert not rows["casa"].applying.get_visible()
+        assert not rows["home"].applying.get_visible()
         assert win.home.pending_group.get_visible()  # now it waits for confirmation
     finally:
         controller.stop_polling()
@@ -474,7 +474,7 @@ def test_forgetting_a_network_can_be_undone(env):
     [("keep", "confirm", True), ("undo", "rollback", True), ("cancel", None, False)],
 )
 def test_closing_with_a_pending_change_asks_first(env, response, call, closed):
-    env.daemon.pending = "casa"
+    env.daemon.pending = "home"
     env.controller.refresh()
     env.win.close()
     pump(0.2)
@@ -497,7 +497,7 @@ def test_closing_with_nothing_pending_just_closes(env):
 
 
 def test_the_profile_editor_checks_networks_while_typing(env):
-    d = editor(env, "personalizado")
+    d = editor(env, "custom")
     d.source.set_selected(2)  # Specific networks
     d.cidrs.set_text("192.168.1.0/16")
     assert d.cidr_problem.get_visible() and "192.168.0.0/16" in d.cidr_problem.get_title()
@@ -534,7 +534,7 @@ def test_settings_end_with_the_credits(env):
 
 
 def test_the_editor_says_what_is_allowed_and_what_is_blocked(env):
-    d = editor(env, "trabalho")
+    d = editor(env, "work")
     rows = d._service_rows
     assert rows["ssh"].get_subtitle() == "Allowed" and rows["samba"].get_subtitle() == "Blocked"
     rows["samba"].set_active(True)
@@ -544,9 +544,9 @@ def test_the_editor_says_what_is_allowed_and_what_is_blocked(env):
 
 
 def test_an_edited_profile_offers_the_defaults_back_at_the_top(env):
-    env.daemon.profiles["trabalho"]["customized"] = True
-    d = editor(env, "trabalho")
+    env.daemon.profiles["work"]["customized"] = True
+    d = editor(env, "work")
     assert d.customized_row.get_visible() and d.reset_btn.get_sensitive()
     restore = [w for w in find(d.customized_row, lambda w: w.__class__.__name__ == "Button")]
     restore[0].emit("clicked")
-    assert ("reset_profile", ("trabalho",)) in env.daemon.calls and d.saved == [1]
+    assert ("reset_profile", ("work",)) in env.daemon.calls and d.saved == [1]

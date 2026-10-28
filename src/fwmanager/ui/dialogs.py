@@ -395,7 +395,7 @@ class RuleEditor(Adw.Dialog):
         if kind != rb.CLOSE_SERVICE:
             self.profile_switches = {}
             for name in self._names:
-                row = Adw.SwitchRow(title=state.profile_title(name), active=name == "casa")
+                row = Adw.SwitchRow(title=state.profile_title(name), active=name == "home")
                 row.connect("notify::active", lambda *_: self._changed())
                 self.profile_switches[name] = row
                 self._add(row)

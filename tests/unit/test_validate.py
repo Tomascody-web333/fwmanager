@@ -12,7 +12,7 @@ def test_name_rejects(bad):
         v.validate_name(bad)
 
 
-@pytest.mark.parametrize("ok", ["casa", "a", "my-profile_2"])
+@pytest.mark.parametrize("ok", ["home", "a", "my-profile_2"])
 def test_name_accepts(ok):
     assert v.validate_name(ok) == ok
 

@@ -17,7 +17,7 @@ HOSTILE = ["Café & Bar", "<b>BOLD</b>", "<span size='90000'>X</span>", "a<b", "
 
 
 def test_saved_network_names_are_shown_literally(env):  # noqa: F811
-    env.daemon.networks = [(s, "", "casa") for s in HOSTILE]
+    env.daemon.networks = [(s, "", "home") for s in HOSTILE]
     env.win.views.set_visible_child_name("networks")
     pump(0.4)
     shown = texts(env.win.networks)

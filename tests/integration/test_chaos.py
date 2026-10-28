@@ -18,7 +18,7 @@ from fwmanager.errors import FwError
 
 pytestmark = pytest.mark.integration
 
-PROFILES = ["casa", "trabalho", "publico", "personalizado"]
+PROFILES = ["home", "work", "public", "custom"]
 EXPECTED = {"apply_pending", "no_pending", "unknown_rule", "profile_too_big"}
 
 
@@ -54,7 +54,7 @@ def test_many_clients_at_once(nft, netns_prefix, private_bus, tmp_path, ufw_root
                 elif action == "status":
                     c.status()
                 elif action == "edit":
-                    c.set_profile("personalizado", r.sample(["ssh", "web", "samba"], 2),
+                    c.set_profile("custom", r.sample(["ssh", "web", "samba"], 2),
                                   r.random() < 0.5, r.random() < 0.5, "lan", [])  # fmt: skip
                 else:
                     rules = c.list_rules()
@@ -91,9 +91,9 @@ def test_killed_in_the_middle_of_a_change(
 ):
     state = tmp_path / "s"
     d = Daemon(netns_prefix, private_bus, ufw_root, timeout=30, state_dir=state)
-    d.client.apply_profile("trabalho")
+    d.client.apply_profile("work")
     d.client.confirm()
-    target = "casa" if delay < 1 else "publico"
+    target = "home" if delay < 1 else "public"
     if during == "rollback":
         d.client.apply_profile(target)
 
@@ -113,7 +113,7 @@ def test_killed_in_the_middle_of_a_change(
     # Restart on the same state: the last *confirmed* profile must come back, whole.
     d2 = Daemon(netns_prefix, private_bus, ufw_root, timeout=30, state_dir=state)
     try:
-        assert assert_consistent(d2) == "trabalho"
+        assert assert_consistent(d2) == "work"
     finally:
         log = d2.stop()
     assert "Traceback" not in log, log[-2000:]

@@ -98,7 +98,7 @@ def test_loopback_probe_unavailable_is_not_applicable(monkeypatch):
 
 
 class FakeClient:
-    def __init__(self, active="casa", pending="", conflicts=(), restore=True, apply_exc=None):
+    def __init__(self, active="home", pending="", conflicts=(), restore=True, apply_exc=None):
         self.active, self.pending, self.conflicts = active, pending, list(conflicts)
         self.restore, self.apply_exc = restore, apply_exc
         self.calls = []
@@ -136,18 +136,18 @@ def test_clean_run_is_safe_and_always_rolls_back():
     c = FakeClient()
     r = pt.run_live_test(
         c,
-        "publico",
+        "public",
         seq([P("dns", True), P("gateway_v4", None)], [P("dns", True), P("gateway_v4", None)]),
     )
     assert r.verdict == "safe" and r.regressions == [] and r.restored
-    assert c.calls == [("apply", "publico"), ("rollback",)]
+    assert c.calls == [("apply", "public"), ("rollback",)]
 
 
 def test_regression_is_detected():
     c = FakeClient()
     r = pt.run_live_test(
         c,
-        "publico",
+        "public",
         seq([P("dns", True), P("loopback_v4", True)], [P("dns", False), P("loopback_v4", True)]),
     )
     assert r.regressions == ["dns"] and r.verdict == "unsafe" and r.restored
@@ -155,7 +155,7 @@ def test_regression_is_detected():
 
 def test_failures_that_already_existed_are_not_regressions():
     c = FakeClient()
-    r = pt.run_live_test(c, "publico", seq([P("dns", False)], [P("dns", False)]))
+    r = pt.run_live_test(c, "public", seq([P("dns", False)], [P("dns", False)]))
     assert r.regressions == [] and r.verdict == "safe"
 
 
@@ -170,27 +170,27 @@ def test_rollback_happens_even_if_probing_crashes():
             raise RuntimeError("probe crashed") from None
 
     with pytest.raises(RuntimeError):
-        pt.run_live_test(c, "publico", probes)
+        pt.run_live_test(c, "public", probes)
     assert c.calls[-1] == ("rollback",)
 
 
 def test_unrestored_state_is_unsafe():
     c = FakeClient(restore=False)
-    r = pt.run_live_test(c, "publico", seq([P("dns", True)], [P("dns", True)]))
+    r = pt.run_live_test(c, "public", seq([P("dns", True)], [P("dns", True)]))
     assert not r.restored and r.verdict == "unsafe"
 
 
 def test_refuses_when_busy_or_conflicting():
     with pytest.raises(FwError) as e:
-        pt.run_live_test(FakeClient(pending="casa"), "publico", seq())
+        pt.run_live_test(FakeClient(pending="home"), "public", seq())
     assert e.value.code == "apply_pending"
     with pytest.raises(FwError) as e:
-        pt.run_live_test(FakeClient(conflicts=["ufw"]), "publico", seq())
+        pt.run_live_test(FakeClient(conflicts=["ufw"]), "public", seq())
     assert e.value.code == "firewall_conflict"
 
 
 def test_apply_failure_means_nothing_to_roll_back():
     c = FakeClient(apply_exc=FwError("x", code="nft_failed"))
     with pytest.raises(FwError):
-        pt.run_live_test(c, "publico", seq([P("dns", True)]))
+        pt.run_live_test(c, "public", seq([P("dns", True)]))
     assert ("rollback",) not in c.calls

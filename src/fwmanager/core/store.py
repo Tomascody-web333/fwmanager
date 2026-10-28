@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from fwmanager.core.backend import Options
-from fwmanager.core.profiles import Profile, Source
+from fwmanager.core.profiles import Profile, Source, current_name
 from fwmanager.core.rulebook import MAX_RULES, Rule
 from fwmanager.core.validate import validate_name
 from fwmanager.errors import StoreCorrupt, StoreError, ValidationError
@@ -73,6 +73,14 @@ def _jsonable(params) -> dict:
     return {k: list(v) if isinstance(v, (tuple, list)) else v for k, v in params.items()}
 
 
+def _current_params(raw) -> dict:
+    """Rule parameters as saved, with legacy profile ids in a "profiles" list renamed."""
+    params = dict(raw)
+    if isinstance(params.get("profiles"), list):
+        params["profiles"] = [current_name(p) for p in params["profiles"]]
+    return params
+
+
 class Store:
     def __init__(self, directory: Path) -> None:
         self._dir = Path(directory)
@@ -120,7 +128,7 @@ class Store:
         if data is None:
             return None
         try:
-            return validate_name(data.get("profile"), "profile")
+            return validate_name(current_name(data.get("profile")), "profile")
         except ValidationError as exc:
             raise StoreCorrupt("state.json holds an invalid profile") from exc
 
@@ -162,8 +170,8 @@ class Store:
             raise StoreCorrupt("profiles.json is malformed")
         try:
             return {
-                name: Profile(
-                    name,
+                current_name(name): Profile(
+                    current_name(name),
                     tuple(p["services"]),
                     bool(p["ping"]),
                     bool(p["mdns"]),
@@ -200,7 +208,7 @@ class Store:
         if not isinstance(items, list) or len(items) > MAX_RULES:
             raise StoreCorrupt("rules.json is malformed")
         try:
-            return [Rule(i["id"], i["template"], dict(i["params"])) for i in items]
+            return [Rule(i["id"], i["template"], _current_params(i["params"])) for i in items]
         except (ValidationError, KeyError, TypeError, ValueError) as exc:
             raise StoreCorrupt("rules.json holds an invalid rule") from exc
 
@@ -270,7 +278,9 @@ class Store:
             raise StoreCorrupt("networks.json is malformed")
         try:
             return [
-                Network(str(i.get("ssid", "")), str(i.get("uuid", "")), i.get("profile"))
+                Network(
+                    str(i.get("ssid", "")), str(i.get("uuid", "")), current_name(i.get("profile"))
+                )
                 for i in items
             ]
         except (ValidationError, AttributeError) as exc:

@@ -245,28 +245,28 @@ def goto_profile(e, network=None):
 def test_public_is_preselected_as_the_safe_default(make):
     e = make(stage="profile")
     goto_profile(e)
-    assert e.wizard.choice == "publico"
+    assert e.wizard.choice == "public"
 
 
 def test_apply_waits_for_confirmation_and_keeping_it_finishes(make):
     e = make(stage="profile")
     goto_profile(e)
-    e.wizard._choice_rows["casa"].set_active(True)
+    e.wizard._choice_rows["home"].set_active(True)
     e.wizard.apply_btn.emit("clicked")
     pump(0.1)
-    assert ("apply_profile", ("casa",)) in e.daemon.calls
+    assert ("apply_profile", ("home",)) in e.daemon.calls
     assert e.wizard.confirm_group.get_visible()
     assert "Home will be undone in 30 s" in e.wizard.confirm_row.get_subtitle()
     assert not e.wizard.apply_btn.get_sensitive()
     e.wizard.keep_btn.emit("clicked")
     pump(0.2)
-    assert e.daemon.active == "casa" and e.wizard.stage == "done"
+    assert e.daemon.active == "home" and e.wizard.stage == "done"
 
 
 def test_undoing_lets_you_pick_again(make):
     e = make(stage="profile")
     goto_profile(e)
-    e.wizard._choice_rows["trabalho"].set_active(True)
+    e.wizard._choice_rows["work"].set_active(True)
     e.wizard.apply_btn.emit("clicked")
     pump(0.1)
     e.wizard.undo_btn.emit("clicked")
@@ -280,12 +280,12 @@ def test_the_network_is_remembered_with_the_chosen_profile(make):
     goto_profile(e, CurrentNetwork("Casa auto", "Casa WiFi", "u-7", "802-11-wireless"))
     assert "Wi-Fi: Casa WiFi" in texts(e.wizard)
     assert e.wizard.remember.get_visible()
-    e.wizard._choice_rows["casa"].set_active(True)
+    e.wizard._choice_rows["home"].set_active(True)
     e.wizard.apply_btn.emit("clicked")
     pump(0.1)
     e.wizard.keep_btn.emit("clicked")
     pump(0.2)
-    assert ("set_network_profile", ("Casa WiFi", "u-7", "casa")) in e.daemon.calls
+    assert ("set_network_profile", ("Casa WiFi", "u-7", "home")) in e.daemon.calls
 
 
 def test_the_remember_switch_can_be_turned_off(make):
@@ -311,10 +311,10 @@ def test_test_opens_the_policy_dialog_for_the_selected_profile(make, monkeypatch
     monkeypatch.setattr(pt, "run_probes", lambda: [pt.Probe("loopback_v4", True)])
     e = make(stage="profile")
     goto_profile(e)
-    e.wizard._choice_rows["trabalho"].set_active(True)
+    e.wizard._choice_rows["work"].set_active(True)
     e.wizard.test_btn.emit("clicked")
     pump(0.4)
-    assert ("check_profile", ("trabalho",)) in e.daemon.calls
+    assert ("check_profile", ("work",)) in e.daemon.calls
 
 
 def test_an_apply_error_is_reported_and_nothing_is_pending(make):
@@ -357,7 +357,7 @@ def test_problems_after_setup_use_the_normal_problem_screen(make):
 def test_the_apply_button_says_it_is_working(make):
     e = make(stage="profile")
     goto_profile(e)
-    e.controller.applying = "casa"
+    e.controller.applying = "home"
     e.wizard.on_snapshot(e.controller.snapshot)
     assert e.wizard.apply_btn.get_label() == "Applying…"
     assert not e.wizard.apply_btn.get_sensitive() and not e.wizard.test_btn.get_sensitive()
@@ -371,17 +371,17 @@ def test_choosing_home_on_an_open_wifi_warns(make):
     goto_profile(e, CurrentNetwork("Café", "Café", "u-9", "802-11-wireless", open=True))
     assert "Wi-Fi: Café (no password)" in texts(e.wizard)
     assert not e.wizard.open_warning.get_visible()  # Public is preselected: fine
-    e.wizard._choice_rows["casa"].set_active(True)
+    e.wizard._choice_rows["home"].set_active(True)
     assert e.wizard.open_warning.get_visible()
     assert "With Home they could" in e.wizard.open_warning.get_title()
-    e.wizard._choice_rows["publico"].set_active(True)
+    e.wizard._choice_rows["public"].set_active(True)
     assert not e.wizard.open_warning.get_visible()
 
 
 def test_no_warning_on_a_wifi_with_a_password(make):
     e = make(stage="profile")
     goto_profile(e, CurrentNetwork("Casa", "Casa WiFi", "u-7", "802-11-wireless"))
-    e.wizard._choice_rows["casa"].set_active(True)
+    e.wizard._choice_rows["home"].set_active(True)
     assert not e.wizard.open_warning.get_visible()
 
 

@@ -144,25 +144,25 @@ def pinger(before=True, after=True):
 
 
 def test_mapped_profile_applied_and_confirmed():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     ping, state = pinger()
     # the fake pinger flips to "after" mode when apply is called
     orig = client.apply_profile
     client.apply_profile = lambda n: (state.update(applied=True), orig(n))
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
-    assert client.calls == [("apply", "casa"), ("confirm",)]
+    assert client.calls == [("apply", "home"), ("confirm",)]
 
 
 def test_unknown_network_gets_publico():
     client = FakeClient()
     ping, _ = pinger()
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
-    assert client.calls[0] == ("apply", "publico")
+    assert client.calls[0] == ("apply", "public")
 
 
 @pytest.mark.parametrize("kind", ["802-3-ethernet", "bond", "vlan"])
 def test_an_unknown_wired_connection_keeps_the_current_profile(kind):
-    client = FakeClient(active="casa")
+    client = FakeClient(active="home")
     ping, state = pinger()
     c = d.Context("eth0", UUID, (GW4,))
     assert d.dispatch(client, c, ping=ping, sleep=lambda s: None, kind=kind) == d.EXIT_OK
@@ -170,42 +170,42 @@ def test_an_unknown_wired_connection_keeps_the_current_profile(kind):
 
 
 def test_a_wired_connection_with_a_profile_still_gets_it():
-    client = FakeClient({UUID: "trabalho"}, active="casa")
+    client = FakeClient({UUID: "work"}, active="home")
     ping, state = pinger()
     orig = client.apply_profile
     client.apply_profile = lambda n: (state.update(applied=True), orig(n))
     c = d.Context("eth0", UUID, (GW4,))
     assert d.dispatch(client, c, ping=ping, sleep=lambda s: None, kind="802-3-ethernet") == 0
-    assert client.calls == [("apply", "trabalho"), ("confirm",)]
+    assert client.calls == [("apply", "work"), ("confirm",)]
 
 
 @pytest.mark.parametrize("kind", ["802-11-wireless", "gsm", ""])
 def test_unknown_wifi_mobile_or_unidentified_still_get_publico(kind):
-    client = FakeClient(active="casa")
+    client = FakeClient(active="home")
     ping, _ = pinger()
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None, kind=kind) == 0
-    assert client.calls[0] == ("apply", "publico")
+    assert client.calls[0] == ("apply", "public")
 
 
 def test_already_active_is_a_noop():
-    client = FakeClient({UUID: "casa"}, active="casa")
+    client = FakeClient({UUID: "home"}, active="home")
     ping, state = pinger()
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
     assert client.calls == [] and state["log"] == []
 
 
 def test_connectivity_lost_triggers_rollback():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     ping, state = pinger(before=True, after=False)
     orig = client.apply_profile
     client.apply_profile = lambda n: (state.update(applied=True), orig(n))
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_REVERTED
-    assert client.calls == [("apply", "casa"), ("rollback",)]
+    assert client.calls == [("apply", "home"), ("rollback",)]
     assert state["log"].count("192.168.1.1") == 1 + d.PING_TRIES  # baseline + retries
 
 
 def test_one_of_two_gateways_lost_triggers_rollback():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     state = {"applied": False}
 
     def ping(addr, iface, timeout):
@@ -217,21 +217,21 @@ def test_one_of_two_gateways_lost_triggers_rollback():
 
 
 def test_silent_gateway_cannot_judge_so_confirms():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     ping, _ = pinger(before=False, after=False)
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
-    assert client.calls == [("apply", "casa"), ("confirm",)]
+    assert client.calls == [("apply", "home"), ("confirm",)]
 
 
 def test_no_gateway_confirms():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     ping, state = pinger()
     assert d.dispatch(client, ctx(), ping=ping, sleep=lambda s: None) == d.EXIT_OK
-    assert client.calls == [("apply", "casa"), ("confirm",)] and state["log"] == []
+    assert client.calls == [("apply", "home"), ("confirm",)] and state["log"] == []
 
 
 def test_transient_ping_loss_is_retried():
-    client = FakeClient({UUID: "casa"})
+    client = FakeClient({UUID: "home"})
     answers = iter([True, False, False, True])  # baseline ok, then two losses, then ok
 
     def ping(addr, iface, timeout):
@@ -242,30 +242,30 @@ def test_transient_ping_loss_is_retried():
 
 
 def test_other_firewall_active_leaves_everything():
-    client = FakeClient({UUID: "casa"}, conflicts=["ufw"])
+    client = FakeClient({UUID: "home"}, conflicts=["ufw"])
     ping, _ = pinger()
     assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
     assert client.calls == []
 
 
 def test_waits_for_a_pending_change_then_proceeds():
-    client = FakeClient({UUID: "casa"}, pending=["trabalho", "trabalho", ""])
+    client = FakeClient({UUID: "home"}, pending=["work", "work", ""])
     sleeps = []
     ping, _ = pinger()
     code = d.dispatch(client, ctx(), ping=ping, sleep=sleeps.append)
     assert code == d.EXIT_OK and len(sleeps) >= 1
-    assert client.calls[0] == ("apply", "casa")
+    assert client.calls[0] == ("apply", "home")
 
 
 def test_gives_up_if_change_stays_pending():
-    client = FakeClient({UUID: "casa"}, pending=["trabalho"])
+    client = FakeClient({UUID: "home"}, pending=["work"])
     ping, _ = pinger()
     assert d.dispatch(client, ctx(), ping=ping, sleep=lambda s: None) == d.EXIT_ERROR
     assert client.calls == []
 
 
 def test_daemon_errors_do_not_confirm(monkeypatch):
-    client = FakeClient({UUID: "casa"}, apply_exc=FwError("x", code="apply_pending"))
+    client = FakeClient({UUID: "home"}, apply_exc=FwError("x", code="apply_pending"))
     monkeypatch.setattr(d, "Client", lambda addr: client)
     monkeypatch.setattr(d, "lookup_ssid", lambda u: "")
     monkeypatch.setattr(d, "lookup_kind", lambda u: "")
@@ -274,16 +274,16 @@ def test_daemon_errors_do_not_confirm(monkeypatch):
 
 
 def test_unidentifiable_network_falls_back_without_asking_the_daemon():
-    client = FakeClient({"": "casa"})  # would wrongly match if it were consulted
+    client = FakeClient({"": "home"})  # would wrongly match if it were consulted
     client.get_network_profile = lambda s, u: pytest.fail("must not be called")
     ping, _ = pinger()
     c = d.Context("eth0", "", ())
     assert d.dispatch(client, c, ping=ping, sleep=lambda s: None) == d.EXIT_OK
-    assert client.calls[0] == ("apply", "publico")
+    assert client.calls[0] == ("apply", "public")
 
 
 def test_run_asks_networkmanager_for_the_connection_type(monkeypatch):
-    client = FakeClient(active="casa")
+    client = FakeClient(active="home")
     monkeypatch.setattr(d, "Client", lambda addr: client)
     monkeypatch.setattr(d, "lookup_ssid", lambda u: "")
     monkeypatch.setattr(d, "lookup_kind", lambda u: "802-3-ethernet")

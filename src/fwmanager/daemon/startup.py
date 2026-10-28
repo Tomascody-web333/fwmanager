@@ -15,7 +15,7 @@ from fwmanager.errors import FwError, StoreCorrupt
 
 log = logging.getLogger("fwmanager")
 
-SAFE_PROFILE = "publico"
+SAFE_PROFILE = "public"
 
 # Machine-readable outcome, shown by the UI.
 OK = "ok"
@@ -55,8 +55,8 @@ def startup_apply(
     """Apply the saved profile without a confirmation timer (nobody is there to confirm).
 
     - ufw missing, or firewalld active: apply nothing.
-    - no saved state: apply ``publico`` (first boot).
-    - damaged or unknown state: apply ``publico`` and log the error.
+    - no saved state: apply ``public`` (first boot).
+    - damaged or unknown state: apply ``public`` and log the error.
     """
     if not manager.backend.ufw.installed():
         log.error("ufw is not installed; not applying anything")

@@ -37,7 +37,7 @@ class NetworksPage(Adw.PreferencesPage):
         self.current_row = Adw.ComboRow(
             title=_("Not connected"),
             model=Gtk.StringList.new([state.profile_title(n) for n in self._names]),
-            selected=self._names.index("publico"),
+            selected=self._names.index("public"),
         )
         self.remember_btn = button(_("Remember"), suggested=True)
         self.remember_btn.connect("clicked", self._remember_current)
@@ -62,7 +62,7 @@ class NetworksPage(Adw.PreferencesPage):
         self.add_profile = Adw.ComboRow(
             title=_("Profile"),
             model=Gtk.StringList.new([state.profile_title(n) for n in self._names]),
-            selected=self._names.index("casa"),
+            selected=self._names.index("home"),
         )
         self.add_btn = button(_("Add"), suggested=True)
         self.add_btn.connect("clicked", self._add_manual)

@@ -16,7 +16,7 @@ pytestmark = pytest.mark.integration
 HOSTILE = [
     "",
     " ",
-    "casa",
+    "home",
     "casa ",
     " casa",
     "CASA",
@@ -133,7 +133,7 @@ CALLS = {
     "SetNetworkProfile": lambda r: ("(sss)", (rnd_str(r), rnd_str(r), rnd_str(r))),
     "RemoveNetwork": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
     "GetNetworkProfile": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
-    "ApplyProfile": lambda r: ("(s)", (r.choice([h for h in HOSTILE if h != "casa"]),)),
+    "ApplyProfile": lambda r: ("(s)", (r.choice([h for h in HOSTILE if h != "home"]),)),
 }
 
 

@@ -31,7 +31,7 @@ from fwmanager.errors import FwError, ValidationError
 
 EXIT_OK, EXIT_ERROR, EXIT_REVERTED = 0, 1, 2
 
-UNKNOWN_NETWORK_PROFILE = "publico"  # most restrictive profile for networks we do not know
+UNKNOWN_NETWORK_PROFILE = "public"  # most restrictive profile for networks we do not know
 # A cable you plug in is rarely a stranger's network, and switching a wired machine to the
 # strictest profile can shut an SSH session out. Unknown wired connections keep the current
 # profile; only Wi-Fi, mobile broadband and anything unidentified fall back to the strict one.
@@ -68,7 +68,7 @@ def parse_context(iface: str, env: Mapping[str, str]) -> Context:
         raise ValidationError("invalid interface name", code="invalid_input")
     uuid = env.get("CONNECTION_UUID", "")
     try:
-        Network("x", uuid, "publico") if uuid else None  # reuse the canonical-UUID check
+        Network("x", uuid, "public") if uuid else None  # reuse the canonical-UUID check
     except ValidationError:
         uuid = ""
     gateways = []
@@ -106,7 +106,7 @@ def lookup_ssid(uuid: str, run: Callable = subprocess.run) -> str:
     """Wi-Fi SSID of a connection via nmcli; empty string when unknown or not Wi-Fi."""
     ssid = _nmcli_field(uuid, "802-11-wireless.ssid", run)
     try:
-        Network(ssid, "", "publico") if ssid else None
+        Network(ssid, "", "public") if ssid else None
     except ValidationError:
         return ""
     return ssid

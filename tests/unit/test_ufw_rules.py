@@ -13,23 +13,23 @@ def argvs(profile, ipv6=True):
 
 
 def test_publico_has_no_rules():
-    assert ur.translate(DEFAULT_PROFILES["publico"], CAT) == []
+    assert ur.translate(DEFAULT_PROFILES["public"], CAT) == []
 
 
 def test_casa_rules_lan_v4_and_v6():
-    rules = ur.translate(DEFAULT_PROFILES["casa"], CAT)
+    rules = ur.translate(DEFAULT_PROFILES["home"], CAT)
     sources = {r.source for r in rules}
     assert sources == set(ur.LAN_V4) | set(ur.LAN_V6)
     tcp = next(r for r in rules if r.proto == "tcp" and r.source == "192.168.0.0/16")
     assert tcp.ports == ("22", "139", "445", "631", "1714:1764", "22000")  # sorted like ufw
-    assert tcp.add_argv("casa") == [
+    assert tcp.add_argv("home") == [
         "allow", "from", "192.168.0.0/16", "to", "any", "port",
-        "22,139,445,631,1714:1764,22000", "proto", "tcp", "comment", "fwmanager:casa",
+        "22,139,445,631,1714:1764,22000", "proto", "tcp", "comment", "fwmanager:home",
     ]  # fmt: skip
 
 
 def test_ipv6_sources_dropped_when_ipv6_is_off():
-    rules = ur.translate(DEFAULT_PROFILES["casa"], CAT, ipv6=False)
+    rules = ur.translate(DEFAULT_PROFILES["home"], CAT, ipv6=False)
     assert rules and not any(r.is_v6 for r in rules)
 
 
@@ -82,13 +82,13 @@ def test_profile_name_in_comment_is_validated():
 # -- parsing `ufw show added` ---
 
 LISTING = """Added user rules (see 'ufw status' for running firewall):
-ufw allow from 192.168.0.0/16 to any port 22,139 proto tcp comment 'fwmanager:casa'
-ufw allow from 10.0.0.0/8 to any port 1714:1764 proto udp comment 'fwmanager:casa'
+ufw allow from 192.168.0.0/16 to any port 22,139 proto tcp comment 'fwmanager:home'
+ufw allow from 10.0.0.0/8 to any port 1714:1764 proto udp comment 'fwmanager:home'
 ufw allow from any to any port 8080 proto tcp
 ufw allow from any to any port 22 proto tcp comment 'my own rule'
 ufw deny from 1.2.3.4
 ufw allow 53
-ufw limit 22/tcp comment 'fwmanager:casa'
+ufw limit 22/tcp comment 'fwmanager:home'
 ufw allow 443/tcp
 ufw allow 1714:1764,22000/udp comment 'fwmanager:personal'
 """
@@ -97,8 +97,8 @@ ufw allow 1714:1764,22000/udp comment 'fwmanager:personal'
 def test_parse_added_separates_ours_from_the_users():
     lst = ur.parse_added(LISTING)
     assert lst.managed == {
-        ur.Rule("tcp", "192.168.0.0/16", ("22", "139")): "casa",
-        ur.Rule("udp", "10.0.0.0/8", ("1714:1764",)): "casa",
+        ur.Rule("tcp", "192.168.0.0/16", ("22", "139")): "home",
+        ur.Rule("udp", "10.0.0.0/8", ("1714:1764",)): "home",
         ur.Rule("udp", "any", ("1714:1764", "22000")): "personal",
     }
     assert ur.Rule("tcp", "any", ("8080",)) in lst.foreign
@@ -138,13 +138,13 @@ def test_short_form_garbage_rejected(line):
 
 def test_a_profile_that_would_be_slow_to_apply_is_refused():
     catalog = load_builtin()
-    biggest_default = Profile("casa", tuple(catalog), source=Source("lan"))
+    biggest_default = Profile("home", tuple(catalog), source=Source("lan"))
     ur.check_size(biggest_default, catalog)  # every service, local network: fine
     many = tuple(f"10.{i}.0.0/16" for i in range(64))
     with pytest.raises(ValidationError) as exc:
-        ur.check_size(Profile("casa", ("ssh",), source=Source("cidrs", many)), catalog)
+        ur.check_size(Profile("home", ("ssh",), source=Source("cidrs", many)), catalog)
     assert exc.value.code == "profile_too_big"
-    at_limit = Profile("casa", ("ssh",), source=Source("cidrs", many[: ur.MAX_RULES_PER_PROFILE]))
+    at_limit = Profile("home", ("ssh",), source=Source("cidrs", many[: ur.MAX_RULES_PER_PROFILE]))
     ur.check_size(at_limit, catalog)
 
 

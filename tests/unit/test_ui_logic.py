@@ -134,7 +134,7 @@ def test_describe_profile_in_plain_words():
 
 def test_protection_title():
     assert state.protection_title({"firewall_active": False}) == "The firewall is off"
-    on = {"firewall_active": True, "active_profile": "publico"}
+    on = {"firewall_active": True, "active_profile": "public"}
     assert state.protection_title(on) == "Protected with the Public profile"
     assert state.protection_title({**on, "active_profile": ""}) == "The firewall is on"
 
@@ -152,14 +152,14 @@ def test_parse_cidrs():
 
 
 def test_event_text():
-    assert state.event_text("applied", "casa") == "Applied Home, waiting for confirmation"
-    assert state.event_text("reverted", "publico") == "Undid Public"
+    assert state.event_text("applied", "home") == "Applied Home, waiting for confirmation"
+    assert state.event_text("reverted", "public") == "Undid Public"
     assert state.event_text("denied", "").startswith("Refused")
     assert state.event_text("brand_new", "x") == "brand_new"  # unknown codes stay visible
 
 
 def test_countdown_text():
-    assert state.countdown_text("casa", 12) == "Home will be undone in 12 s unless you confirm."
+    assert state.countdown_text("home", 12) == "Home will be undone in 12 s unless you confirm."
 
 
 # -- worker ---
@@ -209,7 +209,7 @@ class FakeClient:
         return self._status
 
     def list_profiles(self):
-        return ["casa", "zeta", "publico", "trabalho"]
+        return ["home", "zeta", "public", "work"]
 
     def get_profile(self, name):
         return {"name": name, "services": ["ssh"], "ping": True, "mdns": False,
@@ -267,7 +267,7 @@ def test_operations_call_the_daemon_and_refresh():
     client = FakeClient()
     c = controller(client)
     results = []
-    c.apply("casa", lambda r, e: results.append(e))
+    c.apply("home", lambda r, e: results.append(e))
     c.confirm(lambda r, e: results.append(e))
     c.rollback(lambda r, e: results.append(e))
     assert [n for n, _ in client.calls] == ["apply_profile", "confirm", "rollback"]
@@ -280,7 +280,7 @@ def test_failed_operation_reports_the_error_and_rechecks_the_screen():
     c.refresh()
     client.error = err("access_denied")
     got = []
-    c.apply("casa", lambda r, e: got.append(e))
+    c.apply("home", lambda r, e: got.append(e))
     assert got[0].code == "access_denied" and c.snapshot.screen == state.NOT_IN_GROUP
 
 
@@ -289,7 +289,7 @@ def test_load_profiles_orders_for_display():
     out = []
     c.load_profiles(lambda r, e: out.append(r))
     profiles, titles = out[0]
-    assert list(profiles) == ["casa", "trabalho", "publico", "zeta"] and titles == {"ssh": "SSH"}
+    assert list(profiles) == ["home", "work", "public", "zeta"] and titles == {"ssh": "SSH"}
 
 
 def test_signals_trigger_a_refresh_and_reach_listeners():
@@ -298,7 +298,7 @@ def test_signals_trigger_a_refresh_and_reach_listeners():
     heard, seen = [], []
     c.signal_listeners.append(lambda n, a: heard.append(n))
     c.listeners.append(seen.append)
-    client.signal_cb("Reverted", ("casa",))
+    client.signal_cb("Reverted", ("home",))
     assert heard == ["Reverted"] and seen
 
 
@@ -306,10 +306,10 @@ def test_settings_style_operations_forward_arguments():
     client = FakeClient()
     c = controller(client)
     c.set_options(True, "low")
-    c.save_profile("casa", ["ssh"], True, False, "lan", [])
-    c.set_network("Cafe", "", "publico")
+    c.save_profile("home", ["ssh"], True, False, "lan", [])
+    c.set_network("Cafe", "", "public")
     c.remove_network("Cafe", "")
-    c.reset_profile("casa")
+    c.reset_profile("home")
     names = [n for n, _ in client.calls]
     assert names == ["set_options", "set_profile", "set_network_profile", "remove_network",
                      "reset_profile"]  # fmt: skip
@@ -332,9 +332,9 @@ def test_network_text_and_open_wifi_warning():
     assert state.network_text(locked) == "Wi-Fi: Casa WiFi"
     assert state.network_text(open_) == "Wi-Fi: Café (no password)"
     assert state.network_text(wired) == "Wired: Cable"
-    assert "anyone nearby can join it" in state.open_wifi_warning(open_, "casa")
-    assert "With Work" in state.open_wifi_warning(open_, "trabalho")
-    for net, profile in ((open_, "publico"), (locked, "casa"), (wired, "casa"), (None, "casa")):
+    assert "anyone nearby can join it" in state.open_wifi_warning(open_, "home")
+    assert "With Work" in state.open_wifi_warning(open_, "work")
+    for net, profile in ((open_, "public"), (locked, "home"), (wired, "home"), (None, "home")):
         assert state.open_wifi_warning(net, profile) == ""
 
 
@@ -346,7 +346,7 @@ def test_network_text_and_open_wifi_warning():
         ("", "Write at least one network"),
         ("   ", "Write at least one network"),
         ("192.168.1.0/16", "Did you mean 192.168.0.0/16?"),
-        ("casa", "“casa” is not a network address. Example: 192.168.1.0/24."),
+        ("home", "“home” is not a network address. Example: 192.168.1.0/24."),
         ("10.0.0.0/8 300.1.1.1", "“300.1.1.1” is not a network address"),
     ],
 )

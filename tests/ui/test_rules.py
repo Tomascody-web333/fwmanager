@@ -30,21 +30,21 @@ def english():
 @pytest.mark.parametrize(
     "template,params,expected",
     [
-        (rb.ALLOW_ONLY_IN, {"service": "samba", "profiles": ["casa"]},
+        (rb.ALLOW_ONLY_IN, {"service": "samba", "profiles": ["home"]},
          "Allow File sharing (Samba) only in: Home"),
-        (rb.ALLOW_ONLY_IN, {"service": "ssh", "profiles": ["casa", "trabalho"]},
+        (rb.ALLOW_ONLY_IN, {"service": "ssh", "profiles": ["home", "work"]},
          "Allow SSH only in: Home, Work"),
-        (rb.BLOCK_ALL_EXCEPT, {"services": ["ssh"], "profiles": ["publico"]},
+        (rb.BLOCK_ALL_EXCEPT, {"services": ["ssh"], "profiles": ["public"]},
          "Block everything coming in, except SSH, in: Public"),
-        (rb.BLOCK_ALL_EXCEPT, {"services": ["ssh", "web"], "profiles": ["publico"]},
+        (rb.BLOCK_ALL_EXCEPT, {"services": ["ssh", "web"], "profiles": ["public"]},
          "Block everything coming in, except SSH, Web server (HTTP/HTTPS), in: Public"),
-        (rb.BLOCK_ALL_EXCEPT, {"services": [], "profiles": ["publico"]},
+        (rb.BLOCK_ALL_EXCEPT, {"services": [], "profiles": ["public"]},
          "Block everything coming in, in: Public"),
-        (rb.RESTRICT_SOURCE, {"scope": "lan", "profiles": ["publico"]},
+        (rb.RESTRICT_SOURCE, {"scope": "lan", "profiles": ["public"]},
          "Only accept connections from the local network in: Public"),
-        (rb.RESTRICT_SOURCE, {"scope": "cidrs", "cidrs": ["10.0.0.0/8"], "profiles": ["casa"]},
+        (rb.RESTRICT_SOURCE, {"scope": "cidrs", "cidrs": ["10.0.0.0/8"], "profiles": ["home"]},
          "Only accept connections from 10.0.0.0/8 in: Home"),
-        (rb.HIDE, {"profiles": ["publico"]}, "Hide this computer (no ping, no mDNS) in: Public"),
+        (rb.HIDE, {"profiles": ["public"]}, "Hide this computer (no ping, no mDNS) in: Public"),
         (rb.CLOSE_SERVICE, {"service": "ssh"}, "Close SSH in every profile"),
     ],
 )  # fmt: skip
@@ -59,9 +59,9 @@ def test_every_template_has_a_title_and_a_sentence():
 
 def test_preview_lines():
     changes = [
-        ("trabalho", ["samba"], [], "", "", "", []),
-        ("casa", [], ["samba"], "off", "off", "cidrs", ["10.0.0.0/8", "192.168.0.0/16"]),
-        ("publico", [], [], "on", "on", "lan", []),
+        ("work", ["samba"], [], "", "", "", []),
+        ("home", [], ["samba"], "off", "off", "cidrs", ["10.0.0.0/8", "192.168.0.0/16"]),
+        ("public", [], [], "on", "on", "lan", []),
     ]
     lines = rule_text.preview_lines(changes, TITLES)
     assert lines[0] == "Work: opens File sharing (Samba)"
@@ -158,26 +158,26 @@ def test_editor_starts_with_the_first_template_and_a_preview(env):
 def test_editor_saves_the_chosen_rule(env):
     d = make_editor(env)
     d.service_combo.set_selected(d._service_ids.index("web"))
-    d.profile_switches["trabalho"].set_active(True)
-    d.profile_switches["casa"].set_active(False)
+    d.profile_switches["work"].set_active(True)
+    d.profile_switches["home"].set_active(False)
     assert d.sentence_row.get_title() == "Allow Web server (HTTP/HTTPS) only in: Work"
     d.save_btn.emit("clicked")
     pump(0.1)
     assert env.daemon.rules[0][1:] == (
         "allow_only_in",
-        {"service": "web", "profiles": ["trabalho"]},
+        {"service": "web", "profiles": ["work"]},
     )
     assert d.saved == [1]
 
 
 def test_save_is_disabled_until_a_profile_is_chosen(env):
     d = make_editor(env)
-    d.profile_switches["casa"].set_active(False)
+    d.profile_switches["home"].set_active(False)
     assert not d.save_btn.get_sensitive()
     assert d.sentence_row.get_title() == "Choose the details below."
     d.save_btn.emit("clicked")  # a forced click must not save anything
     assert env.daemon.rules == []
-    d.profile_switches["publico"].set_active(True)
+    d.profile_switches["public"].set_active(True)
     assert d.save_btn.get_sensitive()
 
 
@@ -215,8 +215,8 @@ def test_specific_networks_need_a_valid_list(env):
 def test_preview_shows_what_changes(env):
     d = make_editor(env)
     d.service_combo.set_selected(d._service_ids.index("samba"))
-    d.profile_switches["casa"].set_active(False)
-    d.profile_switches["trabalho"].set_active(True)
+    d.profile_switches["home"].set_active(False)
+    d.profile_switches["work"].set_active(True)
     lines = texts(d.preview)
     assert "Work: opens File sharing (Samba)" in lines
     assert "Home: closes File sharing (Samba)" in lines
@@ -225,15 +225,15 @@ def test_preview_shows_what_changes(env):
 def test_preview_of_a_noop(env):
     d = make_editor(env)
     d.template.set_selected(rb.TEMPLATE_ORDER.index(rb.HIDE))
-    d.profile_switches["casa"].set_active(False)
-    d.profile_switches["publico"].set_active(True)  # publico already hides itself
+    d.profile_switches["home"].set_active(False)
+    d.profile_switches["public"].set_active(True)  # publico already hides itself
     assert "Nothing changes: the profiles already work like this." in texts(d.preview)
 
 
 def test_a_stale_preview_answer_is_ignored(env):
     d = make_editor(env)
     d._serial = 5
-    d._previewed(3, [("casa", ["ssh"], [], "", "", "", [])], None)  # an old answer
+    d._previewed(3, [("home", ["ssh"], [], "", "", "", [])], None)  # an old answer
     assert "Casa" not in " ".join(texts(d.preview))
     assert d.preview.get_visible()
 
@@ -251,12 +251,12 @@ def test_saving_refreshes_the_profile_descriptions(env):
     env.daemon.rules = []
     env.win.home.load()
     before = {r.name_: r.get_subtitle() for r in env.win.home._profile_rows}
-    assert "Printer sharing (IPP)" in before["casa"]
+    assert "Printer sharing (IPP)" in before["home"]
     env.controller.add_rule(rb.CLOSE_SERVICE, {"service": "ipp"})
     env.win.rules._saved()
     after = {r.name_: r.get_subtitle() for r in env.win.home._profile_rows}
-    assert "Printer sharing (IPP)" not in after["casa"]
-    assert "Your rules change this profile." in after["casa"]
+    assert "Printer sharing (IPP)" not in after["home"]
+    assert "Your rules change this profile." in after["home"]
 
 
 def test_daemon_errors_while_saving_keep_the_dialog_open(env):
@@ -284,12 +284,12 @@ def portuguese(tmp_path):
 
 def test_portuguese_sentences(portuguese):
     assert (
-        rule_text.sentence(rb.ALLOW_ONLY_IN, {"service": "samba", "profiles": ["casa"]}, TITLES)
+        rule_text.sentence(rb.ALLOW_ONLY_IN, {"service": "samba", "profiles": ["home"]}, TITLES)
         == "Permitir Partilha de ficheiros (Samba) apenas em: Casa"
     )
     assert (
         rule_text.sentence(
-            rb.BLOCK_ALL_EXCEPT, {"services": ["ssh"], "profiles": ["publico", "trabalho"]}, TITLES
+            rb.BLOCK_ALL_EXCEPT, {"services": ["ssh"], "profiles": ["public", "work"]}, TITLES
         )
         == "Bloquear tudo o que entra, exceto SSH, em: Público, Trabalho"
     )
@@ -300,9 +300,9 @@ def test_portuguese_sentences(portuguese):
 
 def test_portuguese_preview_has_no_broken_contractions(portuguese):
     changes = [
-        ("casa", [], ["samba"], "off", "", "lan", []),
-        ("trabalho", ["ssh"], [], "", "on", "cidrs", ["10.0.0.0/8"]),
-        ("publico", [], [], "", "", "any", []),
+        ("home", [], ["samba"], "off", "", "lan", []),
+        ("work", ["ssh"], [], "", "on", "cidrs", ["10.0.0.0/8"]),
+        ("public", [], [], "", "", "any", []),
     ]
     lines = rule_text.preview_lines(changes, TITLES)
     assert lines[0] == (

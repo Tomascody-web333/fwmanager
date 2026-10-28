@@ -3,7 +3,7 @@
 [English](README.md) · **Português**
 
 Uma interface gráfica para o **ufw**, pensada para quem está a começar. Não é uma firewall
-própria: só torna o ufw mais fácil de usar. Escolha um perfil (`casa`, `trabalho`, `publico`),
+própria: só torna o ufw mais fácil de usar. Escolha um perfil (Casa, Trabalho, Público),
 deixe a aplicação mudar de perfil sozinha quando muda de Wi-Fi e conte com uma rede de
 segurança que desfaz qualquer alteração que lhe corte a ligação.
 
@@ -151,7 +151,7 @@ que o botão Desinstalar da app e o `fwmanager-cli uninstall` executam) remove o
 `before.rules`, e volta a desligar o ufw **apenas se foi o fwmanager que o ligou**, para a
 máquina nunca ficar a filtrar sem ninguém a geri-la. Um ufw que ativou por si fica ligado.
 
-> **Aviso:** no primeiro arranque, sem estado guardado, o serviço aplica `publico` (nada pode
+> **Aviso:** no primeiro arranque, sem estado guardado, o serviço aplica Público (nada pode
 > entrar). Se instalar por SSH, o instalador deixa por isso o serviço parado (contornável com
 > `--allow-ssh-lockout`); arranque-o na própria máquina ou confirme primeiro um perfil que
 > permita SSH (`fwmanager-cli apply casa` e depois `confirm`).
@@ -163,7 +163,10 @@ Se o `firewalld` estiver ativo, não aplica nada e a interface explica porquê.
 
 O `fwmanager-cli` faz o mesmo que a janela, num terminal: para servidores, sessões SSH,
 sistemas mais antigos sem libadwaita 1.5, ou scripts. Os perfis podem ser escritos em
-português ou em inglês (`casa`, `home`, `Público`...).
+português ou em inglês (`casa`, `home`, `Público`...). Por dentro, os perfis têm sempre o
+nome inglês (`home`, `work`, `public`, `custom`): é esse que aparece no `--json` e nos
+comentários das regras do ufw (`fwmanager:home`). Instalações antigas, com os nomes em
+português, passam para os nomes ingleses sozinhas.
 
 ```sh
 fwmanager-cli setup               # configuração inicial, como na janela

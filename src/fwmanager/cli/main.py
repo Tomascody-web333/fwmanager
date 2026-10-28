@@ -12,6 +12,7 @@ import unicodedata
 from fwmanager.cli import argparse_text
 from fwmanager.client import Client
 from fwmanager.core.config import SYSTEM_CONFIG, resolve_language
+from fwmanager.core.profiles import current_name
 from fwmanager.core.services import load_catalog
 from fwmanager.errors import FwError
 from fwmanager.i18n import N_, _, set_language
@@ -133,14 +134,18 @@ def _is_dispatch(argv: list[str]) -> bool:
 
 
 def _fold(text: str) -> str:
-    """Case and accents do not matter: "Público" == "publico"."""
+    """Case and accents do not matter: "Público" == "public"."""
     decomposed = unicodedata.normalize("NFKD", text.strip().casefold())
     return "".join(c for c in decomposed if not unicodedata.combining(c))
 
 
 def resolve_profile(arg: str, names: list[str]) -> str:
-    """Map what a person typed to a profile name; unknown input is passed on unchanged."""
-    wanted = _fold(arg)
+    """Map what a person typed to a profile name; unknown input is passed on unchanged.
+
+    The name in either language works whatever the app's language is, as do the Portuguese
+    ids profiles had before (scripts written for them keep working).
+    """
+    wanted = _fold(current_name(_fold(arg)))
     for name in names:
         english = state.PROFILE_TITLES.get(name, name)
         if wanted in {_fold(name), _fold(english), _fold(state.profile_title(name))}:
@@ -154,7 +159,7 @@ def _profile_label(name: str) -> str:
 
 
 def command_name(name: str) -> str:
-    """What to type for it, in the same language: home / casa, public / publico."""
+    """What to type for it, in the same language: home / casa, public / publico (both work)."""
     return _fold(state.profile_title(name))
 
 
