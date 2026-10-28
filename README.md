@@ -142,7 +142,7 @@ packaging/deb/build-deb.sh          # writes dist/fwmanager.<version>.deb and di
 ```
 
 It needs `dpkg-deb` and PyGObject with GdkPixbuf (for the PNG icons); no root and no signing
-key. Pushing a tag such as `v0.1.0` (matching the version in `pyproject.toml`) makes GitHub
+key. Pushing a tag such as `1.0.0` (matching the version in `pyproject.toml`) makes GitHub
 Actions build both files and attach them to a new release.
 
 The package installs under `/usr` (`/usr/bin`, `/usr/lib/fwmanager`,

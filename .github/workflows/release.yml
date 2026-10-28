@@ -1,10 +1,10 @@
-# Push a tag such as v0.1.0 (the version in pyproject.toml): this builds the .deb, checks it,
+# Push a tag such as 1.0.0 or v1.0.0 (the version in pyproject.toml): this builds the .deb, checks it,
 # and publishes it with SHA256SUMS as a GitHub release.
 name: Release
 
 on:
   push:
-    tags: ["v*"]
+    tags: ["v[0-9]*", "[0-9]*"]
 
 permissions:
   contents: write
@@ -25,7 +25,7 @@ jobs:
       - name: The tag matches the version
         run: |
           version=$(sed -n 's/^version = "\(.*\)"$/\1/p' pyproject.toml | head -n 1)
-          if [ "v$version" != "$GITHUB_REF_NAME" ]; then
+          if [ "$version" != "${GITHUB_REF_NAME#v}" ]; then
             echo "::error::tag $GITHUB_REF_NAME, but pyproject.toml says $version"
             exit 1
           fi

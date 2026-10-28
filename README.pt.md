@@ -148,7 +148,7 @@ packaging/deb/build-deb.sh          # cria dist/fwmanager.<versão>.deb e dist/S
 ```
 
 Precisa do `dpkg-deb` e do PyGObject com GdkPixbuf (para os ícones PNG); não precisa de root
-nem de chave de assinatura. Ao enviar uma tag como `v0.1.0` (igual à versão no
+nem de chave de assinatura. Ao enviar uma tag como `1.0.0` (igual à versão no
 `pyproject.toml`), o GitHub Actions constrói os dois ficheiros e junta-os a uma nova release.
 
 O pacote instala em `/usr` (`/usr/bin`, `/usr/lib/fwmanager`, `/usr/libexec/fwmanager`), guarda
