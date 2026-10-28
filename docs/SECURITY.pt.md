@@ -38,6 +38,10 @@
   `/var/lib/fwmanager`.
 - **Limites de tamanho.** Um perfil pode precisar no máximo de 40 regras do ufw, para que
   aplicá-lo demore segundos e não minutos em que o serviço não responderia a ninguém.
+- **A desinstalação** (botão nas Definições ou `fwmanager-cli uninstall`) passa pelo mesmo
+  auxiliar com uma segunda ação do polkit, `org.fwmanager.uninstall`, distinguida pelo primeiro
+  argumento do auxiliar. Pede sempre a palavra-passe de administrador (`auth_admin`, nada fica
+  guardado) e só executa o desinstalador instalado.
 - **Nada é enviado para lado nenhum.** Sem acesso à rede, contas ou telemetria; os registos
   nunca contêm o conteúdo das regras.
 - **Outras firewalls nunca são desativadas automaticamente.** O firewalld bloqueia o fwmanager

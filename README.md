@@ -27,6 +27,16 @@ it never asks again, and you choose how this computer should behave on the curre
 Nothing needs a terminal. If the password window is not available, the wizard shows the exact
 commands to run instead.
 
+Prefer the terminal? `fwmanager-cli setup` does the same checks, asks the same single password
+and lets you pick the profile there. Setup is recorded for the whole machine, so whichever you
+use first, the other has nothing left to ask.
+
+**Uninstalling** works the same way: **Settings → Uninstall fwmanager…** or
+`fwmanager-cli uninstall`. Either one removes the window, the command line and the service, and
+leaves the firewall as it was before fwmanager (its own rules and settings removed, ufw's
+defaults restored, ufw switched off only if fwmanager had switched it on, your own ufw rules
+kept). It asks for an administrator password every time.
+
 The interface needs GTK 4 and libadwaita 1.5 or newer (Ubuntu 24.04, Fedora 40 or later);
 `fwmanager-cli` works on older systems.
 
@@ -127,7 +137,8 @@ adding your account and starting the service happen in the window, or right away
 `--user NAME`. `--no-systemd` skips the systemd step. Its messages follow the system language
 (Portuguese or English).
 
-`dev-uninstall.sh` removes the files, fwmanager's ufw rules and its block in `before.rules`, and
+`dev-uninstall.sh` (also installed as `/usr/local/libexec/fwmanager/uninstall`, which is what the
+app's Uninstall button and `fwmanager-cli uninstall` run) removes the files, fwmanager's ufw rules and its block in `before.rules`, and
 switches ufw off again **only if fwmanager was the one that turned it on**, so the machine is
 never left filtering with nobody managing it. A ufw you enabled yourself stays on.
 
@@ -146,10 +157,12 @@ systems without libadwaita 1.5, or scripts. Profiles can be typed in English or 
 (`home`, `casa`, `Público`...).
 
 ```sh
+fwmanager-cli setup               # first-run setup, as in the window
 fwmanager-cli status              # is it on, which profile, what it lets in
 fwmanager-cli profiles            # every profile, in plain words
 fwmanager-cli apply home          # switch; press Enter to keep it, r to undo (30 s)
 fwmanager-cli networks list       # which profile on which network
+fwmanager-cli uninstall           # remove fwmanager (asks for a yes, then the password)
 ```
 
 Ctrl+C during `apply` or `test-policy` undoes the change at once. `--json` on `status` and

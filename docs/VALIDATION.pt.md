@@ -37,6 +37,8 @@ primeiro um instantâneo.
 | 9 | Teste de política | **Testar** em todos os perfis | Seguro, ou avisos que correspondem à realidade |
 | 10 | Aspeto no ambiente | tema claro/escuro, escala 200 %, janela estreita, Orca | Legível, nada cortado, o seletor de páginas passa para baixo |
 | 11 | Reiniciar | reiniciar a máquina | O último perfil confirmado volta a aplicar-se, sem temporizador |
-| 12 | Desinstalar | `sudo scripts/dev-uninstall.sh` | O `ufw status` volta ao que era; o ufw só fica desligado se o fwmanager o tinha ligado; sem ficheiros restantes |
+| 12 | Desinstalar pela janela | **Definições → Desinstalar o fwmanager…**, palavra-passe | Página final e a app fecha; o `ufw status` volta ao que era; o ufw só fica desligado se o fwmanager o tinha ligado; sem ficheiros nem entrada no menu |
+| 13 | Setup e desinstalação pelo terminal | reinstalar, depois `fwmanager-cli setup` (com o seu utilizador) e mais tarde `fwmanager-cli uninstall` | Uma palavra-passe no setup e o perfil perguntado no terminal; abrir a janela a seguir não mostra o assistente; a desinstalação não deixa nada |
+| 14 | Ícone | ver a grelha de aplicações, a dock e a janela na barra de tarefas (GNOME e, se possível, XFCE ou KDE) | O escudo em todo o lado; a janela aberta agrupa com o lançador |
 
 Comunique qualquer diferença com o resultado de `journalctl -u fwmanagerd` e `ufw status verbose`.

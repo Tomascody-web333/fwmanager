@@ -33,6 +33,10 @@
   (not the rest of `/etc/default`), its lock in `/run`, and its own `/var/lib/fwmanager`.
 - **Size limits.** A profile may need at most 40 ufw rules, so applying one takes seconds, not
   minutes during which the service would answer nobody.
+- **Uninstalling** (Settings button or `fwmanager-cli uninstall`) goes through the same helper
+  with a second polkit action, `org.fwmanager.uninstall`, told apart by the helper's first
+  argument. It asks for the administrator password every time (`auth_admin`, nothing kept) and
+  runs only the installed uninstaller.
 - **Nothing is sent anywhere.** No network access, accounts or telemetry; logs never contain rule
   content.
 - **Other firewalls are never disabled automatically.** firewalld blocks fwmanager (with an

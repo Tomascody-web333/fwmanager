@@ -34,6 +34,8 @@ Do this in a VM with a desktop session, **from its console, not over SSH**. Take
 | 9 | Policy test | **Test** on every profile | Safe, or warnings that match reality |
 | 10 | Desktop look | light/dark theme, 200 % scale, narrow window, Orca | Readable, nothing clipped, page switcher moves to the bottom |
 | 11 | Reboot | reboot | Last confirmed profile re-applied with no timer |
-| 12 | Uninstall | `sudo scripts/dev-uninstall.sh` | `ufw status` is back to how it was; ufw is off only if fwmanager had enabled it; no files left |
+| 12 | Uninstall from the window | **Settings → Uninstall fwmanager…**, enter the password | Done page, the app closes; `ufw status` is back to how it was; ufw is off only if fwmanager had enabled it; no files left, no menu entry |
+| 13 | Setup and uninstall from the terminal | reinstall, then `fwmanager-cli setup` (as yourself), later `fwmanager-cli uninstall` | One password for setup, profile asked in the terminal; opening the window afterwards shows no wizard; uninstall leaves nothing |
+| 14 | Icon | look at the app grid, the dock and the window in the task bar (GNOME, and XFCE or KDE if you can) | The shield icon everywhere; the open window is grouped with its launcher |
 
 Report anything that differs with the output of `journalctl -u fwmanagerd` and `ufw status verbose`.

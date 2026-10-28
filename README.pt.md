@@ -27,6 +27,16 @@ administrador (polkit). Depois disso nunca mais pede, e escolhe como este comput
 comportar na rede atual. Nada precisa de terminal. Se a janela de palavra-passe não estiver
 disponível, o assistente mostra os comandos exatos a executar.
 
+Prefere o terminal? O `fwmanager-cli setup` faz as mesmas verificações, pede a mesma palavra-passe
+uma vez e deixa escolher o perfil ali. A configuração fica registada para toda a máquina: use o
+que usar primeiro, o outro já não tem nada para pedir.
+
+**Desinstalar** funciona da mesma forma: **Definições → Desinstalar o fwmanager…** ou
+`fwmanager-cli uninstall`. Qualquer um remove a janela, a linha de comandos e o serviço, e deixa
+a firewall como estava antes do fwmanager (as regras e definições dele removidas, os valores
+originais do ufw repostos, o ufw desligado só se foi o fwmanager que o ligou, as suas próprias
+regras do ufw mantidas). Pede sempre a palavra-passe de administrador.
+
 A interface precisa do GTK 4 e do libadwaita 1.5 ou superior (Ubuntu 24.04, Fedora 40 ou
 posterior); o `fwmanager-cli` funciona em sistemas mais antigos.
 
@@ -132,7 +142,8 @@ administrador) e põe o root no grupo `fwmanager` para o hook do NetworkManager.
 adicionar a sua conta e arrancar o serviço acontece na janela, ou logo de seguida se passar
 `--user NOME`. `--no-systemd` salta o passo do systemd.
 
-O `dev-uninstall.sh` remove os ficheiros, as regras do fwmanager no ufw e o seu bloco em
+O `dev-uninstall.sh` (também instalado como `/usr/local/libexec/fwmanager/uninstall`, que é o
+que o botão Desinstalar da app e o `fwmanager-cli uninstall` executam) remove os ficheiros, as regras do fwmanager no ufw e o seu bloco em
 `before.rules`, e volta a desligar o ufw **apenas se foi o fwmanager que o ligou**, para a
 máquina nunca ficar a filtrar sem ninguém a geri-la. Um ufw que ativou por si fica ligado.
 
@@ -151,10 +162,12 @@ sistemas mais antigos sem libadwaita 1.5, ou scripts. Os perfis podem ser escrit
 português ou em inglês (`casa`, `home`, `Público`...).
 
 ```sh
+fwmanager-cli setup               # configuração inicial, como na janela
 fwmanager-cli status              # está ligada, que perfil, o que deixa entrar
 fwmanager-cli profiles            # todos os perfis, em palavras simples
 fwmanager-cli apply casa          # mudar; Enter para manter, r para desfazer (30 s)
 fwmanager-cli networks list       # que perfil em que rede
+fwmanager-cli uninstall           # remover o fwmanager (pede um sim e depois a palavra-passe)
 ```
 
 Ctrl+C durante um `apply` ou `test-policy` desfaz a alteração de imediato. `--json` em
