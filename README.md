@@ -17,8 +17,16 @@ From the Launchpad PPA (Ubuntu 24.04 or newer; updates then arrive with `sudo ap
 
 ```sh
 sudo add-apt-repository ppa:tomascody-web333/fwmanager
+sudo apt update
 sudo apt install fwmanager
 ```
+
+In the PPA, version 1.1.0 is published once per Ubuntu release, with the release in its
+version: `1.1.0~ubuntu24.04.1` for Ubuntu 24.04 and `1.1.0~ubuntu26.04.1` for Ubuntu 26.04.
+`sudo apt install fwmanager` picks the one for your release, and it replaces an older
+`1.0.0` on `sudo apt upgrade`. `apt policy fwmanager` shows which one is installed. The
+`~ubuntuNN.NN.1` part is only how Launchpad tells the releases apart: it is the same program
+as `1.1.0` in the other two ways below.
 
 Or from the APT repository on GitHub (Ubuntu or Debian):
 
@@ -206,15 +214,19 @@ It needs, in **Settings → Secrets and variables → Actions**:
 GitHub Pages must use **Source: GitHub Actions**. Without the key only the release is
 published; without `LAUNCHPAD_PPA` the PPA is skipped.
 
-The PPA gets **one** upload, for Ubuntu 24.04, with exactly the release's version (`1.1.0`).
-fwmanager is pure Python (`Architecture: all`), so for every newer Ubuntu you copy that very
-package on Launchpad, keeping the same version: PPA page → **View package details** →
-**Copy packages** → tick fwmanager → *Destination series*: **The same series** is not what you
-want, pick the newer series (or *All*) → **Copy existing binaries** → Copy. Launchpad refuses
-the same version for two releases when the source differs, which is why uploading once and
-copying is the way to keep plain `1.1.0` everywhere. (Setting `LAUNCHPAD_SERIES` to several
-releases, e.g. `noble=24.04 resolute=26.04`, or to `auto` for every supported one, uploads
-for each instead, as `<version>~ubuntu<release>.1`.)
+With `LAUNCHPAD_SERIES` set to several releases, e.g. `noble=24.04 resolute=26.04`, or to
+`auto` for every supported one, the PPA gets one upload for each, with the release in the
+version: `<version>~ubuntu<release>.1` (Launchpad refuses the same version for two releases
+when the source differs). That is how 1.1.0 is published, so users install
+`1.1.0~ubuntu24.04.1` or `1.1.0~ubuntu26.04.1`. Without `LAUNCHPAD_SERIES` there is a single
+upload for Ubuntu 24.04 with the plain version; the other releases can then get the same
+package with **Copy packages** on the PPA page, but Launchpad only copies once the binary is
+published, so this can take a while.
+
+A version that Launchpad has already used cannot be uploaded again, even after deleting it.
+If one build fails, raise the revision (for example `1.1.0~ubuntu24.04.2`) instead of
+repeating the same number. Older versions on the PPA page (such as `1.0.0`) show as
+*Superseded*; that is normal and Launchpad removes them by itself.
 
 Every push and pull request also runs the whole test suite on GitHub (`tests.yml`): as root,
 with ufw in network namespaces, the windows on a virtual screen and a real install of the
