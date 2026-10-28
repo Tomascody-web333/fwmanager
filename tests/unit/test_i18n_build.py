@@ -84,7 +84,7 @@ def test_compiled_mo_is_readable_by_python_gettext(tmp_path):
 def test_write_po_roundtrip(tmp_path):
     po = tmp_path / "x.po"
     ib.write_po(po, ["A", 'B "q"'], {"A": "Á"}, "pt_PT")
-    assert ib.parse_po(po.read_text()) == {"": ib.HEADER + "Language: pt_PT\n", "A": "Á"}
+    assert ib.parse_po(po.read_text()) == {"": ib.header("pt_PT"), "A": "Á"}
 
 
 def test_compile_dir_layout_and_cli(tmp_path):

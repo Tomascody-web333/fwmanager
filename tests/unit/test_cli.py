@@ -1,5 +1,7 @@
 """fwmanager-cli without a daemon: help, names, and what Ctrl+C leaves behind."""
 
+import json
+
 import pytest
 
 from fwmanager.cli import main as cli
@@ -146,3 +148,118 @@ def test_old_portuguese_ids_and_names_still_resolve_in_english():
     for typed, name in (("casa", "home"), ("Trabalho", "work"), ("PÚBLICO", "public"),
                         ("publico", "public"), ("personalizado", "custom")):  # fmt: skip
         assert cli.resolve_profile(typed, NAMES) == name
+
+
+# -- export, import and the routers of a network ---
+
+
+class Backup:
+    """The calls export / import / networks make, without a service."""
+
+    def __init__(self):
+        self.calls, self.exported = [], '{"format": "fwmanager-settings", "version": 1}\n'
+        self.routers = [("Casa WiFi", "", ["aa:bb:cc:00:11:22"], "")]
+        self.nets = [("Casa WiFi", "", "home")]
+
+    def export_settings(self):
+        return self.exported
+
+    def import_settings(self, text):
+        self.calls.append(("import", text))
+
+    def status(self):
+        return {"active_profile": "home"}
+
+    def list_networks(self):
+        return self.nets
+
+    def list_network_routers(self):
+        return self.routers
+
+    def trust_router(self, ssid, uuid):
+        self.calls.append(("trust", ssid, uuid))
+
+    def forget_routers(self, ssid, uuid):
+        self.calls.append(("forget", ssid, uuid))
+
+
+def run_cli(argv, client):
+    return cli.run(cli._parser().parse_args(argv), client)
+
+
+def test_export_writes_a_private_file(tmp_path, capsys):
+    target = tmp_path / "out.json"
+    assert run_cli(["export", str(target)], Backup()) == 0
+    assert target.read_text().startswith('{"format"')
+    assert target.stat().st_mode & 0o077 == 0
+    assert "Settings saved to" in capsys.readouterr().out
+
+
+def test_export_to_the_screen(capsys):
+    assert run_cli(["export", "-"], Backup()) == 0
+    assert capsys.readouterr().out == Backup().exported
+
+
+def test_export_to_an_unwritable_place_says_so(tmp_path, capsys):
+    assert run_cli(["export", str(tmp_path / "nope" / "x.json")], Backup()) == 1
+    assert "Could not write" in capsys.readouterr().err
+
+
+def test_import_with_yes_replaces_and_says_what_next(tmp_path, capsys):
+    source = tmp_path / "in.json"
+    source.write_text("{}")
+    client = Backup()
+    assert run_cli(["import", str(source), "--yes"], client) == 0
+    assert client.calls == [("import", "{}")]
+    out = capsys.readouterr().out
+    assert "Settings imported." in out and "fwmanager-cli apply home" in out
+
+
+def test_import_asks_first_and_stops_on_no(tmp_path, monkeypatch, capsys):
+    source = tmp_path / "in.json"
+    source.write_text("{}")
+    monkeypatch.setattr(cli.sys.stdin, "isatty", lambda: True)
+    monkeypatch.setattr("builtins.input", lambda _prompt: "no")
+    client = Backup()
+    assert run_cli(["import", str(source)], client) == 130
+    assert client.calls == [] and "Nothing was changed" in capsys.readouterr().out
+
+
+def test_import_without_a_terminal_wants_yes(tmp_path, monkeypatch, capsys):
+    source = tmp_path / "in.json"
+    source.write_text("{}")
+    monkeypatch.setattr(cli.sys.stdin, "isatty", lambda: False)
+    client = Backup()
+    assert run_cli(["import", str(source)], client) == 1
+    assert client.calls == [] and "use --yes" in capsys.readouterr().err
+
+
+def test_import_refuses_what_it_cannot_read(tmp_path, capsys):
+    binary = tmp_path / "x.bin"
+    binary.write_bytes(b"\xff\xfe\x00")
+    client = Backup()
+    for path in (tmp_path / "missing.json", binary):
+        assert run_cli(["import", str(path), "--yes"], client) == 1
+    assert client.calls == [] and "Could not read" in capsys.readouterr().err
+
+
+def test_networks_show_the_router_state(capsys):
+    client = Backup()
+    client.routers = [("Casa WiFi", "", ["aa:bb:cc:00:11:22"], "aa:bb:cc:00:11:99")]
+    run_cli(["networks", "list"], client)
+    out = capsys.readouterr().out
+    assert "aa:bb:cc:00:11:99" in out
+    assert "fwmanager-cli networks trust-router --ssid 'Casa WiFi'" in out
+
+
+def test_networks_json_carries_the_routers(capsys):
+    run_cli(["networks", "list", "--json"], Backup())
+    (item,) = json.loads(capsys.readouterr().out)
+    assert item["routers"] == ["aa:bb:cc:00:11:22"] and item["unrecognised_router"] == ""
+
+
+def test_trusting_and_forgetting_routers(capsys):
+    client = Backup()
+    run_cli(["networks", "trust-router", "--ssid", "Casa WiFi"], client)
+    run_cli(["networks", "forget-router", "--uuid", "u-1"], client)
+    assert client.calls == [("trust", "Casa WiFi", ""), ("forget", "", "u-1")]

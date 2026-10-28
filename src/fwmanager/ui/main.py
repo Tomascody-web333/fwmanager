@@ -80,10 +80,18 @@ def main(argv: list[str] | None = None) -> int:
     from fwmanager.ui.settings import settings_path
 
     set_language(resolve_language(settings_path(), SYSTEM_CONFIG))
+    argv = list(sys.argv if argv is None else argv)
+    background = "--background" in argv  # started at login: notifications, no window
+    argv = [a for a in argv if a != "--background"]
     if os.geteuid() == 0:
         print(_("fwmanager must not run as root: the service does that part."), file=sys.stderr)
         return 1
-    _rejoin_group()
+    if background:
+        from fwmanager.ui import relaunch
+
+        _rejoin_group(do_relaunch=lambda: relaunch.relaunch(args=["--background"]))
+    else:
+        _rejoin_group()
     problem = runtime_problem(_adw_version())
     if problem:
         print(problem, file=sys.stderr)
@@ -100,7 +108,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     from fwmanager.ui.app import FwApplication
 
-    return FwApplication().run(sys.argv if argv is None else argv)
+    return FwApplication(background=background).run(argv)
 
 
 if __name__ == "__main__":

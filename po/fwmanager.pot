@@ -17,6 +17,9 @@ msgstr ""
 msgid "A network you trust, such as your own Wi-Fi."
 msgstr ""
 
+msgid "A router fwmanager does not know was seen here ({mac})."
+msgstr ""
+
 msgid "A shared network at work or school."
 msgstr ""
 
@@ -62,6 +65,9 @@ msgstr ""
 msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
 msgstr ""
 
+msgid "Also when the window is closed"
+msgstr ""
+
 msgid "An administrator password is asked once."
 msgstr ""
 
@@ -78,6 +84,9 @@ msgid "Another firewall manager (firewalld) is active. Disable it first, then tr
 msgstr ""
 
 msgid "Another firewall manager is active"
+msgstr ""
+
+msgid "Another router was seen here ({mac}), so Public was used. If you replaced your router, trust it."
 msgstr ""
 
 msgid "Answer ping"
@@ -107,10 +116,15 @@ msgstr ""
 msgid "Applying…"
 msgstr ""
 
-msgid "At most {n} networks."
-msgstr ""
+msgid "At most {n} network."
+msgid_plural "At most {n} networks."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "BROKEN by this profile: {p}"
+msgstr ""
+
+msgid "Backup"
 msgstr ""
 
 msgid "Be visible on the local network (mDNS)"
@@ -176,7 +190,7 @@ msgstr ""
 msgid "Choose the details below."
 msgstr ""
 
-msgid "Choose what fwmanager tells you about while it is open."
+msgid "Choose what fwmanager tells you about."
 msgstr ""
 
 msgid "Close"
@@ -227,7 +241,19 @@ msgstr ""
 msgid "Copy command"
 msgstr ""
 
+msgid "Could not read that file."
+msgstr ""
+
+msgid "Could not read {file}: {why}"
+msgstr ""
+
 msgid "Could not save the settings."
+msgstr ""
+
+msgid "Could not write that file."
+msgstr ""
+
+msgid "Could not write {file}: {why}"
 msgstr ""
 
 msgid "Current network"
@@ -272,6 +298,15 @@ msgstr ""
 msgid "Error: {msg}"
 msgstr ""
 
+msgid "Export settings"
+msgstr ""
+
+msgid "Export…"
+msgstr ""
+
+msgid "FILE"
+msgstr ""
+
 msgid "FTP"
 msgstr ""
 
@@ -300,6 +335,9 @@ msgid "Forgot {name}."
 msgstr ""
 
 msgid "Forgotten."
+msgstr ""
+
+msgid "Forgotten. The next router seen there is remembered."
 msgstr ""
 
 msgid "General"
@@ -336,6 +374,15 @@ msgid "IPv6 would stop working (neighbour discovery)."
 msgstr ""
 
 msgid "IPv6 would stop working (router advertisements)."
+msgstr ""
+
+msgid "If you replaced the router: fwmanager-cli networks trust-router {which}"
+msgstr ""
+
+msgid "Import settings"
+msgstr ""
+
+msgid "Import…"
 msgstr ""
 
 msgid "In use"
@@ -470,6 +517,9 @@ msgstr ""
 msgid "No other firewall manager is in the way"
 msgstr ""
 
+msgid "No other router has been seen on that network."
+msgstr ""
+
 msgid "No password: anyone nearby can join"
 msgstr ""
 
@@ -584,6 +634,9 @@ msgstr ""
 msgid "Profile changed by itself"
 msgstr ""
 
+msgid "Profile edits, rules, remembered networks and options, in one file: to keep them safe or to take them to another computer."
+msgstr ""
+
 msgid "Profile for {name}"
 msgstr ""
 
@@ -665,6 +718,15 @@ msgstr ""
 msgid "Renewing the IPv6 address (DHCPv6) would fail."
 msgstr ""
 
+msgid "Replace"
+msgstr ""
+
+msgid "Replace the current ones with those in a file."
+msgstr ""
+
+msgid "Replace your settings?"
+msgstr ""
+
 msgid "Replies to your own connections would be blocked."
 msgstr ""
 
@@ -684,6 +746,15 @@ msgid "Router mode"
 msgstr ""
 
 msgid "Router mode may interfere with Docker, VMs and containers."
+msgstr ""
+
+msgid "Router not seen yet: it is remembered the next time you connect."
+msgstr ""
+
+msgid "Router recognised."
+msgstr ""
+
+msgid "Router: not seen yet"
 msgstr ""
 
 msgid "Rule removed."
@@ -743,6 +814,9 @@ msgstr ""
 msgid "Save rule"
 msgstr ""
 
+msgid "Save them to a file."
+msgstr ""
+
 msgid "Saved."
 msgstr ""
 
@@ -761,6 +835,18 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
+msgid "Settings exported."
+msgstr ""
+
+msgid "Settings imported."
+msgstr ""
+
+msgid "Settings imported. They take effect the next time a profile is applied."
+msgstr ""
+
+msgid "Settings saved to {file}."
+msgstr ""
+
 msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
 msgstr ""
 
@@ -771,6 +857,9 @@ msgid "Some diagnostics would fail (time exceeded)."
 msgstr ""
 
 msgid "Some fwmanager rules have an unexpected shape."
+msgstr ""
+
+msgid "Someone may be copying that network; Public is used meanwhile."
 msgstr ""
 
 msgid "Something is still missing; see above."
@@ -804,6 +893,12 @@ msgid "Test {name}"
 msgstr ""
 
 msgid "Testing…"
+msgstr ""
+
+msgid "That file is not a valid fwmanager settings file. Nothing was changed."
+msgstr ""
+
+msgid "That network is not remembered."
 msgstr ""
 
 msgid "That would make the profile too large to apply quickly. Use fewer networks or fewer services."
@@ -863,6 +958,9 @@ msgstr ""
 msgid "There is no change waiting for confirmation."
 msgstr ""
 
+msgid "They take effect the next time a profile is applied, for example: fwmanager-cli apply {name}"
+msgstr ""
+
 msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
 msgstr ""
 
@@ -872,10 +970,19 @@ msgstr ""
 msgid "This network"
 msgstr ""
 
+msgid "This replaces your profile edits, rules, networks and options."
+msgstr ""
+
 msgid "This rule cannot be saved: check the details."
 msgstr ""
 
 msgid "Too many saved networks."
+msgstr ""
+
+msgid "Trust"
+msgstr ""
+
+msgid "Trusted. Its profile is used the next time you connect."
 msgstr ""
 
 msgid "Try again"
@@ -885,6 +992,9 @@ msgid "Turns on recording at Low if it is off."
 msgstr ""
 
 msgid "Turns on recording at Medium if it is lower. Can be frequent."
+msgstr ""
+
+msgid "Type yes to import: "
 msgstr ""
 
 msgid "Type yes to uninstall: "
@@ -920,6 +1030,12 @@ msgstr ""
 msgid "Unknown profile."
 msgstr ""
 
+msgid "Unknown router"
+msgstr ""
+
+msgid "Unknown router on a remembered network"
+msgstr ""
+
 msgid "Unknown service."
 msgstr ""
 
@@ -927,6 +1043,9 @@ msgid "Unknown service: {name}"
 msgstr ""
 
 msgid "Use"
+msgstr ""
+
+msgid "Use its profile with the new router (if you replaced it)"
 msgstr ""
 
 msgid "Use the same profile every time you connect here."
@@ -989,7 +1108,7 @@ msgstr ""
 msgid "Wi-Fi name"
 msgstr ""
 
-msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile."
+msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile. fwmanager also remembers each network's router: a copy of the network with another router gets Public too."
 msgstr ""
 
 msgid "Wi-Fi: {name}"
@@ -1055,10 +1174,19 @@ msgstr ""
 msgid "Your own settings."
 msgstr ""
 
+msgid "Your profile edits, rules, remembered networks and options are replaced by those in the file. Export them first if you may want them back."
+msgstr ""
+
 msgid "Your rules"
 msgstr ""
 
 msgid "Your rules change this profile."
+msgstr ""
+
+msgid "a file made by export"
+msgstr ""
+
+msgid "accept the new router seen on a network (after replacing it)"
 msgstr ""
 
 msgid "accepts connections from anywhere"
@@ -1106,6 +1234,9 @@ msgstr ""
 msgid "forget a network"
 msgstr ""
 
+msgid "forget a network's routers; the next one seen is remembered"
+msgstr ""
+
 msgid "fwmanager"
 msgstr ""
 
@@ -1113,6 +1244,9 @@ msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
 msgstr ""
 
 msgid "fwmanager is already set up. Profile in use: {p}"
+msgstr ""
+
+msgid "fwmanager keeps running in the background and starts when you log in, so notifications still reach you."
 msgstr ""
 
 msgid "fwmanager must not run as root: the service does that part."
@@ -1169,6 +1303,9 @@ msgstr ""
 msgid "none"
 msgstr ""
 
+msgid "not a text file"
+msgstr ""
+
 msgid "not applicable"
 msgstr ""
 
@@ -1206,6 +1343,12 @@ msgid "put a profile back to its defaults"
 msgstr ""
 
 msgid "remove fwmanager and undo its changes to the firewall"
+msgstr ""
+
+msgid "replace the settings with those in a file"
+msgstr ""
+
+msgid "save profiles, rules, networks and options to a file"
 msgstr ""
 
 msgid "services to block"
@@ -1289,6 +1432,9 @@ msgstr ""
 msgid "warning"
 msgstr ""
 
+msgid "where to save them (- for the screen)"
+msgstr ""
+
 msgid "which profile to use on which network"
 msgstr ""
 
@@ -1307,11 +1453,18 @@ msgstr ""
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr ""
 
-msgid "{n} attempts were blocked. The latest: {src} to port {port}."
+msgid "{network} has a router fwmanager has not seen there before, so Public is in use. If you replaced the router, trust it in Networks."
 msgstr ""
 
-msgid "{n} connections were let in. The latest: {src} to port {port}."
-msgstr ""
+msgid "{n} attempt was blocked. The latest: {src} to port {port}."
+msgid_plural "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "{n} connection was let in. The latest: {src} to port {port}."
+msgid_plural "{n} connections were let in. The latest: {src} to port {port}."
+msgstr[0] ""
+msgstr[1] ""
 
 msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 msgstr ""

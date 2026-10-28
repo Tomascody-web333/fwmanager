@@ -10,8 +10,9 @@ pytestmark = pytest.mark.ui
 
 def test_one_switch_per_kind_of_event(env):  # noqa: F811
     rows = env.win.settings.notify_rows
-    assert list(rows) == ["reverted", "switched", "blocked", "allowed"]
+    assert list(rows) == ["reverted", "switched", "router", "blocked", "allowed"]
     assert rows["reverted"].get_active() and rows["switched"].get_active()
+    assert rows["router"].get_active()  # someone copying a network you trust: on by default
     assert not rows["blocked"].get_active() and not rows["allowed"].get_active()
 
 

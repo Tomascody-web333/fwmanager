@@ -48,6 +48,10 @@ class FakeDaemon:
         self.calls = []
         self.error = None  # set to an FwError to make every call fail
         self.signal_cb = None
+        self.routers = {}  # (ssid, uuid) -> list of remembered routers
+        self.unrecognised = {}  # (ssid, uuid) -> router seen there but not remembered
+        self.exported = '{"format": "fwmanager-settings", "version": 1}\n'
+        self.imported = []
 
 
 class FakeClient:
@@ -145,6 +149,26 @@ class FakeClient:
     def remove_network(self, ssid, uuid):
         self._call("remove_network", ssid, uuid)
         self.d.networks = [n for n in self.d.networks if (n[0], n[1]) != (ssid, uuid)]
+
+    def list_network_routers(self):
+        self._call("list_network_routers")
+        return [
+            (s, u, list(self.d.routers.get((s, u), [])), self.d.unrecognised.get((s, u), ""))
+            for s, u, _p in self.d.networks
+        ]
+
+    def trust_router(self, ssid, uuid):
+        self._call("trust_router", ssid, uuid)
+        mac = self.d.unrecognised.pop((ssid, uuid))
+        self.d.routers.setdefault((ssid, uuid), []).append(mac)
+
+    def export_settings(self):
+        self._call("export_settings")
+        return self.d.exported
+
+    def import_settings(self, text):
+        self._call("import_settings", text)
+        self.d.imported.append(text)
 
     def get_options(self):
         self._call("get_options")

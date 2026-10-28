@@ -1,5 +1,13 @@
 fwmanager (1.1.0) noble; urgency=medium
 
+  * A network is also recognised by its router: a copy of a remembered Wi-Fi
+    behind another router gets the strict profile, with a notification and a
+    Trust button for when the router was really replaced.
+  * Export and import of the settings (window and command line).
+  * Notifications with the window closed: fwmanager keeps running in the
+    background and starts at login (can be turned off in Settings).
+  * New languages: Spanish and French, with proper plurals.
+  * Documentation in English only.
   * The PPA builds for every Ubuntu release from 24.04 on that is still
     supported, not only 24.04.
   * The whole test suite (ufw, D-Bus, the window, a real install) runs on

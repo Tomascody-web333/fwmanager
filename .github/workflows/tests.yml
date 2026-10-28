@@ -25,7 +25,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             python3-gi python3-pytest gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gdkpixbuf-2.0 \
             librsvg2-common ufw nftables iptables iproute2 dbus xvfb xdotool \
-            apt-utils dpkg-dev debhelper fakeroot libxml2-utils gnupg
+            apt-utils dpkg-dev debhelper build-essential fakeroot libxml2-utils gnupg pkexec
           python3 -m pip install --user --break-system-packages ruff==0.17.3
 
       - name: Style

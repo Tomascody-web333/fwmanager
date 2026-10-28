@@ -4,8 +4,12 @@ Called by the NetworkManager dispatcher as root. Everything NetworkManager passe
 (interface, connection UUID, gateways) is validated before use; the only thing sent to
 the daemon is a profile *name* chosen from the saved network mapping.
 
-Flow: pick profile (an unknown wired connection keeps the current one) -> ping gateways
+Flow: read the router's hardware address (one ping first if the kernel has not learned it yet)
+-> ask the daemon for the network's profile, giving it that address -> ping gateways
 (baseline) -> apply -> ping again -> confirm if still reachable, otherwise roll back at once.
+An unknown wired connection keeps the current profile. A remembered Wi-Fi whose router is not
+one seen there before is treated as unknown (a fake access point can copy a name and a
+password, not the router behind it).
 If nobody confirms, the daemon reverts by itself after the timeout, so a killed script cannot
 lock the user out.
 """
@@ -26,7 +30,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 
 from fwmanager.client import Client
-from fwmanager.core.store import Network
+from fwmanager.core.store import Network, validate_mac
 from fwmanager.errors import FwError, ValidationError
 
 EXIT_OK, EXIT_ERROR, EXIT_REVERTED = 0, 1, 2
@@ -43,6 +47,8 @@ PING_TIMEOUT = 1.5
 BASELINE_TIMEOUT = 2.0
 PENDING_WAIT = 15  # seconds to wait for another pending change to finish
 NMCLI_PATHS = ("/usr/bin/nmcli", "/bin/nmcli")
+ARP_TABLE = "/proc/net/arp"
+ARP_COMPLETE = 0x2
 
 
 def log(msg: str) -> None:
@@ -116,6 +122,25 @@ def lookup_kind(uuid: str, run: Callable = subprocess.run) -> str:
     """NetworkManager's connection type (``802-3-ethernet``, ``802-11-wireless``...)."""
     kind = _nmcli_field(uuid, "connection.type", run)
     return kind if KIND_RE.fullmatch(kind) else ""
+
+
+def router_mac(gateway: str, iface: str, table: str = ARP_TABLE) -> str:
+    """The hardware address the kernel learned for the IPv4 gateway on ``iface``, or ""."""
+    try:
+        lines = open(table, encoding="ascii", errors="replace").read().splitlines()[1:]
+    except OSError:
+        return ""
+    for line in lines:
+        fields = line.split()
+        if len(fields) < 6 or fields[0] != gateway or fields[5] != iface:
+            continue
+        try:
+            if not int(fields[2], 16) & ARP_COMPLETE:
+                continue
+            return validate_mac(fields[3].lower())
+        except (ValueError, ValidationError):
+            return ""
+    return ""
 
 
 # -- ICMP echo ---
@@ -195,9 +220,19 @@ def dispatch(
     ping: Callable = icmp_echo,
     sleep: Callable[[float], None] = time.sleep,
     kind: str = "",
+    router: Callable[[str, str], str] | None = None,
 ) -> int:
+    router = router or router_mac
+    v4 = next((g.address for g in ctx.gateways if g.version == 4), "")
+    mac = router(v4, ctx.iface) if v4 else ""
+    if v4 and not mac:  # not in the kernel's neighbour table yet: one ping teaches it
+        ping(v4, ctx.iface, BASELINE_TIMEOUT)
+        mac = router(v4, ctx.iface)
+
     # A network we cannot identify at all falls back to the restrictive profile.
-    mapped = client.get_network_profile(ssid, ctx.uuid) if (ssid or ctx.uuid) else ""
+    mapped, verdict = client.check_network(ssid, ctx.uuid, mac) if (ssid or ctx.uuid) else ("", "")
+    if verdict in ("changed", "unverified"):
+        log(f"the router on {ctx.iface} is not the one remembered for this network")
     if not mapped and kind in WIRED_KINDS:
         log(f"wired connection without a profile on {ctx.iface}; keeping the current profile")
         return EXIT_OK

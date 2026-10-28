@@ -29,6 +29,8 @@ class NetworksPage(Adw.PreferencesPage):
         self._current = None
         self._saved: list[tuple[str, str, str]] = []
         self._rows: list[Adw.ActionRow] = []
+        self.rows_by_network: dict[tuple[str, str], Adw.ActionRow] = {}
+        self.trust_buttons: dict[tuple[str, str], Gtk.Button] = {}
 
         self.current_group = Adw.PreferencesGroup(
             title=_("This network"),
@@ -52,7 +54,8 @@ class NetworksPage(Adw.PreferencesPage):
             title=_("Remembered networks"),
             description=_(
                 "Wi-Fi networks you have not chosen a profile for use the Public profile. "
-                "A cable keeps the current profile."
+                "A cable keeps the current profile. fwmanager also remembers each network's "
+                "router: a copy of the network with another router gets Public too."
             ),
         )
         self.add(self.saved_group)
@@ -80,6 +83,8 @@ class NetworksPage(Adw.PreferencesPage):
             toast_error(self, error)
             return
         clear(self.saved_group, self._rows)
+        self.rows_by_network.clear()
+        self.trust_buttons.clear()
         self._saved = list(result)
         self._preselect()
         for ssid, uuid, profile in result:
@@ -101,11 +106,40 @@ class NetworksPage(Adw.PreferencesPage):
             remove.set_tooltip_text(_("Forget this network"))
             label_for_screen_readers(remove, _("Forget this network"))
             remove.connect("clicked", lambda _b, n=(ssid, uuid, profile): self.forget(*n))
+            trust = button(_("Trust"), flat=True)
+            trust.set_tooltip_text(_("Use its profile with the new router (if you replaced it)"))
+            trust.set_visible(False)
+            trust.connect("clicked", lambda _b, s=ssid, u=uuid: self.trust(s, u))
+            row.add_suffix(trust)
             row.add_suffix(combo)
             row.add_suffix(remove)
             self.saved_group.add(row)
             self._rows.append(row)
+            self.rows_by_network[(ssid, uuid)] = row
+            self.trust_buttons[(ssid, uuid)] = trust
         self.saved_group.set_visible(bool(self._rows))
+        if self._rows:
+            self._c.network_routers(self._routers_loaded)
+
+    def _routers_loaded(self, result, error) -> None:
+        if error is not None:
+            return  # the list itself is already shown; the router line is a bonus
+        for ssid, uuid, known, new in result:
+            row = self.rows_by_network.get((ssid, uuid))
+            if row is None:
+                continue
+            row.set_subtitle(state.router_text(bool(known), new))
+            row.set_subtitle_lines(0)
+            self.trust_buttons[(ssid, uuid)].set_visible(bool(new))
+
+    def trust(self, ssid: str, uuid: str) -> None:
+        def trusted(_result, error) -> None:
+            self._after(_result, error)
+            if error is None:
+                toast(self, _("Trusted. Its profile is used the next time you connect."))
+            self.load()
+
+        self._c.trust_router(ssid, uuid, trusted)
 
     def _current_loaded(self, net, _error) -> None:
         self._current = net

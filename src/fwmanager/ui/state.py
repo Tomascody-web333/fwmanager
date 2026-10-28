@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from fwmanager.errors import FwError
-from fwmanager.i18n import N_, _
+from fwmanager.i18n import N_, _, _n
 
 OK = "ok"
 DAEMON_DOWN = "daemon_down"
@@ -197,7 +197,7 @@ def cidr_problem(text: str) -> str:
     if not items:
         return _("Write at least one network, for example 192.168.1.0/24.")
     if len(items) > MAX_CIDRS:
-        return _("At most {n} networks.").format(n=MAX_CIDRS)
+        return _n("At most {n} network.", "At most {n} networks.", MAX_CIDRS).format(n=MAX_CIDRS)
     for item in items:
         try:
             validate_cidr(item)
@@ -229,3 +229,15 @@ def event_text(kind: str, detail: str) -> str:
         "startup": _("Service started"),
     }
     return table.get(kind, kind)
+
+
+def router_text(known: bool, unrecognised: str) -> str:
+    """One line under a remembered network about the router fwmanager knows it by."""
+    if unrecognised:
+        return _(
+            "Another router was seen here ({mac}), so Public was used. If you replaced your "
+            "router, trust it."
+        ).format(mac=unrecognised)
+    if known:
+        return _("Router recognised.")
+    return _("Router not seen yet: it is remembered the next time you connect.")

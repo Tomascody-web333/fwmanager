@@ -227,7 +227,7 @@ def test_staged_uninstall_leaves_nothing(staged):
         (["--user", 'a"b'], "invalid user name"),
         (["--user", "a b"], "invalid user name"),
         (["--user", "-rf"], "needs a value"),
-        (["--user", "alice", "--lang", "fr"], "--lang must be pt or en"),
+        (["--user", "alice", "--lang", "de"], "--lang must be pt, en, es or fr"),
         (["--user", "alice", "--bogus"], "unknown argument"),
         (["--user"], "needs a value"),
     ],

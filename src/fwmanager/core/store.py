@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import uuid as uuid_mod
 from dataclasses import dataclass
 from pathlib import Path
@@ -27,6 +28,15 @@ VERSION = 1
 MAX_NETWORKS = 256
 MAX_SSID_BYTES = 32  # IEEE 802.11 limit
 MAX_FILE_BYTES = 256 * 1024
+MAX_ROUTERS = 4  # routers remembered per network (a replaced one, a second access point...)
+MAC_RE = re.compile(r"^[0-9a-f]{2}(:[0-9a-f]{2}){5}$")
+
+
+def validate_mac(mac: str) -> str:
+    """A router's hardware address, lower case with colons; anything else is refused."""
+    if not isinstance(mac, str) or not MAC_RE.fullmatch(mac) or mac == "00:00:00:00:00:00":
+        raise ValidationError("invalid hardware address", code="invalid_network")
+    return mac
 
 
 @dataclass(frozen=True)
@@ -36,9 +46,16 @@ class Network:
     ssid: str
     uuid: str
     profile: str
+    # The routers seen on this network (their hardware addresses). A Wi-Fi with the same name
+    # and password but another router is not trusted with this profile.
+    routers: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         validate_name(self.profile, "profile")
+        if not isinstance(self.routers, tuple) or len(self.routers) > MAX_ROUTERS:
+            raise ValidationError("too many routers", code="invalid_network")
+        for mac in self.routers:
+            validate_mac(mac)
         if not self.ssid and not self.uuid:
             raise ValidationError("network needs an SSID or a UUID", code="invalid_network")
         if self.ssid:
@@ -56,17 +73,22 @@ class Network:
         return self.uuid == uuid if self.uuid and uuid else bool(self.ssid) and self.ssid == ssid
 
 
-def find_profile(networks: list[Network], ssid: str, uuid: str) -> str | None:
+def find_network(networks: list[Network], ssid: str, uuid: str) -> Network | None:
     """UUID match wins over SSID match."""
     if uuid:
         for n in networks:
             if n.uuid == uuid:
-                return n.profile
+                return n
     if ssid:
         for n in networks:
             if n.ssid == ssid and not (n.uuid and uuid):
-                return n.profile
+                return n
     return None
+
+
+def find_profile(networks: list[Network], ssid: str, uuid: str) -> str | None:
+    net = find_network(networks, ssid, uuid)
+    return net.profile if net else None
 
 
 def _jsonable(params) -> dict:
@@ -279,11 +301,14 @@ class Store:
         try:
             return [
                 Network(
-                    str(i.get("ssid", "")), str(i.get("uuid", "")), current_name(i.get("profile"))
+                    str(i.get("ssid", "")),
+                    str(i.get("uuid", "")),
+                    current_name(i.get("profile")),
+                    tuple(str(m) for m in i.get("routers", ())),
                 )
                 for i in items
             ]
-        except (ValidationError, AttributeError) as exc:
+        except (ValidationError, AttributeError, TypeError) as exc:
             raise StoreCorrupt("networks.json holds an invalid entry") from exc
 
     def save_networks(self, networks: list[Network]) -> None:
@@ -293,7 +318,13 @@ class Store:
             NETWORKS_FILE,
             {
                 "networks": [
-                    {"ssid": n.ssid, "uuid": n.uuid, "profile": n.profile} for n in networks
+                    {
+                        "ssid": n.ssid,
+                        "uuid": n.uuid,
+                        "profile": n.profile,
+                        "routers": list(n.routers),
+                    }
+                    for n in networks
                 ]
             },
         )

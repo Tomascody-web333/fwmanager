@@ -1,6 +1,6 @@
 # Translations for fwmanager (pt_PT).
 msgid ""
-msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: pt_PT\n"
+msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: pt_PT\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "%(prog)s: error: %(message)s\n"
 msgstr "%(prog)s: erro: %(message)s\n"
@@ -16,6 +16,9 @@ msgstr "Uma cara amigável para a firewall ufw. A configuração demora cerca de
 
 msgid "A network you trust, such as your own Wi-Fi."
 msgstr "Uma rede em que confia, como o seu próprio Wi-Fi."
+
+msgid "A router fwmanager does not know was seen here ({mac})."
+msgstr "Foi visto aqui um router que o fwmanager não conhece ({mac})."
 
 msgid "A shared network at work or school."
 msgstr "Uma rede partilhada no trabalho ou na escola."
@@ -62,6 +65,9 @@ msgstr "Permitido. É preciso reiniciar o fwmanager para o notar."
 msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
 msgstr "Filtra também o tráfego que este computador encaminha para outros dispositivos: hotspot Wi-Fi, máquinas virtuais, Docker. Deixe desligado num computador normal; ligá-lo pode cortar-lhes a rede."
 
+msgid "Also when the window is closed"
+msgstr "Também com a janela fechada"
+
 msgid "An administrator password is asked once."
 msgstr "A palavra-passe de administrador é pedida uma vez."
 
@@ -79,6 +85,9 @@ msgstr "Outro gestor de firewall (firewalld) está ativo. Desative-o primeiro e 
 
 msgid "Another firewall manager is active"
 msgstr "Está ativo outro gestor de firewall"
+
+msgid "Another router was seen here ({mac}), so Public was used. If you replaced your router, trust it."
+msgstr "Foi visto aqui outro router ({mac}), por isso foi usado o Público. Se mudou de router, confie nele."
 
 msgid "Answer ping"
 msgstr "Responder a ping"
@@ -107,11 +116,16 @@ msgstr "Aplicar mesmo assim"
 msgid "Applying…"
 msgstr "A aplicar…"
 
-msgid "At most {n} networks."
-msgstr "No máximo {n} redes."
+msgid "At most {n} network."
+msgid_plural "At most {n} networks."
+msgstr[0] "No máximo {n} rede."
+msgstr[1] "No máximo {n} redes."
 
 msgid "BROKEN by this profile: {p}"
 msgstr "PARTIDO por este perfil: {p}"
+
+msgid "Backup"
+msgstr "Cópia de segurança"
 
 msgid "Be visible on the local network (mDNS)"
 msgstr "Ser visível na rede local (mDNS)"
@@ -176,8 +190,8 @@ msgstr "Escolha um perfil abaixo para a ligar."
 msgid "Choose the details below."
 msgstr "Escolha os detalhes abaixo."
 
-msgid "Choose what fwmanager tells you about while it is open."
-msgstr "Escolha sobre o que o fwmanager o avisa enquanto está aberto."
+msgid "Choose what fwmanager tells you about."
+msgstr "Escolha sobre o que o fwmanager o avisa."
 
 msgid "Close"
 msgstr "Fechar"
@@ -227,8 +241,20 @@ msgstr "Continuar"
 msgid "Copy command"
 msgstr "Copiar comando"
 
+msgid "Could not read that file."
+msgstr "Não foi possível ler esse ficheiro."
+
+msgid "Could not read {file}: {why}"
+msgstr "Não foi possível ler {file}: {why}"
+
 msgid "Could not save the settings."
 msgstr "Não foi possível guardar as definições."
+
+msgid "Could not write that file."
+msgstr "Não foi possível escrever nesse ficheiro."
+
+msgid "Could not write {file}: {why}"
+msgstr "Não foi possível escrever em {file}: {why}"
 
 msgid "Current network"
 msgstr "Rede atual"
@@ -272,6 +298,15 @@ msgstr "Erro"
 msgid "Error: {msg}"
 msgstr "Erro: {msg}"
 
+msgid "Export settings"
+msgstr "Exportar definições"
+
+msgid "Export…"
+msgstr "Exportar…"
+
+msgid "FILE"
+msgstr "FICHEIRO"
+
 msgid "FTP"
 msgstr "FTP"
 
@@ -301,6 +336,9 @@ msgstr "{name} foi esquecida."
 
 msgid "Forgotten."
 msgstr "Esquecida."
+
+msgid "Forgotten. The next router seen there is remembered."
+msgstr "Esquecidos. O próximo router visto aí fica memorizado."
 
 msgid "General"
 msgstr "Geral"
@@ -337,6 +375,15 @@ msgstr "O IPv6 deixaria de funcionar (descoberta de vizinhos)."
 
 msgid "IPv6 would stop working (router advertisements)."
 msgstr "O IPv6 deixaria de funcionar (anúncios do router)."
+
+msgid "If you replaced the router: fwmanager-cli networks trust-router {which}"
+msgstr "Se mudou de router: fwmanager-cli networks trust-router {which}"
+
+msgid "Import settings"
+msgstr "Importar definições"
+
+msgid "Import…"
+msgstr "Importar…"
 
 msgid "In use"
 msgstr "Em uso"
@@ -470,6 +517,9 @@ msgstr "Ainda não há redes memorizadas. As redes Wi-Fi desconhecidas usam o P�
 msgid "No other firewall manager is in the way"
 msgstr "Nenhum outro gestor de firewall está a atrapalhar"
 
+msgid "No other router has been seen on that network."
+msgstr "Não foi visto nenhum outro router nessa rede."
+
 msgid "No password: anyone nearby can join"
 msgstr "Sem palavra-passe: qualquer pessoa por perto pode entrar"
 
@@ -584,6 +634,9 @@ msgstr "Perfil alterado"
 msgid "Profile changed by itself"
 msgstr "O perfil mudou sozinho"
 
+msgid "Profile edits, rules, remembered networks and options, in one file: to keep them safe or to take them to another computer."
+msgstr "As edições dos perfis, as regras, as redes memorizadas e as opções, num só ficheiro: para as guardar em segurança ou levar para outro computador."
+
 msgid "Profile for {name}"
 msgstr "Perfil para {name}"
 
@@ -665,6 +718,15 @@ msgstr "A renovação do endereço IPv4 (DHCP) falharia."
 msgid "Renewing the IPv6 address (DHCPv6) would fail."
 msgstr "A renovação do endereço IPv6 (DHCPv6) falharia."
 
+msgid "Replace"
+msgstr "Substituir"
+
+msgid "Replace the current ones with those in a file."
+msgstr "Substitui as atuais pelas de um ficheiro."
+
+msgid "Replace your settings?"
+msgstr "Substituir as suas definições?"
+
 msgid "Replies to your own connections would be blocked."
 msgstr "As respostas às suas próprias ligações seriam bloqueadas."
 
@@ -685,6 +747,15 @@ msgstr "Modo router"
 
 msgid "Router mode may interfere with Docker, VMs and containers."
 msgstr "O modo router pode interferir com o Docker, as máquinas virtuais e os contentores."
+
+msgid "Router not seen yet: it is remembered the next time you connect."
+msgstr "Router ainda não visto: fica memorizado da próxima vez que se ligar."
+
+msgid "Router recognised."
+msgstr "Router reconhecido."
+
+msgid "Router: not seen yet"
+msgstr "Router: ainda não visto"
 
 msgid "Rule removed."
 msgstr "Regra removida."
@@ -743,6 +814,9 @@ msgstr "Guardar"
 msgid "Save rule"
 msgstr "Guardar regra"
 
+msgid "Save them to a file."
+msgstr "Guarde-as num ficheiro."
+
 msgid "Saved."
 msgstr "Guardado."
 
@@ -761,6 +835,18 @@ msgstr "Serviço iniciado"
 msgid "Settings"
 msgstr "Definições"
 
+msgid "Settings exported."
+msgstr "Definições exportadas."
+
+msgid "Settings imported."
+msgstr "Definições importadas."
+
+msgid "Settings imported. They take effect the next time a profile is applied."
+msgstr "Definições importadas. Entram em vigor da próxima vez que um perfil for aplicado."
+
+msgid "Settings saved to {file}."
+msgstr "Definições guardadas em {file}."
+
 msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
 msgstr "Aparece na página Registo. Baixo regista as tentativas bloqueadas; Médio e Alto também as ligações permitidas."
 
@@ -772,6 +858,9 @@ msgstr "Alguns diagnósticos falhariam (tempo excedido)."
 
 msgid "Some fwmanager rules have an unexpected shape."
 msgstr "Algumas regras do fwmanager têm um formato inesperado."
+
+msgid "Someone may be copying that network; Public is used meanwhile."
+msgstr "Alguém pode estar a copiar essa rede; entretanto usa-se o Público."
 
 msgid "Something is still missing; see above."
 msgstr "Ainda falta alguma coisa; veja acima."
@@ -805,6 +894,12 @@ msgstr "Testar {name}"
 
 msgid "Testing…"
 msgstr "A testar…"
+
+msgid "That file is not a valid fwmanager settings file. Nothing was changed."
+msgstr "Esse ficheiro não é um ficheiro de definições válido do fwmanager. Nada foi alterado."
+
+msgid "That network is not remembered."
+msgstr "Essa rede não está memorizada."
 
 msgid "That would make the profile too large to apply quickly. Use fewer networks or fewer services."
 msgstr "Isso tornaria o perfil demasiado grande para ser aplicado depressa. Use menos redes ou menos serviços."
@@ -863,6 +958,9 @@ msgstr "A janela, a linha de comandos e o serviço em segundo plano são removid
 msgid "There is no change waiting for confirmation."
 msgstr "Não há nenhuma alteração à espera de confirmação."
 
+msgid "They take effect the next time a profile is applied, for example: fwmanager-cli apply {name}"
+msgstr "Entram em vigor da próxima vez que um perfil for aplicado, por exemplo: fwmanager-cli apply {name}"
+
 msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
 msgstr "Este Wi-Fi não tem palavra-passe, por isso qualquer pessoa por perto pode entrar nele. Com o perfil {profile}, essas pessoas também poderiam ligar-se a este computador. Aqui, o Público é a escolha segura."
 
@@ -872,11 +970,20 @@ msgstr "Esta conta pode usar o fwmanager"
 msgid "This network"
 msgstr "Esta rede"
 
+msgid "This replaces your profile edits, rules, networks and options."
+msgstr "Isto substitui as suas edições de perfis, regras, redes e opções."
+
 msgid "This rule cannot be saved: check the details."
 msgstr "Esta regra não pode ser guardada: verifique os detalhes."
 
 msgid "Too many saved networks."
 msgstr "Demasiadas redes guardadas."
+
+msgid "Trust"
+msgstr "Confiar"
+
+msgid "Trusted. Its profile is used the next time you connect."
+msgstr "Confiado. O seu perfil é usado da próxima vez que se ligar."
 
 msgid "Try again"
 msgstr "Tentar de novo"
@@ -886,6 +993,9 @@ msgstr "Liga o registo em Baixo se estiver desligado."
 
 msgid "Turns on recording at Medium if it is lower. Can be frequent."
 msgstr "Liga o registo em Médio se estiver mais baixo. Pode ser frequente."
+
+msgid "Type yes to import: "
+msgstr "Escreva sim para importar: "
 
 msgid "Type yes to uninstall: "
 msgstr "Escreva sim para desinstalar: "
@@ -920,6 +1030,12 @@ msgstr "Desinstalar…"
 msgid "Unknown profile."
 msgstr "Perfil desconhecido."
 
+msgid "Unknown router"
+msgstr "Router desconhecido"
+
+msgid "Unknown router on a remembered network"
+msgstr "Router desconhecido numa rede memorizada"
+
 msgid "Unknown service."
 msgstr "Serviço desconhecido."
 
@@ -928,6 +1044,9 @@ msgstr "Serviço desconhecido: {name}"
 
 msgid "Use"
 msgstr "Usar"
+
+msgid "Use its profile with the new router (if you replaced it)"
+msgstr "Usar o seu perfil com o router novo (se o mudou)"
 
 msgid "Use the same profile every time you connect here."
 msgstr "Usar o mesmo perfil sempre que se liga aqui."
@@ -989,8 +1108,8 @@ msgstr "Quem se pode ligar"
 msgid "Wi-Fi name"
 msgstr "Nome do Wi-Fi"
 
-msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile."
-msgstr "As redes Wi-Fi para as quais não escolheu um perfil usam o perfil Público. Uma ligação por cabo mantém o perfil atual."
+msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile. fwmanager also remembers each network's router: a copy of the network with another router gets Public too."
+msgstr "As redes Wi-Fi para as quais não escolheu um perfil usam o perfil Público. Uma ligação por cabo mantém o perfil atual. O fwmanager também memoriza o router de cada rede: uma cópia da rede com outro router também recebe o Público."
 
 msgid "Wi-Fi: {name}"
 msgstr "Wi-Fi: {name}"
@@ -1055,11 +1174,20 @@ msgstr "A sua firewall fica como estava antes do fwmanager."
 msgid "Your own settings."
 msgstr "As suas próprias definições."
 
+msgid "Your profile edits, rules, remembered networks and options are replaced by those in the file. Export them first if you may want them back."
+msgstr "As suas edições de perfis, regras, redes memorizadas e opções são substituídas pelas do ficheiro. Exporte-as primeiro se as quiser recuperar."
+
 msgid "Your rules"
 msgstr "As suas regras"
 
 msgid "Your rules change this profile."
 msgstr "As suas regras alteram este perfil."
+
+msgid "a file made by export"
+msgstr "um ficheiro criado por export"
+
+msgid "accept the new router seen on a network (after replacing it)"
+msgstr "aceitar o router novo visto numa rede (depois de o mudar)"
 
 msgid "accepts connections from anywhere"
 msgstr "aceita ligações de qualquer lado"
@@ -1106,6 +1234,9 @@ msgstr "falha"
 msgid "forget a network"
 msgstr "esquecer uma rede"
 
+msgid "forget a network's routers; the next one seen is remembered"
+msgstr "esquecer os routers de uma rede; o próximo visto fica memorizado"
+
 msgid "fwmanager"
 msgstr "fwmanager"
 
@@ -1114,6 +1245,9 @@ msgstr "O fwmanager é uma cara amigável para o ufw, por isso o ufw tem de esta
 
 msgid "fwmanager is already set up. Profile in use: {p}"
 msgstr "O fwmanager já está configurado. Perfil em uso: {p}"
+
+msgid "fwmanager keeps running in the background and starts when you log in, so notifications still reach you."
+msgstr "O fwmanager continua em segundo plano e arranca quando inicia sessão, para as notificações chegarem na mesma."
 
 msgid "fwmanager must not run as root: the service does that part."
 msgstr "O fwmanager não deve correr como root: essa parte é feita pelo serviço."
@@ -1169,6 +1303,9 @@ msgstr "não"
 msgid "none"
 msgstr "nenhum"
 
+msgid "not a text file"
+msgstr "não é um ficheiro de texto"
+
 msgid "not applicable"
 msgstr "não aplicável"
 
@@ -1207,6 +1344,12 @@ msgstr "repor as predefinições de um perfil"
 
 msgid "remove fwmanager and undo its changes to the firewall"
 msgstr "remover o fwmanager e desfazer as suas alterações à firewall"
+
+msgid "replace the settings with those in a file"
+msgstr "substituir as definições pelas de um ficheiro"
+
+msgid "save profiles, rules, networks and options to a file"
+msgstr "guardar perfis, regras, redes e opções num ficheiro"
 
 msgid "services to block"
 msgstr "serviços a bloquear"
@@ -1289,6 +1432,9 @@ msgstr "usar um perfil numa rede"
 msgid "warning"
 msgstr "aviso"
 
+msgid "where to save them (- for the screen)"
+msgstr "onde os guardar (- para o ecrã)"
+
 msgid "which profile to use on which network"
 msgstr "que perfil usar em que rede"
 
@@ -1307,11 +1453,18 @@ msgstr "{before} → {after}"
 msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
 msgstr "{names} está a gerir a firewall. Desligue-o primeiro e depois volte a abrir o fwmanager:"
 
-msgid "{n} attempts were blocked. The latest: {src} to port {port}."
-msgstr "{n} tentativas foram bloqueadas. A mais recente: {src} para a porta {port}."
+msgid "{network} has a router fwmanager has not seen there before, so Public is in use. If you replaced the router, trust it in Networks."
+msgstr "{network} tem um router que o fwmanager nunca viu aí, por isso está em uso o Público. Se mudou de router, confie nele em Redes."
 
-msgid "{n} connections were let in. The latest: {src} to port {port}."
-msgstr "{n} ligações foram permitidas. A mais recente: {src} para a porta {port}."
+msgid "{n} attempt was blocked. The latest: {src} to port {port}."
+msgid_plural "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr[0] "{n} tentativa foi bloqueada. A última: {src} para a porta {port}."
+msgstr[1] "{n} tentativas foram bloqueadas. A última: {src} para a porta {port}."
+
+msgid "{n} connection was let in. The latest: {src} to port {port}."
+msgid_plural "{n} connections were let in. The latest: {src} to port {port}."
+msgstr[0] "{n} ligação foi permitida. A última: {src} para a porta {port}."
+msgstr[1] "{n} ligações foram permitidas. A última: {src} para a porta {port}."
 
 msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
 msgstr "O perfil {profile} ainda aguarda a sua confirmação. Se fechar sem escolher, é desfeito dentro de poucos segundos."

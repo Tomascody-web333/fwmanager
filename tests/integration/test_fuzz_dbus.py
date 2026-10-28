@@ -117,6 +117,21 @@ def rnd_params(r):
     return out
 
 
+MACS = ["", "aa:bb:cc:00:11:22", "AA:BB:CC:00:11:22", "00:00:00:00:00:00", "aa:bb:cc:00:11"]
+SETTINGS_FILES = [
+    "",
+    "{}",
+    "[]",
+    '{"format": "fwmanager-settings", "version": 1}',
+    '{"format": "fwmanager-settings", "version": 1, '
+    '"networks": [{"ssid": "A", "profile": "work"}]}',
+    '{"format": "fwmanager-settings", "version": 1, "rules": 5}',
+    '{"format": "fwmanager-settings", "version": 1, "profiles": {"home": {"services": [1, 2]}}}',
+    '{"format": "fwmanager-settings", "version": 1, "options": {"router_mode": null}}',
+    '{"format": "fwmanager-settings", "version": 1, "networks": [{"ssid": 5, "profile": "home"}]}',
+    "[" * 5000,
+]  # none of these may break the service, and the good ones may change it
+
 CALLS = {
     "CheckProfile": lambda r: ("(s)", (rnd_str(r),)),
     "GetProfile": lambda r: ("(s)", (rnd_str(r),)),
@@ -133,6 +148,10 @@ CALLS = {
     "SetNetworkProfile": lambda r: ("(sss)", (rnd_str(r), rnd_str(r), rnd_str(r))),
     "RemoveNetwork": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
     "GetNetworkProfile": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
+    "CheckNetwork": lambda r: ("(sss)", (rnd_str(r), rnd_str(r), r.choice(MACS + [rnd_str(r)]))),
+    "TrustRouter": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
+    "ForgetRouters": lambda r: ("(ss)", (rnd_str(r), rnd_str(r))),
+    "ImportSettings": lambda r: ("(s)", (r.choice(SETTINGS_FILES + [rnd_str(r)]),)),
     "ApplyProfile": lambda r: ("(s)", (r.choice([h for h in HOSTILE if h != "home"]),)),
 }
 

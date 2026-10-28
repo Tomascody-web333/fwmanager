@@ -1,0 +1,1494 @@
+# Translations for fwmanager (es).
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nLanguage: es\nPlural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "%(prog)s: error: %(message)s\n"
+msgstr "%(prog)s: error: %(message)s\n"
+
+msgid "* = in use. Switch with: fwmanager-cli apply {names}"
+msgstr "* = en uso. Para cambiar: fwmanager-cli apply {names}"
+
+msgid "A change was undone"
+msgstr "Se deshizo un cambio"
+
+msgid "A friendly face for the ufw firewall. Setup takes about a minute and needs no terminal."
+msgstr "Una cara amable para el cortafuegos ufw. La configuración dura aproximadamente un minuto y no necesita terminal."
+
+msgid "A network you trust, such as your own Wi-Fi."
+msgstr "Una red de confianza, como tu propia Wi-Fi."
+
+msgid "A router fwmanager does not know was seen here ({mac})."
+msgstr "Se vio aquí un router que fwmanager no conoce ({mac})."
+
+msgid "A shared network at work or school."
+msgstr "Una red compartida en el trabajo o en la escuela."
+
+msgid "ACTION"
+msgstr "ACCIÓN"
+
+msgid "Accept connections from"
+msgstr "Aceptar conexiones de"
+
+msgid "Add"
+msgstr "Añadir"
+
+msgid "Add a network by name"
+msgstr "Añadir una red por su nombre"
+
+msgid "Add a rule"
+msgstr "Añadir una regla"
+
+msgid "Add your user to the fwmanager group, then log out and back in. No password is asked after that."
+msgstr "Añade tu usuario al grupo fwmanager y luego cierra la sesión y vuelve a iniciarla. Después no se pide ninguna contraseña."
+
+msgid "Added a rule"
+msgstr "Añadió una regla"
+
+msgid "Allow a service only in some profiles"
+msgstr "Permitir un servicio solo en algunos perfiles"
+
+msgid "Allow {service} only in: {profiles}"
+msgstr "Permitir {service} solo en: {profiles}"
+
+msgid "Allowed"
+msgstr "Permitido"
+
+msgid "Allowed networks (e.g. 192.168.1.0/24)"
+msgstr "Redes permitidas (por ejemplo, 192.168.1.0/24)"
+
+msgid "Allowed services are reachable from any network."
+msgstr "Los servicios permitidos son accesibles desde cualquier red."
+
+msgid "Allowed. fwmanager has to be restarted to notice it."
+msgstr "Permitido. Hay que reiniciar fwmanager para que lo note."
+
+msgid "Also filter traffic this computer passes on to other devices: Wi-Fi hotspot, virtual machines, Docker. Leave it off on an ordinary computer; turning it on can cut those off."
+msgstr "También filtra el tráfico que este equipo reenvía a otros dispositivos: punto de acceso Wi-Fi, máquinas virtuales, Docker. Déjalo desactivado en un equipo normal; activarlo puede dejarlos sin red."
+
+msgid "Also when the window is closed"
+msgstr "También con la ventana cerrada"
+
+msgid "An administrator password is asked once."
+msgstr "La contraseña de administrador se pide una vez."
+
+msgid "Announces itself, but does not answer ping."
+msgstr "Se anuncia en la red, pero no responde al ping."
+
+msgid "Another change is waiting for confirmation."
+msgstr "Otro cambio está esperando confirmación."
+
+msgid "Another firewall manager (firewalld) is active."
+msgstr "Otro gestor de cortafuegos (firewalld) está activo."
+
+msgid "Another firewall manager (firewalld) is active. Disable it first, then try again."
+msgstr "Otro gestor de cortafuegos (firewalld) está activo. Desactívalo primero y vuelve a intentarlo."
+
+msgid "Another firewall manager is active"
+msgstr "Hay otro gestor de cortafuegos activo"
+
+msgid "Another router was seen here ({mac}), so Public was used. If you replaced your router, trust it."
+msgstr "Se vio aquí otro router ({mac}), así que se usó Público. Si cambiaste de router, confía en él."
+
+msgid "Answer ping"
+msgstr "Responder al ping"
+
+msgid "Answers ping, but does not announce itself."
+msgstr "Responde al ping, pero no se anuncia en la red."
+
+msgid "Anything that needs administrator rights is asked once, with the usual password window. After that, fwmanager never asks again."
+msgstr "Lo que requiera permisos de administrador se pide una sola vez, en la ventana de contraseña habitual. Después, fwmanager no vuelve a pedirla."
+
+msgid "Anywhere"
+msgstr "Desde cualquier lugar"
+
+msgid "Applied {name}, waiting for confirmation"
+msgstr "Se aplicó {name}; esperando confirmación"
+
+msgid "Applied."
+msgstr "Aplicado."
+
+msgid "Apply"
+msgstr "Aplicar"
+
+msgid "Apply anyway"
+msgstr "Aplicar de todos modos"
+
+msgid "Applying…"
+msgstr "Aplicando…"
+
+msgid "At most {n} network."
+msgid_plural "At most {n} networks."
+msgstr[0] "A lo sumo {n} red."
+msgstr[1] "Como máximo {n} redes."
+
+msgid "BROKEN by this profile: {p}"
+msgstr "ROTO por este perfil: {p}"
+
+msgid "Backup"
+msgstr "Copia de seguridad"
+
+msgid "Be visible on the local network (mDNS)"
+msgstr "Ser visible en la red local (mDNS)"
+
+msgid "Block everything coming in, except some services"
+msgstr "Bloquear todo lo que entra, salvo algunos servicios"
+
+msgid "Block everything coming in, except {services}, in: {profiles}"
+msgstr "Bloquear todo lo que entra, salvo {services}, en: {profiles}"
+
+msgid "Block everything coming in, in: {profiles}"
+msgstr "Bloquear todo lo que entra, en: {profiles}"
+
+msgid "Blocked"
+msgstr "Bloqueado"
+
+msgid "Blocked connection attempts"
+msgstr "Intentos de conexión bloqueados"
+
+msgid "Broken"
+msgstr "Roto"
+
+msgid "COMMAND"
+msgstr "COMANDO"
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Cancelled."
+msgstr "Cancelado."
+
+msgid "Cancelled. Nothing was changed."
+msgstr "Cancelado. No se cambió nada."
+
+msgid "Cancelled. Previous rules restored."
+msgstr "Cancelado. Se restauraron las reglas anteriores."
+
+msgid "Change what this profile allows and blocks"
+msgstr "Cambiar lo que este perfil permite y bloquea"
+
+msgid "Changed the settings"
+msgstr "Cambió los ajustes"
+
+msgid "Changes apply right away. No password needed."
+msgstr "Los cambios se aplican al instante. No hace falta contraseña."
+
+msgid "Check again"
+msgstr "Comprobar de nuevo"
+
+msgid "Check that this profile will not break your connection"
+msgstr "Comprobar que este perfil no cortará tu conexión"
+
+msgid "Checking your system"
+msgstr "Comprobando tu sistema"
+
+msgid "Checking…"
+msgstr "Comprobando…"
+
+msgid "Choose a profile below to turn it on."
+msgstr "Elige un perfil abajo para activarlo."
+
+msgid "Choose the details below."
+msgstr "Elige los detalles abajo."
+
+msgid "Choose what fwmanager tells you about."
+msgstr "Elige de qué te avisa fwmanager."
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Close a service in every profile"
+msgstr "Cerrar un servicio en todos los perfiles"
+
+msgid "Close {service} in every profile"
+msgstr "Cerrar {service} en todos los perfiles"
+
+msgid "Command copied"
+msgstr "Comando copiado"
+
+msgid "Command line for fwmanager, a friendly interface for the ufw firewall. A change is undone after 30 seconds unless you confirm it."
+msgstr "Línea de comandos de fwmanager, una interfaz amable para el cortafuegos ufw. Un cambio se deshace a los 30 segundos si no lo confirmas."
+
+msgid "Command to run"
+msgstr "Comando a ejecutar"
+
+msgid "Confirm with the administrator password when asked."
+msgstr "Confirma con la contraseña de administrador cuando se pida."
+
+msgid "Confirmed {name}"
+msgstr "Confirmó {name}"
+
+msgid "Confirmed."
+msgstr "Confirmado."
+
+msgid "Connecting to the service…"
+msgstr "Conectando con el servicio…"
+
+msgid "Connection attempts blocked"
+msgstr "Intentos de conexión bloqueados"
+
+msgid "Connection {id}"
+msgstr "Conexión {id}"
+
+msgid "Connections could hang (destination unreachable)."
+msgstr "Las conexiones podrían quedarse colgadas (destino inalcanzable)."
+
+msgid "Connections let in"
+msgstr "Conexiones admitidas"
+
+msgid "Continue"
+msgstr "Continuar"
+
+msgid "Copy command"
+msgstr "Copiar comando"
+
+msgid "Could not read that file."
+msgstr "No se pudo leer ese archivo."
+
+msgid "Could not read {file}: {why}"
+msgstr "No se pudo leer {file}: {why}"
+
+msgid "Could not save the settings."
+msgstr "No se pudieron guardar los ajustes."
+
+msgid "Could not write that file."
+msgstr "No se pudo escribir ese archivo."
+
+msgid "Could not write {file}: {why}"
+msgstr "No se pudo escribir {file}: {why}"
+
+msgid "Current network"
+msgstr "Red actual"
+
+msgid "Custom"
+msgstr "Personalizado"
+
+msgid "DNS resolver answers"
+msgstr "El servidor DNS responde"
+
+msgid "Decide later"
+msgstr "Decidir más tarde"
+
+msgid "Details"
+msgstr "Detalles"
+
+msgid "Do not apply this profile as it is."
+msgstr "No apliques este perfil tal como está."
+
+msgid "Docker manages its own rules (they are left untouched)."
+msgstr "Docker gestiona sus propias reglas (no se tocan)."
+
+msgid "Docker or virtual machines were found. They manage their own rules, which fwmanager leaves alone."
+msgstr "Se encontraron Docker o máquinas virtuales. Gestionan sus propias reglas, que fwmanager no toca."
+
+msgid "Done."
+msgstr "Hecho."
+
+msgid "Edit {name}"
+msgstr "Editar {name}"
+
+msgid "Edit {profile}"
+msgstr "Editar {profile}"
+
+msgid "Edited {name}"
+msgstr "Editó {name}"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Error: {msg}"
+msgstr "Error: {msg}"
+
+msgid "Export settings"
+msgstr "Exportar ajustes"
+
+msgid "Export…"
+msgstr "Exportar…"
+
+msgid "FILE"
+msgstr "ARCHIVO"
+
+msgid "FTP"
+msgstr "FTP"
+
+msgid "File sharing (Samba)"
+msgstr "Compartir archivos (Samba)"
+
+msgid "Fine"
+msgstr "Bien"
+
+msgid "Firewall"
+msgstr "Cortafuegos"
+
+msgid "Firewall: {state}"
+msgstr "Cortafuegos: {state}"
+
+msgid "Fix this"
+msgstr "Arreglar esto"
+
+msgid "For example when you join another network."
+msgstr "Por ejemplo, cuando te conectas a otra red."
+
+msgid "Forget this network"
+msgstr "Olvidar esta red"
+
+msgid "Forgot {name}."
+msgstr "Se olvidó {name}."
+
+msgid "Forgotten."
+msgstr "Olvidada."
+
+msgid "Forgotten. The next router seen there is remembered."
+msgstr "Olvidados. El próximo router visto allí se recuerda."
+
+msgid "General"
+msgstr "General"
+
+msgid "Get started"
+msgstr "Empezar"
+
+msgid "Hidden on the network."
+msgstr "Oculto en la red."
+
+msgid "Hide this computer (no ping, no mDNS)"
+msgstr "Ocultar este equipo (sin ping ni mDNS)"
+
+msgid "Hide this computer (no ping, no mDNS) in: {profiles}"
+msgstr "Ocultar este equipo (sin ping ni mDNS) en: {profiles}"
+
+msgid "High"
+msgstr "Alto"
+
+msgid "Home"
+msgstr "Casa"
+
+msgid "How should this computer behave on this network?"
+msgstr "¿Cómo debe comportarse este equipo en esta red?"
+
+msgid "IPv6 connections could hang (packet-too-big)."
+msgstr "Las conexiones IPv6 podrían quedarse colgadas (paquete demasiado grande)."
+
+msgid "IPv6 is not enabled in ufw, so it is not filtered."
+msgstr "IPv6 no está activado en ufw, así que no se filtra."
+
+msgid "IPv6 would stop working (neighbour discovery)."
+msgstr "IPv6 dejaría de funcionar (descubrimiento de vecinos)."
+
+msgid "IPv6 would stop working (router advertisements)."
+msgstr "IPv6 dejaría de funcionar (anuncios del router)."
+
+msgid "If you replaced the router: fwmanager-cli networks trust-router {which}"
+msgstr "Si cambiaste de router: fwmanager-cli networks trust-router {which}"
+
+msgid "Import settings"
+msgstr "Importar ajustes"
+
+msgid "Import…"
+msgstr "Importar…"
+
+msgid "In use"
+msgstr "En uso"
+
+msgid "Internal error."
+msgstr "Error interno."
+
+msgid "Invalid input."
+msgstr "Entrada no válida."
+
+msgid "Invalid network (name or UUID)."
+msgstr "Red no válida (nombre o UUID)."
+
+msgid "Invalid network address (CIDR)."
+msgstr "Dirección de red no válida (CIDR)."
+
+msgid "Invalid option."
+msgstr "Opción no válida."
+
+msgid "Invalid packets would not be dropped."
+msgstr "Los paquetes no válidos no se descartarían."
+
+msgid "Invalid port."
+msgstr "Puerto no válido."
+
+msgid "Invalid profile."
+msgstr "Perfil no válido."
+
+msgid "Invalid protocol."
+msgstr "Protocolo no válido."
+
+msgid "Invalid service."
+msgstr "Servicio no válido."
+
+msgid "Invalid traffic source."
+msgstr "Origen de tráfico no válido."
+
+msgid "Is your connection still working?"
+msgstr "¿Tu conexión sigue funcionando?"
+
+msgid "It is in use: apply it again to use the changes: fwmanager-cli apply {p}"
+msgstr "Está en uso: vuelve a aplicarlo para usar los cambios: fwmanager-cli apply {p}"
+
+msgid "It should work, but read the notes below first."
+msgstr "Debería funcionar, pero lee antes las notas de abajo."
+
+msgid "KDE Connect"
+msgstr "KDE Connect"
+
+msgid "Keep it"
+msgstr "Conservarlo"
+
+msgid "Keep it: fwmanager-cli confirm    Undo it: fwmanager-cli rollback"
+msgstr "Conservarlo: fwmanager-cli confirm    Deshacerlo: fwmanager-cli rollback"
+
+msgid "Keep the new profile?"
+msgstr "¿Conservar el perfil nuevo?"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Lets in {services}, from anywhere."
+msgstr "Deja entrar {services}, desde cualquier lugar."
+
+msgid "Lets in {services}, from the local network only."
+msgstr "Deja entrar {services}, solo desde la red local."
+
+msgid "Lets in {services}, only from the networks you chose."
+msgstr "Deja entrar {services}, solo desde las redes que elegiste."
+
+msgid "Lets nothing in."
+msgstr "No deja entrar nada."
+
+msgid "Lets others check that this computer is on."
+msgstr "Permite que otros comprueben que este equipo está encendido."
+
+msgid "Live test (the profile is applied for a few seconds, then reverted):"
+msgstr "Prueba real (el perfil se aplica unos segundos y luego se revierte):"
+
+msgid "Live test skipped: fix the errors above first."
+msgstr "Prueba real omitida: corrige primero los errores de arriba."
+
+msgid "Local (loopback) traffic would be blocked."
+msgstr "El tráfico local (loopback) quedaría bloqueado."
+
+msgid "Local IPv4 connections"
+msgstr "Conexiones locales IPv4"
+
+msgid "Local IPv6 connections"
+msgstr "Conexiones locales IPv6"
+
+msgid "Local network only"
+msgstr "Solo la red local"
+
+msgid "Log"
+msgstr "Registro"
+
+msgid "Low"
+msgstr "Bajo"
+
+msgid "MQTT"
+msgstr "MQTT"
+
+msgid "Made by {author} with help of Claude Code"
+msgstr "Hecho por {author} con la ayuda de Claude Code"
+
+msgid "Medium"
+msgstr "Medio"
+
+msgid "NFS"
+msgstr "NFS"
+
+msgid "Needs attention"
+msgstr "Necesita atención"
+
+msgid "NetworkManager connection UUID"
+msgstr "UUID de la conexión de NetworkManager"
+
+msgid "Networks"
+msgstr "Redes"
+
+msgid "Networks (e.g. 192.168.1.0/24)"
+msgstr "Redes (por ejemplo, 192.168.1.0/24)"
+
+msgid "No blocked attempts found."
+msgstr "No se encontraron intentos bloqueados."
+
+msgid "No networks remembered yet. Unknown Wi-Fi networks use Public."
+msgstr "Aún no hay redes recordadas. Las redes Wi-Fi desconocidas usan Público."
+
+msgid "No other firewall manager is in the way"
+msgstr "Ningún otro gestor de cortafuegos estorba"
+
+msgid "No other router has been seen on that network."
+msgstr "No se ha visto ningún otro router en esa red."
+
+msgid "No password: anyone nearby can join"
+msgstr "Sin contraseña: cualquiera cerca puede conectarse"
+
+msgid "No problems found in the rules."
+msgstr "No se encontraron problemas en las reglas."
+
+msgid "No rules yet."
+msgstr "Aún no hay reglas."
+
+msgid "No terminal to ask in: use --profile NAME --yes."
+msgstr "No hay terminal donde preguntar: usa --profile NOMBRE --yes."
+
+msgid "No terminal to ask in: use --yes."
+msgstr "No hay terminal donde preguntar: usa --yes."
+
+msgid "No, undo it"
+msgstr "No, deshacerlo"
+
+msgid "Not authorised. Ask an administrator, or use the command below."
+msgstr "Sin autorización. Pide a un administrador o usa el comando de abajo."
+
+msgid "Not confirmed in time, so it was undone."
+msgstr "No se confirmó a tiempo, así que se deshizo."
+
+msgid "Not connected"
+msgstr "Sin conexión"
+
+msgid "Note"
+msgstr "Nota"
+
+msgid "Nothing changes: the profiles already work like this."
+msgstr "No cambia nada: los perfiles ya funcionan así."
+
+msgid "Nothing is changed on your computer until you apply a profile."
+msgstr "No se cambia nada en tu equipo hasta que apliques un perfil."
+
+msgid "Nothing was found that could cut your connection."
+msgstr "No se encontró nada que pueda cortar tu conexión."
+
+msgid "Nothing yet."
+msgstr "Aún nada."
+
+msgid "Notifications"
+msgstr "Notificaciones"
+
+msgid "Now using the {profile} profile."
+msgstr "Usando ahora el perfil {profile}."
+
+msgid "Off"
+msgstr "Desactivado"
+
+msgid "Only accept connections from some networks"
+msgstr "Aceptar conexiones solo de algunas redes"
+
+msgid "Only accept connections from the local network in: {profiles}"
+msgstr "Aceptar conexiones solo de la red local en: {profiles}"
+
+msgid "Only accept connections from {networks} in: {profiles}"
+msgstr "Aceptar conexiones solo de {networks} en: {profiles}"
+
+msgid "Open fwmanager"
+msgstr "Abrir fwmanager"
+
+msgid "Open fwmanager from the applications menu to set up your account, or ask an administrator to run: sudo usermod -aG fwmanager YOUR_USER"
+msgstr "Abre fwmanager desde el menú de aplicaciones para configurar tu cuenta, o pide a un administrador que ejecute: sudo usermod -aG fwmanager TU_USUARIO"
+
+msgid "Options"
+msgstr "Opciones"
+
+msgid "Or run this in a terminal:"
+msgstr "O ejecuta esto en una terminal:"
+
+msgid "Overview"
+msgstr "Resumen"
+
+msgid "PROFILE"
+msgstr "PERFIL"
+
+msgid "Pick how open this computer should be. After a switch you have 30 seconds to confirm that everything still works, otherwise it is undone."
+msgstr "Elige cuán abierto debe estar este equipo. Tras cambiar, tienes 30 segundos para confirmar que todo sigue funcionando; si no, se deshace."
+
+msgid "Please log out and back in, then open fwmanager again."
+msgstr "Cierra la sesión y vuelve a entrar; luego abre fwmanager otra vez."
+
+msgid "Please log out and back in, then run fwmanager-cli setup again."
+msgstr "Cierra la sesión y vuelve a entrar; luego ejecuta fwmanager-cli setup otra vez."
+
+msgid "Policy check for {p}:"
+msgstr "Comprobación de la política de {p}:"
+
+msgid "Press Enter to confirm, r to revert ({n}s left)... "
+msgstr "Pulsa Intro para confirmar, r para revertir (quedan {n} s)... "
+
+msgid "Press “Add a rule” to start from a ready-made sentence."
+msgstr "Pulsa «Añadir una regla» para empezar con una frase ya hecha."
+
+msgid "Previous rules restored."
+msgstr "Reglas anteriores restauradas."
+
+msgid "Printer sharing (IPP)"
+msgstr "Compartir impresoras (IPP)"
+
+msgid "Profile"
+msgstr "Perfil"
+
+msgid "Profile [{default}]: "
+msgstr "Perfil [{default}]: "
+
+msgid "Profile changed"
+msgstr "Perfil cambiado"
+
+msgid "Profile changed by itself"
+msgstr "El perfil cambió solo"
+
+msgid "Profile edits, rules, remembered networks and options, in one file: to keep them safe or to take them to another computer."
+msgstr "Las ediciones de perfiles, las reglas, las redes recordadas y las opciones, en un solo archivo: para guardarlas a salvo o llevarlas a otro equipo."
+
+msgid "Profile for {name}"
+msgstr "Perfil de {name}"
+
+msgid "Profile in use: {p}"
+msgstr "Perfil en uso: {p}"
+
+msgid "Profile saved. Use it again to apply the changes."
+msgstr "Perfil guardado. Úsalo de nuevo para aplicar los cambios."
+
+msgid "Profiles"
+msgstr "Perfiles"
+
+msgid "Profiles can be named in English or Portuguese (home, casa, Público...). Exit codes: 0 done, 1 error, 2 change undone or warnings, 3 unsafe, 130 cancelled."
+msgstr "Los perfiles pueden nombrarse en inglés o en portugués (home, casa, Público...). Códigos de salida: 0 hecho, 1 error, 2 cambio deshecho o avisos, 3 inseguro, 130 cancelado."
+
+msgid "Protected with the {profile} profile"
+msgstr "Protegido con el perfil {profile}"
+
+msgid "Public"
+msgstr "Público"
+
+msgid "Reach the IPv4 gateway"
+msgstr "Alcanzar la puerta de enlace IPv4"
+
+msgid "Reach the IPv6 gateway"
+msgstr "Alcanzar la puerta de enlace IPv6"
+
+msgid "Ready"
+msgstr "Listo"
+
+msgid "Record connections"
+msgstr "Registrar conexiones"
+
+msgid "Recording turned on at {level}, so there is something to notify about."
+msgstr "Se activó el registro en {level}, para que haya algo de lo que avisar."
+
+msgid "Refresh"
+msgstr "Actualizar"
+
+msgid "Refused a request from an account that is not allowed"
+msgstr "Rechazó una petición de una cuenta sin permiso"
+
+msgid "Remember"
+msgstr "Recordar"
+
+msgid "Remember this choice for this network"
+msgstr "Recordar esta elección para esta red"
+
+msgid "Remember {profile} for this network ({network})? [Y/n] "
+msgstr "¿Recordar {profile} para esta red ({network})? [S/n] "
+
+msgid "Remembered networks"
+msgstr "Redes recordadas"
+
+msgid "Remembered."
+msgstr "Recordado."
+
+msgid "Remote desktop (RDP)"
+msgstr "Escritorio remoto (RDP)"
+
+msgid "Remote desktop (VNC)"
+msgstr "Escritorio remoto (VNC)"
+
+msgid "Remove this rule"
+msgstr "Eliminar esta regla"
+
+msgid "Removed a rule"
+msgstr "Eliminó una regla"
+
+msgid "Removes the app, the command line and the service, and leaves your firewall as it was before fwmanager."
+msgstr "Elimina la aplicación, la línea de comandos y el servicio, y deja tu cortafuegos como estaba antes de fwmanager."
+
+msgid "Removing fwmanager…"
+msgstr "Eliminando fwmanager…"
+
+msgid "Renewing the IPv4 address (DHCP) would fail."
+msgstr "Renovar la dirección IPv4 (DHCP) fallaría."
+
+msgid "Renewing the IPv6 address (DHCPv6) would fail."
+msgstr "Renovar la dirección IPv6 (DHCPv6) fallaría."
+
+msgid "Replace"
+msgstr "Reemplazar"
+
+msgid "Replace the current ones with those in a file."
+msgstr "Reemplaza las actuales por las de un archivo."
+
+msgid "Replace your settings?"
+msgstr "¿Reemplazar tus ajustes?"
+
+msgid "Replies to your own connections would be blocked."
+msgstr "Las respuestas a tus propias conexiones quedarían bloqueadas."
+
+msgid "Restart fwmanager"
+msgstr "Reiniciar fwmanager"
+
+msgid "Restore defaults"
+msgstr "Restaurar valores predeterminados"
+
+msgid "Restore the original settings"
+msgstr "Restaurar los ajustes originales"
+
+msgid "Result: {v}"
+msgstr "Resultado: {v}"
+
+msgid "Router mode"
+msgstr "Modo router"
+
+msgid "Router mode may interfere with Docker, VMs and containers."
+msgstr "El modo router puede interferir con Docker, las máquinas virtuales y los contenedores."
+
+msgid "Router not seen yet: it is remembered the next time you connect."
+msgstr "Router aún no visto: se recuerda la próxima vez que te conectes."
+
+msgid "Router recognised."
+msgstr "Router reconocido."
+
+msgid "Router: not seen yet"
+msgstr "Router: aún no visto"
+
+msgid "Rule removed."
+msgstr "Regla eliminada."
+
+msgid "Rule saved. Apply a profile to use it."
+msgstr "Regla guardada. Aplica un perfil para usarla."
+
+msgid "Rule type"
+msgstr "Tipo de regla"
+
+msgid "Rules"
+msgstr "Reglas"
+
+msgid "Rules adjust what the profiles allow. Nothing changes on your computer until you apply a profile."
+msgstr "Las reglas ajustan lo que permiten los perfiles. No cambia nada en tu equipo hasta que apliques un perfil."
+
+msgid "Rules that will be added."
+msgstr "Reglas que se añadirán."
+
+msgid "Rules that will be removed."
+msgstr "Reglas que se eliminarán."
+
+msgid "Rules you added to ufw yourself are kept."
+msgstr "Las reglas que añadiste tú mismo a ufw se conservan."
+
+msgid "Run it as your normal user: it asks for the password itself."
+msgstr "Ejecútalo con tu usuario normal: él mismo pide la contraseña."
+
+msgid "Run this in a terminal, then press “Check again”:"
+msgstr "Ejecuta esto en una terminal y luego pulsa «Comprobar de nuevo»:"
+
+msgid "Run this, then run fwmanager-cli setup again:"
+msgstr "Ejecuta esto y luego vuelve a ejecutar fwmanager-cli setup:"
+
+msgid "SAFE"
+msgstr "SEGURO"
+
+msgid "SAFE WITH WARNINGS"
+msgstr "SEGURO CON AVISOS"
+
+msgid "SERVICE"
+msgstr "SERVICIO"
+
+msgid "SSH"
+msgstr "SSH"
+
+msgid "Safe to use"
+msgstr "Seguro de usar"
+
+msgid "Safe, with warnings"
+msgstr "Seguro, con avisos"
+
+msgid "Save"
+msgstr "Guardar"
+
+msgid "Save rule"
+msgstr "Guardar regla"
+
+msgid "Save them to a file."
+msgstr "Guárdalos en un archivo."
+
+msgid "Saved."
+msgstr "Guardado."
+
+msgid "Saved. Now {p}:"
+msgstr "Guardado. Ahora {p}:"
+
+msgid "See the names with: fwmanager-cli profiles"
+msgstr "Consulta los nombres con: fwmanager-cli profiles"
+
+msgid "Service"
+msgstr "Servicio"
+
+msgid "Service started"
+msgstr "Servicio iniciado"
+
+msgid "Settings"
+msgstr "Ajustes"
+
+msgid "Settings exported."
+msgstr "Ajustes exportados."
+
+msgid "Settings imported."
+msgstr "Ajustes importados."
+
+msgid "Settings imported. They take effect the next time a profile is applied."
+msgstr "Ajustes importados. Surten efecto la próxima vez que se aplique un perfil."
+
+msgid "Settings saved to {file}."
+msgstr "Ajustes guardados en {file}."
+
+msgid "Shown in the Log page. Low records blocked attempts; Medium and High also the connections that were let in."
+msgstr "Aparece en la página Registro. Bajo registra los intentos bloqueados; Medio y Alto también las conexiones admitidas."
+
+msgid "Skip setup"
+msgstr "Omitir la configuración"
+
+msgid "Some diagnostics would fail (time exceeded)."
+msgstr "Algunos diagnósticos fallarían (tiempo excedido)."
+
+msgid "Some fwmanager rules have an unexpected shape."
+msgstr "Algunas reglas de fwmanager tienen un formato inesperado."
+
+msgid "Someone may be copying that network; Public is used meanwhile."
+msgstr "Alguien podría estar copiando esa red; mientras tanto se usa Público."
+
+msgid "Something is still missing; see above."
+msgstr "Aún falta algo; mira arriba."
+
+msgid "Something went wrong: {why}"
+msgstr "Algo salió mal: {why}"
+
+msgid "Specific networks"
+msgstr "Redes concretas"
+
+msgid "Start it with: sudo systemctl enable --now fwmanagerd"
+msgstr "Inícialo con: sudo systemctl enable --now fwmanagerd"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Switch a service off to block it. Anything not on this list is always blocked."
+msgstr "Desactiva un servicio para bloquearlo. Todo lo que no esté en esta lista queda siempre bloqueado."
+
+msgid "Switch to this profile now"
+msgstr "Cambiar ya a este perfil"
+
+msgid "Syncthing"
+msgstr "Syncthing"
+
+msgid "Test"
+msgstr "Probar"
+
+msgid "Test {name}"
+msgstr "Probar {name}"
+
+msgid "Testing…"
+msgstr "Probando…"
+
+msgid "That file is not a valid fwmanager settings file. Nothing was changed."
+msgstr "Ese archivo no es un archivo de ajustes válido de fwmanager. No se cambió nada."
+
+msgid "That network is not remembered."
+msgstr "Esa red no está recordada."
+
+msgid "That would make the profile too large to apply quickly. Use fewer networks or fewer services."
+msgstr "Eso haría el perfil demasiado grande para aplicarlo rápido. Usa menos redes o menos servicios."
+
+msgid "The background service is running"
+msgstr "El servicio en segundo plano está funcionando"
+
+msgid "The firewall is off"
+msgstr "El cortafuegos está desactivado"
+
+msgid "The firewall is on"
+msgstr "El cortafuegos está activado"
+
+msgid "The firewall service is not running"
+msgstr "El servicio del cortafuegos no está funcionando"
+
+msgid "The fwmanager service is not running."
+msgstr "El servicio de fwmanager no está funcionando."
+
+msgid "The local network"
+msgstr "La red local"
+
+msgid "The most recent ones, newest first. Turn logging on in Settings."
+msgstr "Las más recientes, primero las nuevas. Activa el registro en Ajustes."
+
+msgid "The password window is not available. Use the command below."
+msgstr "La ventana de contraseña no está disponible. Usa el comando de abajo."
+
+msgid "The password window is not available. Use the commands shown instead."
+msgstr "La ventana de contraseña no está disponible. Usa en su lugar los comandos indicados."
+
+msgid "The profile is applied for a few seconds while your connection is measured, then everything goes back to how it was."
+msgstr "El perfil se aplica unos segundos mientras se mide tu conexión y luego todo vuelve a como estaba."
+
+msgid "The rule"
+msgstr "La regla"
+
+msgid "The rules touch something fwmanager does not manage."
+msgstr "Las reglas tocan algo que fwmanager no gestiona."
+
+msgid "The saved firewall state was damaged; the safest profile was used."
+msgstr "El estado guardado del cortafuegos estaba dañado; se usó el perfil más seguro."
+
+msgid "The saved settings were damaged, so the strictest profile was used."
+msgstr "Los ajustes guardados estaban dañados, así que se usó el perfil más estricto."
+
+msgid "The setup step failed. Try the commands shown instead."
+msgstr "Falló el paso de configuración. Prueba en su lugar los comandos indicados."
+
+msgid "The strictest: cafés, airports, hotels."
+msgstr "El más estricto: cafeterías, aeropuertos, hoteles."
+
+msgid "The window, the command line and the background service are removed, for every account on this computer."
+msgstr "La ventana, la línea de comandos y el servicio en segundo plano se eliminan, para todas las cuentas de este equipo."
+
+msgid "There is no change waiting for confirmation."
+msgstr "No hay ningún cambio esperando confirmación."
+
+msgid "They take effect the next time a profile is applied, for example: fwmanager-cli apply {name}"
+msgstr "Surten efecto la próxima vez que se aplique un perfil, por ejemplo: fwmanager-cli apply {name}"
+
+msgid "This Wi-Fi has no password, so anyone nearby can join it. With {profile} they could also connect to this computer. Public is the safe choice here."
+msgstr "Esta Wi-Fi no tiene contraseña, así que cualquiera cerca puede unirse. Con {profile} también podrían conectarse a este equipo. Público es la opción segura aquí."
+
+msgid "This account may use fwmanager"
+msgstr "Esta cuenta puede usar fwmanager"
+
+msgid "This network"
+msgstr "Esta red"
+
+msgid "This replaces your profile edits, rules, networks and options."
+msgstr "Esto reemplaza tus ediciones de perfiles, reglas, redes y opciones."
+
+msgid "This rule cannot be saved: check the details."
+msgstr "Esta regla no se puede guardar: revisa los detalles."
+
+msgid "Too many saved networks."
+msgstr "Demasiadas redes guardadas."
+
+msgid "Trust"
+msgstr "Confiar"
+
+msgid "Trusted. Its profile is used the next time you connect."
+msgstr "Confiado. Su perfil se usa la próxima vez que te conectes."
+
+msgid "Try again"
+msgstr "Reintentar"
+
+msgid "Turns on recording at Low if it is off."
+msgstr "Activa el registro en Bajo si está desactivado."
+
+msgid "Turns on recording at Medium if it is lower. Can be frequent."
+msgstr "Activa el registro en Medio si está más bajo. Puede ser frecuente."
+
+msgid "Type yes to import: "
+msgstr "Escribe sí para importar: "
+
+msgid "Type yes to uninstall: "
+msgstr "Escribe sí para desinstalar: "
+
+msgid "UNSAFE"
+msgstr "INSEGURO"
+
+msgid "Undid {name}"
+msgstr "Deshizo {name}"
+
+msgid "Undo"
+msgstr "Deshacer"
+
+msgid "Undo it"
+msgstr "Deshacerlo"
+
+msgid "Undone. Pick another profile, or test it first."
+msgstr "Deshecho. Elige otro perfil o pruébalo primero."
+
+msgid "Uninstall"
+msgstr "Desinstalar"
+
+msgid "Uninstall fwmanager"
+msgstr "Desinstalar fwmanager"
+
+msgid "Uninstalling failed. Use the command below to see why."
+msgstr "Falló la desinstalación. Usa el comando de abajo para ver por qué."
+
+msgid "Uninstall…"
+msgstr "Desinstalar…"
+
+msgid "Unknown profile."
+msgstr "Perfil desconocido."
+
+msgid "Unknown router"
+msgstr "Router desconocido"
+
+msgid "Unknown router on a remembered network"
+msgstr "Router desconocido en una red recordada"
+
+msgid "Unknown service."
+msgstr "Servicio desconocido."
+
+msgid "Unknown service: {name}"
+msgstr "Servicio desconocido: {name}"
+
+msgid "Use"
+msgstr "Usar"
+
+msgid "Use its profile with the new router (if you replaced it)"
+msgstr "Usar su perfil con el router nuevo (si lo cambiaste)"
+
+msgid "Use the same profile every time you connect here."
+msgstr "Usar el mismo perfil cada vez que te conectes aquí."
+
+msgid "Used to find printers and shared devices by name."
+msgstr "Sirve para encontrar impresoras y dispositivos compartidos por su nombre."
+
+msgid "Visible on the network."
+msgstr "Visible en la red."
+
+msgid "WARNING: previous rules could not be confirmed as restored."
+msgstr "AVISO: no se pudo confirmar que las reglas anteriores se restauraran."
+
+msgid "WHO"
+msgstr "QUIÉN"
+
+msgid "Waiting for confirmation of {p} ({n}s left)"
+msgstr "Esperando la confirmación de {p} (quedan {n} s)"
+
+msgid "Waiting for the service"
+msgstr "Esperando al servicio"
+
+msgid "Warning"
+msgstr "Aviso"
+
+msgid "Warning: {name} is also managing the firewall."
+msgstr "Aviso: {name} también está gestionando el cortafuegos."
+
+msgid "Warning: {text}"
+msgstr "Aviso: {text}"
+
+msgid "Web server (HTTP/HTTPS)"
+msgstr "Servidor web (HTTP/HTTPS)"
+
+msgid "Welcome to fwmanager"
+msgstr "Te damos la bienvenida a fwmanager"
+
+msgid "What do you want to do?"
+msgstr "¿Qué quieres hacer?"
+
+msgid "What fwmanager did"
+msgstr "Lo que hizo fwmanager"
+
+msgid "What happens"
+msgstr "Qué ocurre"
+
+msgid "What this profile lets in"
+msgstr "Lo que este perfil deja entrar"
+
+msgid "What was checked"
+msgstr "Lo que se comprobó"
+
+msgid "What will happen"
+msgstr "Lo que ocurrirá"
+
+msgid "Who can connect"
+msgstr "Quién puede conectarse"
+
+msgid "Wi-Fi name"
+msgstr "Nombre de la Wi-Fi"
+
+msgid "Wi-Fi networks you have not chosen a profile for use the Public profile. A cable keeps the current profile. fwmanager also remembers each network's router: a copy of the network with another router gets Public too."
+msgstr "Las redes Wi-Fi para las que no has elegido perfil usan el perfil Público. Un cable mantiene el perfil actual. fwmanager también recuerda el router de cada red: una copia de la red con otro router también recibe Público."
+
+msgid "Wi-Fi: {name}"
+msgstr "Wi-Fi: {name}"
+
+msgid "Wi-Fi: {name} (no password)"
+msgstr "Wi-Fi: {name} (sin contraseña)"
+
+msgid "Wired: {name}"
+msgstr "Por cable: {name}"
+
+msgid "Work"
+msgstr "Trabajo"
+
+msgid "Would break something"
+msgstr "Rompería algo"
+
+msgid "Write at least one network, for example 192.168.1.0/24."
+msgstr "Escribe al menos una red, por ejemplo 192.168.1.0/24."
+
+msgid "Yes, keep it"
+msgstr "Sí, conservarlo"
+
+msgid "You are all set"
+msgstr "Todo listo"
+
+msgid "You are all set. fwmanager switches profile by itself when you change network."
+msgstr "Todo listo. fwmanager cambia de perfil solo cuando cambias de red."
+
+msgid "You are not allowed to control the firewall."
+msgstr "No tienes permiso para controlar el cortafuegos."
+
+msgid "You can change this at any time, and fwmanager remembers it per network."
+msgstr "Puedes cambiarlo en cualquier momento, y fwmanager lo recuerda por red."
+
+msgid "You can use:"
+msgstr "Puedes usar:"
+
+msgid "You changed this profile."
+msgstr "Cambiaste este perfil."
+
+msgid "You edited this profile."
+msgstr "Editaste este perfil."
+
+msgid "Your SSH session and new SSH connections stay allowed."
+msgstr "Tu sesión SSH y las nuevas conexiones SSH siguen permitidas."
+
+msgid "Your SSH session survives, but you could not open a new one."
+msgstr "Tu sesión SSH sobrevive, pero no podrías abrir una nueva."
+
+msgid "Your account is not allowed to use fwmanager"
+msgstr "Tu cuenta no tiene permiso para usar fwmanager"
+
+msgid "Your connection, before and after"
+msgstr "Tu conexión, antes y después"
+
+msgid "Your firewall is back to how it was before fwmanager. Thank you!"
+msgstr "Tu cortafuegos ha vuelto a como estaba antes de fwmanager. ¡Gracias!"
+
+msgid "Your firewall is left the way it was before fwmanager."
+msgstr "Tu cortafuegos queda como estaba antes de fwmanager."
+
+msgid "Your own settings."
+msgstr "Tus propios ajustes."
+
+msgid "Your profile edits, rules, remembered networks and options are replaced by those in the file. Export them first if you may want them back."
+msgstr "Tus ediciones de perfiles, reglas, redes recordadas y opciones se reemplazan por las del archivo. Expórtalas antes si puede que las quieras recuperar."
+
+msgid "Your rules"
+msgstr "Tus reglas"
+
+msgid "Your rules change this profile."
+msgstr "Tus reglas cambian este perfil."
+
+msgid "a file made by export"
+msgstr "un archivo creado con export"
+
+msgid "accept the new router seen on a network (after replacing it)"
+msgstr "aceptar el router nuevo visto en una red (tras cambiarlo)"
+
+msgid "accepts connections from anywhere"
+msgstr "acepta conexiones desde cualquier lugar"
+
+msgid "answer ping"
+msgstr "responder al ping"
+
+msgid "anywhere"
+msgstr "cualquiera"
+
+msgid "argument %(argument_name)s: %(message)s"
+msgstr "argumento %(argument_name)s: %(message)s"
+
+msgid "be visible on the local network"
+msgstr "ser visible en la red local"
+
+msgid "change what a profile allows and blocks"
+msgstr "cambiar lo que un perfil permite y bloquea"
+
+msgid "check that a profile will not break the machine"
+msgstr "comprobar que un perfil no romperá el equipo"
+
+msgid "closes {services}"
+msgstr "cierra {services}"
+
+msgid "commands"
+msgstr "comandos"
+
+msgid "confirm immediately, no countdown"
+msgstr "confirmar al instante, sin cuenta atrás"
+
+msgid "do not ask for confirmation"
+msgstr "no pedir confirmación"
+
+msgid "error"
+msgstr "error"
+
+msgid "expected one argument"
+msgstr "se esperaba un argumento"
+
+msgid "fails"
+msgstr "falla"
+
+msgid "forget a network"
+msgstr "olvidar una red"
+
+msgid "forget a network's routers; the next one seen is remembered"
+msgstr "olvidar los routers de una red; el próximo visto se recuerda"
+
+msgid "fwmanager"
+msgstr "fwmanager"
+
+msgid "fwmanager is a friendly face for ufw, so ufw has to be installed first:"
+msgstr "fwmanager es una cara amable para ufw, así que ufw debe estar instalado primero:"
+
+msgid "fwmanager is already set up. Profile in use: {p}"
+msgstr "fwmanager ya está configurado. Perfil en uso: {p}"
+
+msgid "fwmanager keeps running in the background and starts when you log in, so notifications still reach you."
+msgstr "fwmanager sigue en segundo plano y se inicia al abrir sesión, para que las notificaciones sigan llegando."
+
+msgid "fwmanager must not run as root: the service does that part."
+msgstr "fwmanager no debe ejecutarse como root: esa parte la hace el servicio."
+
+msgid "fwmanager needs GTK 4 and libadwaita 1.5 or newer, and they were not found. On Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+msgstr "fwmanager necesita GTK 4 y libadwaita 1.5 o posterior, y no se encontraron. En Ubuntu: sudo apt install gir1.2-gtk-4.0 gir1.2-adw-1"
+
+msgid "fwmanager needs a graphical session to open its window. Over SSH or in a text console, use fwmanager-cli."
+msgstr "fwmanager necesita una sesión gráfica para abrir su ventana. Por SSH o en una consola de texto, usa fwmanager-cli."
+
+msgid "fwmanager needs its background service. Start it with this command:"
+msgstr "fwmanager necesita su servicio en segundo plano. Inícialo con este comando:"
+
+msgid "fwmanager needs libadwaita 1.5 or newer, but this system has {found}. Use Ubuntu 24.04, Fedora 40 or later. The command line (fwmanager-cli) works on older systems."
+msgstr "fwmanager necesita libadwaita 1.5 o posterior, pero este sistema tiene {found}. Usa Ubuntu 24.04, Fedora 40 o posterior. La línea de comandos (fwmanager-cli) funciona en sistemas más antiguos."
+
+msgid "fwmanager switches profile by itself when you change network. Use Test before applying anything new, and Rules for your own settings."
+msgstr "fwmanager cambia de perfil solo cuando cambias de red. Usa Probar antes de aplicar algo nuevo y Reglas para tus propios ajustes."
+
+msgid "fwmanager was removed"
+msgstr "fwmanager se ha eliminado"
+
+msgid "fwmanager's own rules and its ping/mDNS settings are removed."
+msgstr "Se eliminan las reglas del propio fwmanager y sus ajustes de ping/mDNS."
+
+msgid "info"
+msgstr "info"
+
+msgid "invalid choice: %(value)r (choose from %(choices)s)"
+msgstr "opción no válida: %(value)r (elige entre %(choices)s)"
+
+msgid "keep the change that is waiting for confirmation"
+msgstr "conservar el cambio que espera confirmación"
+
+msgid "libvirt manages its own rules (they are left untouched)."
+msgstr "libvirt gestiona sus propias reglas (no se tocan)."
+
+msgid "list the profiles and what each one lets in"
+msgstr "listar los perfiles y lo que deja entrar cada uno"
+
+msgid "local"
+msgstr "local"
+
+msgid "machine-readable output"
+msgstr "salida legible por programas (JSON)"
+
+msgid "n"
+msgstr "n"
+
+msgid "no"
+msgstr "no"
+
+msgid "none"
+msgstr "ninguno"
+
+msgid "not a text file"
+msgstr "no es un archivo de texto"
+
+msgid "not applicable"
+msgstr "no aplicable"
+
+msgid "off"
+msgstr "desactivado"
+
+msgid "on"
+msgstr "activado"
+
+msgid "only accepts connections from the local network"
+msgstr "solo acepta conexiones de la red local"
+
+msgid "only accepts connections from {networks}"
+msgstr "solo acepta conexiones de {networks}"
+
+msgid "only analyse the rules, change nothing"
+msgstr "solo analizar las reglas, sin cambiar nada"
+
+msgid "opens {services}"
+msgstr "abre {services}"
+
+msgid "options"
+msgstr "opciones"
+
+msgid "positional arguments"
+msgstr "argumentos"
+
+msgid "profile name"
+msgstr "nombre del perfil"
+
+msgid "profile to use, without asking"
+msgstr "perfil a usar, sin preguntar"
+
+msgid "put a profile back to its defaults"
+msgstr "devolver un perfil a sus valores predeterminados"
+
+msgid "remove fwmanager and undo its changes to the firewall"
+msgstr "eliminar fwmanager y deshacer sus cambios en el cortafuegos"
+
+msgid "replace the settings with those in a file"
+msgstr "reemplazar los ajustes por los de un archivo"
+
+msgid "save profiles, rules, networks and options to a file"
+msgstr "guardar perfiles, reglas, redes y opciones en un archivo"
+
+msgid "services to block"
+msgstr "servicios a bloquear"
+
+msgid "services to let in"
+msgstr "servicios a dejar entrar"
+
+msgid "set fwmanager up (the same as the window's first run)"
+msgstr "configurar fwmanager (igual que la primera ejecución de la ventana)"
+
+msgid "show the firewall state"
+msgstr "mostrar el estado del cortafuegos"
+
+msgid "show the remembered networks"
+msgstr "mostrar las redes recordadas"
+
+msgid "show this help message and exit"
+msgstr "mostrar este mensaje de ayuda y salir"
+
+msgid "starts answering ping"
+msgstr "empieza a responder al ping"
+
+msgid "stops answering ping"
+msgstr "deja de responder al ping"
+
+msgid "switch to a profile (undone unless you confirm)"
+msgstr "cambiar a un perfil (se deshace si no lo confirmas)"
+
+msgid "the following arguments are required: %s"
+msgstr "se requieren los siguientes argumentos: %s"
+
+msgid "turns mDNS off"
+msgstr "desactiva mDNS"
+
+msgid "turns mDNS on"
+msgstr "activa mDNS"
+
+msgid "ufw is installed"
+msgstr "ufw está instalado"
+
+msgid "ufw is not installed"
+msgstr "ufw no está instalado"
+
+msgid "ufw is not installed."
+msgstr "ufw no está instalado."
+
+msgid "ufw is not installed. Install it first (for example: sudo apt install ufw)."
+msgstr "ufw no está instalado. Instálalo primero (por ejemplo: sudo apt install ufw)."
+
+msgid "ufw is off and will be turned on."
+msgstr "ufw está apagado y se va a encender."
+
+msgid "ufw is switched off only if fwmanager was the one that switched it on."
+msgstr "ufw solo se apaga si fue fwmanager quien lo encendió."
+
+msgid "ufw refused one of the rules."
+msgstr "ufw rechazó una de las reglas."
+
+msgid "ufw rejected the change."
+msgstr "ufw rechazó el cambio."
+
+msgid "ufw's configuration was edited in a way fwmanager cannot work with."
+msgstr "La configuración de ufw se editó de una forma con la que fwmanager no puede trabajar."
+
+msgid "ufw's original default settings are put back."
+msgstr "Se restauran los ajustes originales de ufw."
+
+msgid "undo the change that is waiting for confirmation"
+msgstr "deshacer el cambio que espera confirmación"
+
+msgid "unrecognized arguments: %s"
+msgstr "argumentos no reconocidos: %s"
+
+msgid "usage: "
+msgstr "uso: "
+
+msgid "use a profile on a network"
+msgstr "usar un perfil en una red"
+
+msgid "warning"
+msgstr "aviso"
+
+msgid "where to save them (- for the screen)"
+msgstr "dónde guardarlos (- para la pantalla)"
+
+msgid "which profile to use on which network"
+msgstr "qué perfil usar en cada red"
+
+msgid "who may connect: anywhere, lan, or networks such as 192.168.1.0/24,10.0.0.0/8"
+msgstr "quién puede conectarse: anywhere, lan o redes como 192.168.1.0/24,10.0.0.0/8"
+
+msgid "works"
+msgstr "funciona"
+
+msgid "yes"
+msgstr "sí"
+
+msgid "{before} → {after}"
+msgstr "{before} → {after}"
+
+msgid "{names} is managing the firewall. Turn it off first, then reopen fwmanager:"
+msgstr "{names} está gestionando el cortafuegos. Desactívalo primero y luego vuelve a abrir fwmanager:"
+
+msgid "{network} has a router fwmanager has not seen there before, so Public is in use. If you replaced the router, trust it in Networks."
+msgstr "{network} tiene un router que fwmanager no había visto allí, así que se usa Público. Si cambiaste de router, confía en él en Redes."
+
+msgid "{n} attempt was blocked. The latest: {src} to port {port}."
+msgid_plural "{n} attempts were blocked. The latest: {src} to port {port}."
+msgstr[0] "{n} intento fue bloqueado. El último: {src} al puerto {port}."
+msgstr[1] "{n} intentos fueron bloqueados. El último: {src} al puerto {port}."
+
+msgid "{n} connection was let in. The latest: {src} to port {port}."
+msgid_plural "{n} connections were let in. The latest: {src} to port {port}."
+msgstr[0] "{n} conexión fue admitida. La última: {src} al puerto {port}."
+msgstr[1] "{n} conexiones fueron admitidas. La última: {src} al puerto {port}."
+
+msgid "{profile} is still waiting for your confirmation. If you close without choosing, it is undone in a few seconds."
+msgstr "{profile} sigue esperando tu confirmación. Si cierras sin elegir, se deshace en unos segundos."
+
+msgid "{profile} was undone because it was not confirmed in time."
+msgstr "{profile} se deshizo porque no se confirmó a tiempo."
+
+msgid "{profile} will be undone in {n} s unless you confirm."
+msgstr "{profile} se deshará en {n} s si no lo confirmas."
+
+msgid "{p} is back to its defaults."
+msgstr "{p} ha vuelto a sus valores predeterminados."
+
+msgid "{src} connected to port {port}."
+msgstr "{src} se conectó al puerto {port}."
+
+msgid "{src} tried to reach port {port}."
+msgstr "{src} intentó llegar al puerto {port}."
+
+msgid "{src} tried to reach {target}"
+msgstr "{src} intentó acceder a {target}"
+
+msgid "“{text}” is not a network address. Did you mean {guess}?"
+msgstr "«{text}» no es una dirección de red. ¿Querías decir {guess}?"
+
+msgid "“{text}” is not a network address. Example: 192.168.1.0/24."
+msgstr "«{text}» no es una dirección de red. Ejemplo: 192.168.1.0/24."

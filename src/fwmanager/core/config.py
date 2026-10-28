@@ -1,7 +1,8 @@
 """Language and system configuration.
 
 Priority for the UI language: user settings > ``/etc/fwmanager/config.toml`` >
-system locale (``pt*`` -> Portuguese, anything else -> English).
+system locale (``pt*`` -> Portuguese, ``es*`` -> Spanish, ``fr*`` -> French, anything else ->
+English).
 """
 
 from __future__ import annotations
@@ -11,7 +12,7 @@ import tomllib
 from pathlib import Path
 
 SYSTEM_CONFIG = Path("/etc/fwmanager/config.toml")
-LANGUAGES = ("pt", "en")
+LANGUAGES = ("pt", "en", "es", "fr")
 
 
 def _read_lang(path: Path | None) -> str | None:
@@ -26,8 +27,8 @@ def _read_lang(path: Path | None) -> str | None:
 
 
 def system_language(env_lang: str | None = None) -> str:
-    value = env_lang if env_lang is not None else os.environ.get("LANG", "")
-    return "pt" if value.lower().startswith("pt") else "en"
+    value = (env_lang if env_lang is not None else os.environ.get("LANG", "")).lower()
+    return next((code for code in LANGUAGES if value.startswith(code)), "en")
 
 
 def resolve_language(

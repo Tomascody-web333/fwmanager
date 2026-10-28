@@ -1,7 +1,5 @@
 # Validation
 
-**English** · [Português](VALIDATION.pt.md)
-
 ## What the automated tests prove
 
 Run in a throw-away network namespace with a private copy of `/etc/ufw` (never the host's):
@@ -37,5 +35,10 @@ Do this in a VM with a desktop session, **from its console, not over SSH**. Take
 | 12 | Uninstall from the window | **Settings → Uninstall fwmanager…**, enter the password | Done page, the app closes; `ufw status` is back to how it was; ufw is off only if fwmanager had enabled it; no files left, no menu entry |
 | 13 | Setup and uninstall from the terminal | reinstall, then `fwmanager-cli setup` (as yourself), later `fwmanager-cli uninstall` | One password for setup, profile asked in the terminal; opening the window afterwards shows no wizard; uninstall leaves nothing |
 | 14 | Icon | look at the app grid, the dock and the window in the task bar (GNOME, and XFCE or KDE if you can) | The shield icon everywhere; the open window is grouped with its launcher |
+
+| 15 | Notifications with the window closed | Settings → turn on *Also when the window is closed*, close the window, log out and in, then switch network (or `sudo ufw ...` is not needed: `fwmanager-cli apply home` from a terminal) | A notification arrives although no window is open; `ps` shows `fwmanager --background`; turning the switch off removes `~/.config/autostart/org.fwmanager.App-background.desktop` |
+| 16 | Router recognition | Connect to a remembered Wi-Fi twice, then a copy of it behind another router (a phone hotspot with the same name and password), then press **Trust** in Networks | First time: Networks says the router is recognised; the copy gets **Public** and a notification; after **Trust**, connecting to the copy gets the remembered profile |
+| 17 | Export and import | Settings → Backup → Export; change a profile and forget a network; Import the file | The profile edit and the network come back; the file is readable only by you; a damaged file is refused with nothing changed |
+| 18 | Languages | Settings → Language → Español, then Français (and back) | Everything is in that language, plurals read right (1 attempt / 3 attempts), nothing is cut off in a narrow window |
 
 Report anything that differs with the output of `journalctl -u fwmanagerd` and `ufw status verbose`.

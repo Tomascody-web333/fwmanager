@@ -104,12 +104,20 @@ def _parser() -> argparse.ArgumentParser:
     for name, text in (
         ("set", _("use a profile on a network")),
         ("remove", _("forget a network")),
+        ("trust-router", _("accept the new router seen on a network (after replacing it)")),
+        ("forget-router", _("forget a network's routers; the next one seen is remembered")),
     ):
         nsp = nsub.add_parser(name, help=text)
         nsp.add_argument("--ssid", default="", help=_("Wi-Fi name"))
         nsp.add_argument("--uuid", default="", help=_("NetworkManager connection UUID"))
         if name == "set":
             nsp.add_argument("profile", metavar=_("PROFILE"), help=_("profile name"))
+
+    sp = sub.add_parser("export", help=_("save profiles, rules, networks and options to a file"))
+    sp.add_argument("file", metavar=_("FILE"), help=_("where to save them (- for the screen)"))
+    sp = sub.add_parser("import", help=_("replace the settings with those in a file"))
+    sp.add_argument("file", metavar=_("FILE"), help=_("a file made by export"))
+    sp.add_argument("--yes", action="store_true", help=_("do not ask for confirmation"))
 
     return p
 
@@ -359,8 +367,14 @@ def _edit_profile(client, args: argparse.Namespace) -> int:
 
 def _print_networks(client, as_json: bool) -> None:
     nets = client.list_networks()
+    routers = {(s, u): (r, new) for s, u, r, new in client.list_network_routers()}
     if as_json:
-        print(json.dumps([{"ssid": s, "uuid": u, "profile": p} for s, u, p in nets]))
+        print(json.dumps([
+            {"ssid": s, "uuid": u, "profile": p,
+             "routers": routers.get((s, u), ([], ""))[0],
+             "unrecognised_router": routers.get((s, u), ([], ""))[1]}
+            for s, u, p in nets
+        ]))  # fmt: skip
         return
     if not nets:
         print(_("No networks remembered yet. Unknown Wi-Fi networks use Public."))
@@ -368,6 +382,67 @@ def _print_networks(client, as_json: bool) -> None:
     for ssid, uuid, profile in nets:
         name = ssid or _("Connection {id}").format(id=uuid[:8])
         print(f"{name}  →  {_profile_label(profile)}")
+        known, new = routers.get((ssid, uuid), ([], ""))
+        if new:
+            print("    " + _("A router fwmanager does not know was seen here ({mac}).").format(
+                mac=new
+            ))  # fmt: skip
+            print("    " + _("If you replaced the router: fwmanager-cli networks trust-router"
+                            " {which}").format(which=_which(ssid, uuid)))  # fmt: skip
+        elif not known:
+            print("    " + _("Router: not seen yet"))
+
+
+def _which(ssid: str, uuid: str) -> str:
+    import shlex
+
+    return f"--uuid {uuid}" if uuid else f"--ssid {shlex.quote(ssid)}"
+
+
+def _export(client, target: str) -> int:
+    text = client.export_settings()
+    if target == "-":
+        sys.stdout.write(text)
+        return EXIT_OK
+    import os
+
+    try:  # only you can read it: it lists your networks
+        fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(text)
+    except OSError as exc:
+        print(_("Could not write {file}: {why}").format(file=target, why=exc.strerror),
+              file=sys.stderr)  # fmt: skip
+        return EXIT_ERROR
+    print(_("Settings saved to {file}.").format(file=target))
+    return EXIT_OK
+
+
+def _import(client, source: str, yes: bool) -> int:
+    from fwmanager.core.settings_io import MAX_BYTES
+
+    try:
+        with open(source, encoding="utf-8") as fh:
+            text = fh.read(MAX_BYTES + 1)
+    except (OSError, UnicodeDecodeError) as exc:
+        why = getattr(exc, "strerror", None) or _("not a text file")
+        print(_("Could not read {file}: {why}").format(file=source, why=why), file=sys.stderr)
+        return EXIT_ERROR
+    if not yes:
+        print(_("This replaces your profile edits, rules, networks and options."))
+        if not sys.stdin.isatty():
+            print(_("No terminal to ask in: use --yes."), file=sys.stderr)
+            return EXIT_ERROR
+        if input(_("Type yes to import: ")).strip().lower() not in ("yes", _("yes")):
+            print(_("Cancelled. Nothing was changed."))
+            return EXIT_INTERRUPTED
+    client.import_settings(text)
+    print(_("Settings imported."))
+    active = client.status().get("active_profile")
+    if active:
+        print(_("They take effect the next time a profile is applied, for example: "
+                "fwmanager-cli apply {name}").format(name=command_name(active)))  # fmt: skip
+    return EXIT_OK
 
 
 def run(args: argparse.Namespace, client: _Tracking | None = None) -> int:
@@ -387,10 +462,20 @@ def run(args: argparse.Namespace, client: _Tracking | None = None) -> int:
         elif args.net_cmd == "set":
             client.set_network_profile(args.ssid, args.uuid, args.profile)
             print(_("Saved."))
+        elif args.net_cmd == "trust-router":
+            client.trust_router(args.ssid, args.uuid)
+            print(_("Trusted. Its profile is used the next time you connect."))
+        elif args.net_cmd == "forget-router":
+            client.forget_routers(args.ssid, args.uuid)
+            print(_("Forgotten. The next router seen there is remembered."))
         else:
             client.remove_network(args.ssid, args.uuid)
             print(_("Forgotten."))
         return EXIT_OK
+    if args.cmd == "export":
+        return _export(client, args.file)
+    if args.cmd == "import":
+        return _import(client, args.file, args.yes)
     if args.cmd == "apply":
         if args.yes:
             client.apply_profile(args.profile)

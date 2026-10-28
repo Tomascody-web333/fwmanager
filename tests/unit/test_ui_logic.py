@@ -52,9 +52,11 @@ def test_settings_path_honours_xdg(monkeypatch, tmp_path):
 
 
 def test_with_lang_rejects_unknown():
-    assert us.UserSettings().with_lang("pt").lang == "pt"
-    with pytest.raises(ValueError):
-        us.UserSettings().with_lang("fr")
+    for code in ("pt", "en", "es", "fr"):
+        assert us.UserSettings().with_lang(code).lang == code
+    for bad in ("de", "pt_PT", "", "FR", "../x"):
+        with pytest.raises(ValueError):
+            us.UserSettings().with_lang(bad)
 
 
 # -- which screen ---

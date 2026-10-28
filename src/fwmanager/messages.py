@@ -29,6 +29,11 @@ def describe(code: str) -> str:
         "daemon_unavailable": _("The fwmanager service is not running."),
         "invalid_network": _("Invalid network (name or UUID)."),
         "too_many_networks": _("Too many saved networks."),
+        "unknown_network": _("That network is not remembered."),
+        "no_new_router": _("No other router has been seen on that network."),
+        "invalid_settings": _(
+            "That file is not a valid fwmanager settings file. Nothing was changed."
+        ),
         "profile_too_big": _(
             "That would make the profile too large to apply quickly. "
             "Use fewer networks or fewer services."

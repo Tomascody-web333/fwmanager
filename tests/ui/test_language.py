@@ -82,7 +82,7 @@ def test_changing_language_rebuilds_the_window_and_remembers_it(make_app):
     app = make_app(user_lang="pt")
     old_window, controller = app.window, app.controller
     calls_before = len(app.daemon.calls)
-    app.window.settings.language.set_selected(1)  # English
+    app.window.settings.language.set_selected(0)  # English
     pump(0.4)
     assert app.window is not old_window and app.controller is controller  # same daemon link
     assert page_titles(app) == ["Overview", "Networks", "Rules", "Log", "Settings"]
@@ -95,7 +95,7 @@ def test_changing_language_rebuilds_the_window_and_remembers_it(make_app):
 
 def test_changing_back_to_portuguese(make_app):
     app = make_app(user_lang="en")
-    app.window.settings.language.set_selected(0)
+    app.window.settings.language.set_selected(1)  # Português
     pump(0.4)
     assert page_titles(app)[0] == "Início" and 'lang = "pt"' in app.settings_file.read_text()
 
@@ -132,3 +132,16 @@ def test_switching_language_many_times_leaves_one_window_listening(make_app):
         app.window.settings.language.set_selected(choice)
         pump(0.2)
     assert app.controller.listeners == [app.window.on_snapshot]
+
+
+@pytest.mark.parametrize(
+    "code,title",
+    [("es", "Resumen"), ("fr", "Aperçu")],
+)
+def test_spanish_and_french_are_offered_and_work(make_app, code, title):
+    app = make_app(user_lang="en")
+    codes = [c for c, _name in __import__("fwmanager.ui.pages.settings", fromlist=["x"]).LANGUAGES]
+    assert code in codes
+    app.change_language(code)
+    pump(0.4)
+    assert page_titles(app)[0] == title

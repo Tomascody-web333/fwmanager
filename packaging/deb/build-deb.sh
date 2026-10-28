@@ -135,7 +135,7 @@ install -m 644 "$HICOLOR/128x128/apps/org.fwmanager.App.png" "$PKG/usr/share/pix
 # -- documentation and licence (the same files the Launchpad build ships) ---
 DOC="$PKG/usr/share/doc/fwmanager"
 install -d "$DOC"
-install -m 644 "$REPO/README.md" "$REPO/README.pt.md" "$REPO/debian/copyright" "$DOC/"
+install -m 644 "$REPO/README.md" "$REPO/debian/copyright" "$DOC/"
 gzip -n -9 -c "$REPO/debian/changelog" > "$DOC/changelog.gz"
 chmod 644 "$DOC/changelog.gz"
 install -d "$PKG/usr/share/lintian/overrides"

@@ -1,3 +1,5 @@
+import pytest
+
 from fwmanager.core.config import resolve_language, system_language
 from fwmanager.core.conflicts import detect
 
@@ -49,3 +51,11 @@ def test_a_system_config_that_is_not_utf8_is_ignored(tmp_path):
     bad = tmp_path / "config.toml"
     bad.write_bytes(b'lang = "\xff"')
     assert resolve_language(None, bad, env_lang="pt_PT.UTF-8") == "pt"
+
+
+@pytest.mark.parametrize(
+    "env,expected",
+    [("es_ES.UTF-8", "es"), ("fr_FR.UTF-8", "fr"), ("pt_PT", "pt"), ("de_DE", "en"), ("", "en")],
+)
+def test_system_language_knows_the_four_languages(env, expected):
+    assert system_language(env) == expected

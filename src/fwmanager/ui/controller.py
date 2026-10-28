@@ -200,6 +200,18 @@ class Controller:
     def remove_network(self, ssid: str, uuid: str, done: Done | None = None) -> None:
         self._op(lambda c: c.remove_network(ssid, uuid), done)
 
+    def network_routers(self, done: Done) -> None:
+        self._op(lambda c: c.list_network_routers(), done)
+
+    def trust_router(self, ssid: str, uuid: str, done: Done | None = None) -> None:
+        self._op(lambda c: c.trust_router(ssid, uuid), done)
+
+    def export_settings(self, done: Done) -> None:
+        self._op(lambda c: c.export_settings(), done)
+
+    def import_settings(self, text: str, done: Done | None = None) -> None:
+        self._op(lambda c: c.import_settings(text), done)
+
     def options(self, done: Done) -> None:
         self._op(lambda c: c.get_options(), done)
 
