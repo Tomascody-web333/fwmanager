@@ -2,7 +2,7 @@
 # Instalador de desenvolvimento do fwmanager / Development installer for fwmanager.
 # Para uma VM ou um contentor, com sudo / For a VM or container, run with sudo.
 #
-#   sudo scripts/dev-install.sh [--user NOME|NAME] [--lang pt|en] [--no-systemd]
+#   sudo scripts/dev-install.sh [--user NOME|NAME] [--lang pt|en|es|fr] [--no-systemd]
 #
 # Everything else (language, what is missing, the first profile) is set up in the window the
 # first time you open fwmanager. --user and --lang are optional shortcuts. Requires ufw.
@@ -53,8 +53,8 @@ if [ -n "$USER_NAME" ]; then
                "recusado: a interface tem de correr como utilizador normal, não root"
 fi
 case "$LANG_CHOICE" in
-    ""|pt|en) ;;
-    *) die "--lang must be pt or en" "--lang tem de ser pt ou en" ;;
+    ""|pt|en|es|fr) ;;
+    *) die "--lang must be pt, en, es or fr" "--lang tem de ser pt, en, es ou fr" ;;
 esac
 
 if [ "$STAGED" -eq 0 ]; then

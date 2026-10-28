@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fwmanager"
-version = "1.0.0"
+version = "1.1.0"
 description = "Beginner-friendly graphical interface for ufw, with profiles per network"
 readme = "README.md"
 license = { file = "LICENSE" }  # MIT

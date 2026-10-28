@@ -6,6 +6,8 @@ set -e
 
 if [ "$1" = remove ]; then
     if [ -d /run/systemd/system ]; then
+        # systemctl, not deb-systemd-helper: the service was enabled by the first-run setup
+        # with systemctl, so deb-systemd-helper has no record of it to undo.
         systemctl disable --now fwmanagerd.service >/dev/null 2>&1 || true
     fi
     if command -v ufw >/dev/null 2>&1; then

@@ -318,7 +318,7 @@ def test_networks_page_lists_and_changes_remembered_networks(env):
     drop = find(row, lambda w: w.__class__.__name__ == "DropDown")[0]
     drop.set_selected(1)  # Work
     assert ("set_network_profile", ("Casa WiFi", uuid, "work")) in env.daemon.calls
-    remove = find(row, lambda w: w.__class__.__name__ == "Button")[0]
+    remove = find(row, lambda w: w.__class__.__name__ == "Button")[-1]  # the bin, after "Trust"
     remove.emit("clicked")
     assert ("remove_network", ("Casa WiFi", uuid)) in env.daemon.calls
     assert env.win.networks._rows == [] or "Casa WiFi" not in texts(env.win.networks)
@@ -380,8 +380,8 @@ def test_settings_do_not_write_back_while_loading(env):
 
 
 def test_language_and_notification_switches_call_back(env):
-    assert env.win.settings.language.get_selected() == 1  # English is the current language
-    env.win.settings.language.set_selected(0)  # Português
+    assert env.win.settings.language.get_selected() == 0  # English is the current language
+    env.win.settings.language.set_selected(1)  # Português
     env.win.settings.notifications.set_active(False)
     assert env.changes["lang"] == ["pt"] and env.changes["notifications"] == [("reverted", False)]
 

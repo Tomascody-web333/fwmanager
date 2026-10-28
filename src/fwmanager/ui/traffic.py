@@ -10,7 +10,7 @@ from __future__ import annotations
 import time
 from collections.abc import Callable
 
-from fwmanager.i18n import N_, _
+from fwmanager.i18n import N_, _, _n
 
 MIN_GAP = 60.0  # seconds between two notifications of the same kind
 
@@ -25,21 +25,25 @@ def _key(item: tuple) -> tuple:
 def describe(kind: str, items: list[tuple]) -> str:
     """One sentence for a batch, newest entry named (items are newest first).
 
-    Portuguese and English both only tell one from many, so two plain sentences do.
+    A single entry gets its own sentence; a batch takes the plural form of the language.
     """
     _when, _iface, src, _dst, proto, dport = items[0]
     port, n = dport or proto, len(items)
     if kind == "blocked":
         if n == 1:
             return _("{src} tried to reach port {port}.").format(src=src, port=port)
-        return _("{n} attempts were blocked. The latest: {src} to port {port}.").format(
-            n=n, src=src, port=port
-        )
+        return _n(
+            "{n} attempt was blocked. The latest: {src} to port {port}.",
+            "{n} attempts were blocked. The latest: {src} to port {port}.",
+            n,
+        ).format(n=n, src=src, port=port)
     if n == 1:
         return _("{src} connected to port {port}.").format(src=src, port=port)
-    return _("{n} connections were let in. The latest: {src} to port {port}.").format(
-        n=n, src=src, port=port
-    )
+    return _n(
+        "{n} connection was let in. The latest: {src} to port {port}.",
+        "{n} connections were let in. The latest: {src} to port {port}.",
+        n,
+    ).format(n=n, src=src, port=port)
 
 
 class TrafficWatcher:

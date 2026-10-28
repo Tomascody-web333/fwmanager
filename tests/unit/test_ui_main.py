@@ -1,8 +1,6 @@
 import os
-import shutil
 import subprocess
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -54,28 +52,13 @@ def test_without_a_graphical_session_it_explains_instead_of_crashing(monkeypatch
     assert "graphical session" in capsys.readouterr().err
 
 
-def _src_readable_by_nobody(tmp_path) -> str:
-    """The source tree, somewhere the "nobody" account can read (a CI checkout may not be)."""
-    if os.access(SRC, os.R_OK | os.X_OK) and all(
-        os.stat(p).st_mode & 0o005 == 0o005 for p in [SRC, *map(str, Path(SRC).parents)][:-1]
-    ):
-        return SRC
-    copy = Path(tempfile.mkdtemp(prefix="fwm-src-"))
-    shutil.copytree(Path(SRC) / "fwmanager", copy / "fwmanager")
-    for path in [copy, *copy.rglob("*")]:
-        path.chmod(0o755 if path.is_dir() else 0o644)
-    return str(copy)
-
-
-def test_the_real_app_without_a_display_says_why(tmp_path):
-    src = _src_readable_by_nobody(tmp_path) if os.geteuid() == 0 else SRC
+def test_the_real_app_without_a_display_says_why(tmp_path, src_for_others):
+    src = str(src_for_others) if os.geteuid() == 0 else SRC
     env = {"PATH": os.environ["PATH"], "HOME": str(tmp_path), "PYTHONPATH": src, "LANG": "C"}
     out = subprocess.run(
         [sys.executable, "-m", "fwmanager.ui.main"], capture_output=True, text=True,
         timeout=60, env=env, user=65534 if os.geteuid() == 0 else None,
     )  # fmt: skip
-    if src != SRC:
-        shutil.rmtree(src)
     assert out.returncode == 1 and "Traceback" not in out.stderr, out.stderr
     assert "graphical session" in out.stderr
 

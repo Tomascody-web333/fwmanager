@@ -101,9 +101,18 @@ class FakeClient:
         self.conflicts = list(conflicts)
         self.apply_exc = apply_exc
         self.calls = []
+        self.routers_seen = []
+        self.router_verdict = "known"
 
     def get_network_profile(self, ssid, uuid):
         return self.mapping.get(uuid or ssid, "")
+
+    def check_network(self, ssid, uuid, router):
+        self.routers_seen.append(router)
+        profile = self.get_network_profile(ssid, uuid)
+        if profile and self.router_verdict in ("changed", "unverified"):
+            return "", self.router_verdict
+        return profile, (self.router_verdict if profile else "unknown")
 
     def status(self):
         pending = (
@@ -127,6 +136,16 @@ class FakeClient:
 
     def rollback(self):
         self.calls.append(("rollback",))
+
+
+ROUTER = "02:00:5e:00:00:01"
+READ_NEIGHBOUR_TABLE = d.router_mac  # the real one, before the fixture below replaces it
+
+
+@pytest.fixture(autouse=True)
+def known_router(monkeypatch):
+    """The router's address is in the neighbour table already, so no ping is needed for it."""
+    monkeypatch.setattr(d, "router_mac", lambda addr, iface: ROUTER)
 
 
 def ctx(*gws):
@@ -275,7 +294,7 @@ def test_daemon_errors_do_not_confirm(monkeypatch):
 
 def test_unidentifiable_network_falls_back_without_asking_the_daemon():
     client = FakeClient({"": "home"})  # would wrongly match if it were consulted
-    client.get_network_profile = lambda s, u: pytest.fail("must not be called")
+    client.check_network = lambda s, u, r: pytest.fail("must not be called")
     ping, _ = pinger()
     c = d.Context("eth0", "", ())
     assert d.dispatch(client, c, ping=ping, sleep=lambda s: None) == d.EXIT_OK
@@ -289,3 +308,70 @@ def test_run_asks_networkmanager_for_the_connection_type(monkeypatch):
     monkeypatch.setattr(d, "lookup_kind", lambda u: "802-3-ethernet")
     assert d.run("eth0", env={"CONNECTION_UUID": UUID}) == d.EXIT_OK
     assert client.calls == []
+
+
+# -- the router behind a remembered network ---
+
+
+def test_the_router_address_goes_to_the_daemon():
+    client = FakeClient({UUID: "home"})
+    ping, _ = pinger()
+    d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None)
+    assert client.routers_seen == [ROUTER]
+
+
+@pytest.mark.parametrize("verdict", ["changed", "unverified"])
+def test_a_remembered_wifi_with_another_router_gets_public(verdict):
+    client = FakeClient({UUID: "home"}, active="home")
+    client.router_verdict = verdict
+    ping, _ = pinger()
+    assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
+    assert client.calls[0] == ("apply", "public")
+
+
+def test_a_cable_with_another_router_keeps_the_current_profile():
+    client = FakeClient({UUID: "work"}, active="home")
+    client.router_verdict = "changed"
+    ping, _ = pinger()
+    c = d.Context("eth0", UUID, (GW4,))
+    assert d.dispatch(client, c, ping=ping, sleep=lambda s: None, kind="802-3-ethernet") == 0
+    assert client.calls == []
+
+
+def test_an_unlearned_router_costs_one_ping(monkeypatch):
+    table = {"filled": False}
+    monkeypatch.setattr(d, "router_mac", lambda a, i: ROUTER if table["filled"] else "")
+    client = FakeClient({UUID: "home"}, active="home")
+    log = []
+
+    def ping(addr, iface, timeout):
+        log.append(addr)
+        table["filled"] = True
+        return True
+
+    assert d.dispatch(client, ctx(GW4), ping=ping, sleep=lambda s: None) == d.EXIT_OK
+    assert log == [GW4.address] and client.routers_seen == [ROUTER]
+
+
+ARP = """IP address       HW type     Flags       HW address            Mask     Device
+192.168.1.1      0x1         0x2         AA:BB:CC:00:11:22     *        wlan0
+192.168.1.1      0x1         0x2         aa:bb:cc:00:11:33     *        eth0
+10.0.0.1         0x1         0x0         00:00:00:00:00:00     *        wlan0
+10.0.0.2         0x1         0x2         not-a-mac             *        wlan0
+"""
+
+
+@pytest.mark.parametrize(
+    "addr,iface,expected",
+    [
+        ("192.168.1.1", "wlan0", "aa:bb:cc:00:11:22"),  # lower case, the right interface
+        ("192.168.1.1", "eth0", "aa:bb:cc:00:11:33"),
+        ("10.0.0.1", "wlan0", ""),  # incomplete entry
+        ("10.0.0.2", "wlan0", ""),  # garbage is never passed on
+        ("10.9.9.9", "wlan0", ""),
+    ],
+)
+def test_router_mac_reads_the_neighbour_table(tmp_path, addr, iface, expected):
+    table = tmp_path / "arp"
+    table.write_text(ARP)
+    assert READ_NEIGHBOUR_TABLE(addr, iface, str(table)) == expected

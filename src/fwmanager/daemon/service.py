@@ -12,13 +12,21 @@ from collections.abc import Callable
 
 from gi.repository import Gio, GLib
 
-from fwmanager.core import blocklog, rulebook
+from fwmanager.core import blocklog, rulebook, settings_io
 from fwmanager.core.backend import Options
 from fwmanager.core.conflicts import Conflicts
 from fwmanager.core.manager import CONFIRM_TIMEOUT, FirewallManager
 from fwmanager.core.policy_check import check_profile
 from fwmanager.core.profiles import Profile, Source
-from fwmanager.core.store import MAX_NETWORKS, Network, Store, find_profile
+from fwmanager.core.store import (
+    MAX_NETWORKS,
+    MAX_ROUTERS,
+    Network,
+    Store,
+    find_network,
+    find_profile,
+    validate_mac,
+)
 from fwmanager.core.ufw_rules import check_size
 from fwmanager.core.validate import validate_name
 from fwmanager.daemon.interface import INTERFACE, OBJECT_PATH, interface_info
@@ -51,6 +59,9 @@ class ControlService:
         self._events: deque[tuple[int, str, str]] = deque(maxlen=200)
         self._authorize = authorize
         self._conn: Gio.DBusConnection | None = None
+        # A router seen on a remembered network that is not one of its routers, per network:
+        # what "Trust this router" adds. Kept in memory only; the next connection sees it again.
+        self._unrecognised: dict[tuple[str, str], str] = {}
         self._load_saved_settings()
         self._record("startup", startup_outcome)
         manager.on_revert = self._on_reverted
@@ -266,8 +277,10 @@ class ControlService:
             if profile not in self._profiles:
                 validate_name(profile, "profile")
                 raise ValidationError("unknown profile", code="unknown_profile")
-            new = Network(ssid, uuid, profile)  # validates
-            nets = [n for n in self._load_networks() if not n.same_network(ssid, uuid)]
+            nets = self._load_networks()
+            old = next((n for n in nets if n.same_network(ssid, uuid)), None)
+            new = Network(ssid, uuid, profile, old.routers if old else ())  # validates
+            nets = [n for n in nets if not n.same_network(ssid, uuid)]
             if len(nets) >= MAX_NETWORKS:
                 raise ValidationError("too many networks", code="too_many_networks")
             self._save_networks([*nets, new])
@@ -282,6 +295,36 @@ class ControlService:
             ssid, uuid = args
             Network(ssid, uuid, next(iter(self._profiles)))
             return GLib.Variant("(s)", (find_profile(self._load_networks(), ssid, uuid) or "",))
+        if method == "CheckNetwork":
+            return GLib.Variant("(ss)", self._check_network(*args))
+        if method == "ListNetworkRouters":
+            items = [
+                (n.ssid, n.uuid, list(n.routers), self._unrecognised.get((n.ssid, n.uuid), ""))
+                for n in self._load_networks()
+            ]
+            return GLib.Variant("(a(ssass))", (items,))
+        if method == "TrustRouter":
+            ssid, uuid = args
+            net = self._remembered_network(ssid, uuid)
+            mac = self._unrecognised.get((net.ssid, net.uuid))
+            if not mac:
+                raise ValidationError("no new router was seen there", code="no_new_router")
+            routers = (*net.routers, mac)[-MAX_ROUTERS:]
+            self._replace_network(net, Network(net.ssid, net.uuid, net.profile, routers))
+            del self._unrecognised[(net.ssid, net.uuid)]
+            self._record("router_trusted", net.ssid or net.uuid)
+            return None
+        if method == "ForgetRouters":
+            ssid, uuid = args
+            net = self._remembered_network(ssid, uuid)
+            self._replace_network(net, Network(net.ssid, net.uuid, net.profile, ()))
+            self._unrecognised.pop((net.ssid, net.uuid), None)
+            return None
+        if method == "ExportSettings":
+            return GLib.Variant("(s)", (settings_io.export_settings(self._bundle()),))
+        if method == "ImportSettings":
+            self._import(args[0])
+            return None
         raise ValidationError("unknown method", code="invalid_input")
 
     def _new_rule(self, template, params, assign_id: bool = True) -> rulebook.Rule:
@@ -376,6 +419,68 @@ class ControlService:
 
     def _save_networks(self, nets: list[Network]) -> None:
         self._require_store().save_networks(nets)
+
+    # -- routers ---
+
+    def _check_network(self, ssid: str, uuid: str, router: str) -> tuple[str, str]:
+        """The profile for a network that just came up, and how sure we are it is that network.
+
+        ``unknown``: not remembered. ``known``: its router is one we have seen there.
+        ``learned``: first router seen there, now remembered. ``changed`` / ``unverified``:
+        another router, or none could be read, so its profile is not handed out.
+        """
+        Network(ssid, uuid, next(iter(self._profiles)))  # validates ssid/uuid only
+        if router:
+            validate_mac(router)
+        nets = self._load_networks()
+        net = find_network(nets, ssid, uuid)
+        if net is None:
+            return "", "unknown"
+        if not net.routers:
+            if router:
+                self._replace_network(net, Network(net.ssid, net.uuid, net.profile, (router,)))
+                return net.profile, "learned"
+            return net.profile, "known"
+        if router in net.routers:
+            return net.profile, "known"
+        verdict = "changed" if router else "unverified"
+        if router:
+            self._unrecognised[(net.ssid, net.uuid)] = router
+        self._record("router_changed", net.ssid or net.uuid)
+        self._emit("RouterChanged", "(ss)", (net.ssid, net.uuid))
+        log.warning("network %s: router not recognised (%s)", net.ssid or net.uuid, verdict)
+        return "", verdict
+
+    def _remembered_network(self, ssid: str, uuid: str) -> Network:
+        Network(ssid, uuid, next(iter(self._profiles)))  # validates ssid/uuid only
+        net = next((n for n in self._load_networks() if n.same_network(ssid, uuid)), None)
+        if net is None:
+            raise ValidationError("unknown network", code="unknown_network")
+        return net
+
+    def _replace_network(self, old: Network, new: Network) -> None:
+        nets = [new if n == old else n for n in self._load_networks()]
+        self._save_networks(nets)
+
+    # -- export / import ---
+
+    def _bundle(self) -> settings_io.Bundle:
+        edited = {n: p for n, p in self._base.items() if p != self._defaults[n]}
+        return settings_io.Bundle(edited, list(self._rules), self._load_networks(), self._options)
+
+    def _import(self, text: str) -> None:
+        bundle = settings_io.import_settings(text, self._mgr.catalog, self._defaults)
+        base = {**self._defaults, **bundle.profiles}
+        self._compile_checked(base, bundle.rules)  # refused before anything is written
+        store = self._require_store()
+        store.save_options(bundle.options)
+        store.save_rules(bundle.rules)
+        store.save_profiles(bundle.profiles)
+        store.save_networks(bundle.networks)
+        self._base, self._rules, self._options = base, list(bundle.rules), bundle.options
+        self._recompute()
+        self._unrecognised.clear()
+        self._record("imported", "")
 
     def _configured(self) -> bool:
         """A profile was confirmed at least once: setup is done (in the window or the CLI)."""

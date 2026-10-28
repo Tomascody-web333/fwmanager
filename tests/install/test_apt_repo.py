@@ -181,26 +181,43 @@ def test_apt_installs_from_the_signed_repository(repo, netns_prefix, tmp_path):
 @pytest.mark.skipif(
     not (shutil.which("dpkg-buildpackage") and shutil.which("dh")), reason="needs debhelper"
 )
-def test_ppa_upload_signs_the_source_package_with_the_key(gnupg):
+def test_ppa_upload_signs_one_source_package_per_ubuntu_release(gnupg):
     env, fingerprint = gnupg
     subprocess.run(["gpgconf", "--kill", "gpg-agent"], env=env, check=True)  # no cached secret
     r = subprocess.run(
         ["sh", str(ROOT / "packaging/ppa/upload.sh"), "someone/fwmanager", fingerprint,
          "--no-upload"],
-        env={**env, "APT_GPG_PASSPHRASE": "secret"}, capture_output=True, text=True, timeout=300,
+        env={**env, "APT_GPG_PASSPHRASE": "secret",
+             "LAUNCHPAD_SERIES": "noble=24.04 resolute=26.04"},
+        capture_output=True, text=True, timeout=600,
     )  # fmt: skip
     assert r.returncode == 0, r.stderr[-3000:]
     work = Path(r.stdout.strip().splitlines()[-1])
     try:
-        version = DEB.split(".", 1)[1].removesuffix(".deb")
-        for name in (f"fwmanager_{version}.dsc", f"fwmanager_{version}_source.changes"):
-            v = subprocess.run(["gpg", "--batch", "--verify", str(work / name)], env=env,
-                               capture_output=True, text=True)  # fmt: skip
-            assert v.returncode == 0 and "Good signature" in v.stderr, v.stderr
-        assert (work / f"fwmanager_{version}.tar.xz").is_file()
+        release = DEB.split(".", 1)[1].removesuffix(".deb")
+        for series, number in (("noble", "24.04"), ("resolute", "26.04")):
+            version = f"{release}~ubuntu{number}.1"
+            folder = work / series
+            for name in (f"fwmanager_{version}.dsc", f"fwmanager_{version}_source.changes"):
+                v = subprocess.run(["gpg", "--batch", "--verify", str(folder / name)], env=env,
+                                   capture_output=True, text=True)  # fmt: skip
+                assert v.returncode == 0 and "Good signature" in v.stderr, v.stderr
+            changes = (folder / f"fwmanager_{version}_source.changes").read_text()
+            assert f"Distribution: {series}\n" in changes and f"Version: {version}\n" in changes
         assert not (work / "pass").exists()  # the passphrase never stays on disk
     finally:
         shutil.rmtree(work)
+
+
+@pytest.mark.parametrize("value", ["noble=24.04 Bad=1", "noble=24.04;rm"])
+def test_ppa_upload_refuses_odd_release_lists(gnupg, value):
+    env, fingerprint = gnupg
+    r = subprocess.run(
+        ["sh", str(ROOT / "packaging/ppa/upload.sh"), "someone/fwmanager", fingerprint,
+         "--no-upload"],
+        env={**env, "LAUNCHPAD_SERIES": value}, capture_output=True, text=True,
+    )  # fmt: skip
+    assert r.returncode != 0 and "bad release" in r.stderr
 
 
 def test_ppa_upload_refuses_a_malformed_ppa_name(gnupg):

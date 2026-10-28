@@ -21,12 +21,14 @@ def settings_path() -> Path:
 
 SETUP_STAGES = ("welcome", "requirements", "profile", "done")
 # What may send a desktop notification. "reverted" is the original `notifications` switch.
-NOTIFY_KINDS = ("reverted", "switched", "blocked", "allowed")
+NOTIFY_KINDS = ("reverted", "switched", "router", "blocked", "allowed")
 _NOTIFY_KEYS = {
     "switched": "notify_switched",
+    "router": "notify_router",
     "blocked": "notify_blocked",
     "allowed": "notify_allowed",
 }
+_FLAGS = (*_NOTIFY_KEYS.values(), "background")
 
 
 @dataclass(frozen=True)
@@ -37,6 +39,8 @@ class UserSettings:
     notify_switched: bool = True  # the profile changed by itself (a network came up)
     notify_blocked: bool = False  # connection attempts were blocked (needs logging on)
     notify_allowed: bool = False  # connections were let in (needs logging medium or high)
+    notify_router: bool = True  # a remembered network turned up with another router
+    background: bool = True  # keep running (and notifying) with the window closed
 
     def wants(self, kind: str) -> bool:
         if kind == "reverted":
@@ -52,6 +56,9 @@ class UserSettings:
         if stage not in SETUP_STAGES:
             raise ValueError("unknown setup stage")
         return replace(self, setup_stage=stage)
+
+    def with_background(self, enabled: bool) -> UserSettings:
+        return replace(self, background=bool(enabled))
 
     def with_lang(self, lang: str | None) -> UserSettings:
         if lang is not None and lang not in LANGUAGES:
@@ -73,7 +80,7 @@ def load(path: Path | None = None) -> UserSettings:
     defaults = UserSettings()
     flags = {
         key: data[key] if isinstance(data.get(key), bool) else getattr(defaults, key)
-        for key in _NOTIFY_KEYS.values()
+        for key in _FLAGS
     }
     return UserSettings(
         lang if lang in LANGUAGES else None,
@@ -91,8 +98,43 @@ def save(settings: UserSettings, path: Path | None = None) -> None:
         lines.append(f'lang = "{settings.lang}"')
     lines.append(f"notifications = {'true' if settings.notifications else 'false'}")
     lines.append(f'setup_stage = "{settings.setup_stage}"')
-    for key in _NOTIFY_KEYS.values():
+    for key in _FLAGS:
         lines.append(f"{key} = {'true' if getattr(settings, key) else 'false'}")
     tmp = path.with_name(path.name + ".tmp")
     tmp.write_text("\n".join(lines) + "\n", encoding="utf-8")
     os.replace(tmp, path)
+
+
+# -- starting with the session (notifications with the window closed) ---
+
+AUTOSTART_NAME = "org.fwmanager.App-background.desktop"
+AUTOSTART = """[Desktop Entry]
+Type=Application
+Name=fwmanager
+Comment=Firewall notifications while the window is closed
+Exec=fwmanager --background
+TryExec=fwmanager
+Icon=org.fwmanager.App
+NoDisplay=true
+X-GNOME-Autostart-enabled=true
+"""
+
+
+def autostart_path() -> Path:
+    base = os.environ.get("XDG_CONFIG_HOME") or str(Path.home() / ".config")
+    return Path(base) / "autostart" / AUTOSTART_NAME
+
+
+def set_autostart(enabled: bool, path: Path | None = None) -> None:
+    """Start fwmanager in the background at login, or stop doing so. Errors are ignored: it
+    only decides whether notifications reach you after the next login."""
+    path = path or autostart_path()
+    try:
+        if enabled:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if not path.exists() or path.read_text(encoding="utf-8") != AUTOSTART:
+                path.write_text(AUTOSTART, encoding="utf-8")
+        else:
+            path.unlink(missing_ok=True)
+    except OSError:
+        pass

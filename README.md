@@ -1,7 +1,5 @@
 # fwmanager
 
-**English** · [Português](README.pt.md)
-
 A beginner-friendly graphical interface for **ufw**. It is not a firewall of its own: it only
 makes ufw easier to use. Pick a profile (**Home**, **Work**, **Public**), let the app switch
 profile by itself when you change Wi-Fi, and rely on a safety net that undoes any change that
@@ -9,7 +7,7 @@ cuts your connection.
 
 100% local: no accounts, no servers, no telemetry.
 
-> Version 1.0.0: on the Launchpad PPA, in the APT repository on GitHub Pages and as a `.deb`
+> Version 1.1.0: on the Launchpad PPA, in the APT repository on GitHub Pages and as a `.deb`
 > in [Releases](https://github.com/Tomascody-web333/fwmanager/releases). What only a real
 > machine can prove is in [docs/VALIDATION.md](docs/VALIDATION.md).
 
@@ -87,6 +85,10 @@ NetworkManager dispatcher (root)  ─┘            only fixed commands
   network that just connected, then checks the gateway is still reachable; if not, it reverts.
   A Wi-Fi or mobile network with no profile gets **Public**; a cable with no profile keeps the
   current one, so plugging in never locks out an SSH session.
+- **The router is part of the network.** The first time you connect to a remembered network,
+  fwmanager remembers its router's hardware address (read from the kernel, never typed). A
+  copy of that Wi-Fi (same name, same password) behind another router gets **Public**, you are
+  notified, and a **Trust** button appears in Networks for when you really replaced the router.
 - **The daemon never accepts rule text.** Clients can only call fixed commands (apply a
   profile by name, confirm, roll back, read state); every argument is validated, and the
   only thing run is `ufw` with an argument list (no shell). Callers must be in the
@@ -108,14 +110,28 @@ wizard appears (see above); it can be skipped and is never shown again once fini
   nothing in. Hidden on the network."), the current network, and the profiles. Each profile
   says in plain words what it lets in, and has **Use**, **Test** (the policy test below) and an
   edit button. After a switch a card asks "Is your connection still working?" with a countdown.
-- **Networks**: which profile for which Wi-Fi.
+- **Networks**: which profile for which Wi-Fi, and whether its router is the one fwmanager
+  knows (a **Trust** button when it is a new one).
 - **Rules**: plain-language sentences (below).
 - **Log**: what the service did, and recent blocked attempts.
 - **Settings**: language; **notifications**, one switch per kind (a change undone, the profile
-  changing by itself on another network, blocked attempts, connections let in — the last two
-  turn ufw's recording on at the level they need and are summed up at most once a minute);
-  recording level; router mode (also filter traffic this computer passes on to a hotspot, VMs
-  or Docker); and Uninstall.
+  changing by itself on another network, an unknown router on a remembered network, blocked
+  attempts, connections let in — the last two turn ufw's recording on at the level they need
+  and are summed up at most once a minute), and **Also when the window is closed**: fwmanager
+  then keeps running in the background and starts at login (`fwmanager --background`, an entry
+  in `~/.config/autostart`), so notifications still reach you; recording level; router mode
+  (also filter traffic this computer passes on to a hotspot, VMs or Docker); **Backup**
+  (below); and Uninstall.
+
+### Backup: export and import
+
+**Settings → Backup** (or `fwmanager-cli export FILE` / `fwmanager-cli import FILE`) saves
+your profile edits, rules, remembered networks (with their routers) and options in one JSON
+file, readable only by you, and puts them back from such a file on this or another computer.
+Importing replaces what is there, after asking. The service checks the file as strictly as it
+checks each setting on its own and refuses all of it if one entry is wrong; nothing is half
+imported. What is not in the file: which profile is active, and anything about ufw itself.
+Imported settings take effect the next time a profile is applied.
 
 Ctrl+1..5 jump between pages, and the page switcher moves to the bottom on narrow windows.
 
@@ -147,14 +163,17 @@ also the moment to press **Test**. Rules are stored in `/var/lib/fwmanager/rules
 
 ## Languages
 
-Portuguese (Portugal) and English. The language is chosen in this order: your choice in
-**Settings** (`~/.config/fwmanager/settings.toml`) > `/etc/fwmanager/config.toml` > the system
-locale (`pt*` gives Portuguese, anything else English). Changing it in Settings rebuilds the window
-at once; it needs no password and never touches the service. The service itself always logs in
-English; the interface translates its status and error codes.
+English, Portuguese (Portugal), Spanish and French. The language is chosen in this order: your
+choice in **Settings** (`~/.config/fwmanager/settings.toml`) > `/etc/fwmanager/config.toml` >
+the system locale (`pt*`, `es*` and `fr*` give those languages, anything else English).
+Changing it in Settings rebuilds the window at once; it needs no password and never touches
+the service. The service itself always logs in English; the interface translates its status
+and error codes. Profile names follow the language too (Home, Casa, Maison...), but inside they
+are always `home`, `work`, `public`, `custom`.
 
-Translations live in `po/*.po`; the `.mo` files are compiled by `dev-install.sh` (no gettext
-tools needed). After changing user-visible text run `python3 scripts/update-po.py`, translate the
+Translations live in `po/*.po` (`pt_PT`, `es`, `fr`; `en` is generated); the `.mo` files are
+compiled by `dev-install.sh` and the package build (no gettext tools needed). Plurals use
+`_n(singular, plural, n)` and each language's own rule. After changing user-visible text run `python3 scripts/update-po.py`, translate the
 new entries, and `python3 scripts/update-po.py --check` (also run by the tests) must pass.
 
 ## Releasing a new version
@@ -182,10 +201,17 @@ It needs, in **Settings → Secrets and variables → Actions**:
 | `APT_GPG_PASSPHRASE` | secret | its passphrase, if it has one |
 | `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
 | `APT_GPG_KEY_ID` | variable | optional: which key signs, if the secret holds several |
+| `LAUNCHPAD_SERIES` | variable | optional: which Ubuntu releases, e.g. `noble=24.04 resolute=26.04` |
 
 GitHub Pages must use **Source: GitHub Actions**. Without the key only the release is
-published; without `LAUNCHPAD_PPA` the PPA is skipped. Launchpad builds for Ubuntu 24.04
-(noble); to offer a newer Ubuntu, use **Copy packages** on the PPA page.
+published; without `LAUNCHPAD_PPA` the PPA is skipped. The PPA gets one upload per Ubuntu
+release from 24.04 on that Launchpad still builds for (asked from Launchpad each time), as
+`<version>~ubuntu<release>.1`, so a newer Ubuntu always gets the newer build.
+
+Every push and pull request also runs the whole test suite on GitHub (`tests.yml`): as root,
+with ufw in network namespaces, the windows on a virtual screen and a real install of the
+package. A test that would be skipped there fails instead, and a release only starts once
+they all pass.
 
 The pieces can also run by hand:
 
@@ -205,7 +231,7 @@ script (`build-deb.sh --stage`), so both packages hold the same files.
 
 ```sh
 sudo apt install ufw                       # fwmanager drives ufw; install it first
-sudo scripts/dev-install.sh                # --user NAME and --lang pt|en are optional shortcuts
+sudo scripts/dev-install.sh                # --user NAME and --lang pt|en|es|fr are optional shortcuts
 sudo scripts/dev-uninstall.sh
 ```
 
@@ -244,7 +270,10 @@ fwmanager-cli profiles            # every profile, in plain words
 fwmanager-cli apply home          # switch; press Enter to keep it, r to undo (30 s)
 fwmanager-cli edit home --block samba --ping off   # change what a profile allows and blocks
 fwmanager-cli reset home          # back to the defaults
-fwmanager-cli networks list       # which profile on which network
+fwmanager-cli networks list       # which profile on which network, and its router
+fwmanager-cli networks trust-router --ssid "Home Wi-Fi"   # after replacing that router
+fwmanager-cli export backup.json  # profile edits, rules, networks and options in one file
+fwmanager-cli import backup.json  # put them back (asks first; --yes to skip)
 fwmanager-cli uninstall           # remove fwmanager (asks for a yes, then the password)
 ```
 
@@ -289,7 +318,6 @@ install/uninstall test changes the machine, so it is opt-in:
 - [docs/VALIDATION.md](docs/VALIDATION.md): what the automated tests cover, and the checklist for
   what only a real machine can prove (systemd, NetworkManager, IPv6, DHCP, desktop, polkit).
 - [docs/SECURITY.md](docs/SECURITY.md): the security model in one page.
-- Every document exists in English and Portuguese (`*.pt.md`).
 
 ## Known limits
 
@@ -300,10 +328,11 @@ install/uninstall test changes the machine, so it is opt-in:
   host with IPv6 enabled.
 - Not yet exercised on a real machine: the systemd hardening, the NetworkManager hook, DHCP,
   the polkit prompt and the desktop look (see [docs/VALIDATION.md](docs/VALIDATION.md)).
-- A network is recognised by its NetworkManager connection (Wi-Fi name and connection id). A
-  fake access point with the same name and password is treated as the real one, so keep
-  services open only on networks protected by a password you trust (WPA2/WPA3). The window
-  warns when you pick Home, Work or Custom for a Wi-Fi without a password.
+- A network is recognised by its NetworkManager connection (Wi-Fi name and connection id) and,
+  once seen, by its router's hardware address. An attacker who also copies that address (it
+  is not secret) still passes as the real router, so keep services open only on networks
+  protected by a password you trust (WPA2/WPA3). The window warns when you pick Home, Work or
+  Custom for a Wi-Fi without a password. Only IPv4 gateways are read for the address.
 - The systemd unit is relaxed from the minimal set (`CAP_NET_RAW`, `AF_INET`, write access to
   `/etc/ufw`) because ufw and iptables need it.
 

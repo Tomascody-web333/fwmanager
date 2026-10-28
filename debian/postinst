@@ -23,7 +23,8 @@ if [ "$1" = configure ]; then
         / org.freedesktop.DBus.ReloadConfig >/dev/null 2>&1 || true
     if [ -d /run/systemd/system ]; then
         systemctl daemon-reload || true
-        systemctl try-restart fwmanagerd.service || true  # an upgrade runs the new code
+        # Only if it runs or is enabled (setup did that): an upgrade then runs the new code.
+        deb-systemd-invoke restart fwmanagerd.service >/dev/null || true
     fi
 fi
 # Lines debhelper adds in the Launchpad/PPA build (a plain comment in the GitHub .deb).

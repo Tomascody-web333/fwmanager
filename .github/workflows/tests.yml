@@ -1,0 +1,43 @@
+# Every test, on every push and pull request, and before every release (release.yml calls it).
+# Runs as root on a throw-away GitHub machine, so the tests that really install the package,
+# build network namespaces or open windows on a virtual screen all run; a test that skips here
+# fails instead (FWMANAGER_TEST_NO_SKIPS), so a missing tool cannot hide a broken test.
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            python3-gi python3-pytest gir1.2-gtk-4.0 gir1.2-adw-1 gir1.2-gdkpixbuf-2.0 \
+            librsvg2-common ufw nftables iptables iproute2 dbus xvfb xdotool \
+            apt-utils dpkg-dev debhelper build-essential fakeroot libxml2-utils gnupg pkexec
+          python3 -m pip install --user --break-system-packages ruff==0.17.3
+
+      - name: Style
+        run: |
+          ~/.local/bin/ruff check src tests packaging
+          ~/.local/bin/ruff format --check src tests packaging
+
+      - name: Translations up to date
+        run: PYTHONPATH=src python3 scripts/update-po.py --check
+
+      - name: Every test, as root
+        env:
+          FWMANAGER_TEST_REAL_INSTALL: "1"
+          FWMANAGER_TEST_NO_SKIPS: "1"
+        run: sudo -E /usr/bin/python3 -m pytest -q -p no:cacheprovider -rs

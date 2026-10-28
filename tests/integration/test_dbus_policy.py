@@ -13,7 +13,7 @@ import subprocess
 
 import pytest
 from helpers import system_bus
-from helpers.harness import ROOT, Daemon
+from helpers.harness import Daemon
 
 pytestmark = pytest.mark.integration
 
@@ -127,8 +127,8 @@ print("signals:", ",".join(got))
 """
 
 
-def test_members_receive_the_daemons_signals(daemon):
-    script = SIGNAL_SCRIPT.replace("@SRC@", str(ROOT / "src")).replace("@BUS@", daemon.bus)
+def test_members_receive_the_daemons_signals(daemon, src_for_others):
+    script = SIGNAL_SCRIPT.replace("@SRC@", str(src_for_others)).replace("@BUS@", daemon.bus)
     r = subprocess.run(
         ["/usr/bin/python3.12", "-c", script], capture_output=True, text=True,
         env={"PATH": "/usr/bin:/bin"}, timeout=60, **MEMBER,

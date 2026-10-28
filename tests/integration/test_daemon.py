@@ -128,6 +128,12 @@ def test_no_method_accepts_rule_text(daemon):
         "SetNetworkProfile",
         "RemoveNetwork",
         "GetNetworkProfile",
+        "CheckNetwork",
+        "ListNetworkRouters",
+        "TrustRouter",
+        "ForgetRouters",
+        "ExportSettings",
+        "ImportSettings",
     }
 
 

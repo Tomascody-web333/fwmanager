@@ -1,0 +1,4 @@
+# The first-run setup enables the service with systemctl, so removal disables it the same way;
+# deb-systemd-helper only undoes what it enabled itself.
+fwmanager: maintainer-script-calls-systemctl [prerm:*]
+fwmanager: maintainer-script-calls-systemctl [postrm:*]

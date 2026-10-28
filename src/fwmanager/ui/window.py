@@ -56,7 +56,12 @@ class MainWindow(Adw.ApplicationWindow):
         self.rules = RulesPage(controller, self._refresh_profiles)
         self.log = LogPage(controller)
         self.settings = SettingsPage(
-            controller, user_settings, on_language, on_notifications, self.open_uninstall
+            controller,
+            user_settings,
+            on_language,
+            on_notifications,
+            self.open_uninstall,
+            on_background=getattr(app, "set_background", None),
         )
         self.pages = [
             ("home", self.home),
@@ -280,6 +285,8 @@ class MainWindow(Adw.ApplicationWindow):
         if dialog is not None:
             dialog.force_close()  # an open dialog would catch the window's close
         app = self.get_application()
+        if hasattr(app, "forget_login_start"):
+            app.forget_login_start()  # nothing left to start at login
         self.close()
         if app is not None:
             app.quit()

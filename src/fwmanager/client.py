@@ -154,8 +154,30 @@ class Client:
     def get_network_profile(self, ssid: str, uuid: str) -> str:
         return self._call("GetNetworkProfile", GLib.Variant("(ss)", (ssid, uuid)), "(s)")[0]
 
+    def check_network(self, ssid: str, uuid: str, router: str) -> tuple[str, str]:
+        """(profile, verdict) for a network that just came up; see the service."""
+        args = GLib.Variant("(sss)", (ssid, uuid, router))
+        return tuple(self._call("CheckNetwork", args, "(ss)"))
+
+    def list_network_routers(self) -> list[tuple[str, str, list[str], str]]:
+        """(ssid, uuid, remembered routers, router seen but not recognised) per network."""
+        return self._call("ListNetworkRouters", reply="(a(ssass))")[0]
+
+    def trust_router(self, ssid: str, uuid: str) -> None:
+        self._call("TrustRouter", GLib.Variant("(ss)", (ssid, uuid)))
+
+    def forget_routers(self, ssid: str, uuid: str) -> None:
+        self._call("ForgetRouters", GLib.Variant("(ss)", (ssid, uuid)))
+
+    def export_settings(self) -> str:
+        return self._call("ExportSettings", reply="(s)")[0]
+
+    def import_settings(self, text: str) -> None:
+        self._call("ImportSettings", GLib.Variant("(s)", (text,)))
+
     def subscribe(self, callback: Callable[[str, tuple], None]) -> int:
-        """Call ``callback(signal_name, args)`` for Applied/Confirmed/Reverted signals."""
+        """Call ``callback(signal_name, args)`` for every signal of the service (Applied,
+        Confirmed, Reverted, RouterChanged)."""
 
         def _on_signal(_conn, _sender, _path, _iface, name, params) -> None:
             callback(name, params.unpack())

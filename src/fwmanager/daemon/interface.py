@@ -95,6 +95,34 @@ INTROSPECTION_XML = f"""
       <arg type="s" name="uuid" direction="in"/>
       <arg type="s" name="profile" direction="out"/>
     </method>
+    <method name="CheckNetwork">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+      <arg type="s" name="router" direction="in"/>
+      <arg type="s" name="profile" direction="out"/>
+      <arg type="s" name="verdict" direction="out"/>
+    </method>
+    <method name="ListNetworkRouters">
+      <arg type="a(ssass)" name="networks" direction="out"/>
+    </method>
+    <method name="TrustRouter">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+    </method>
+    <method name="ForgetRouters">
+      <arg type="s" name="ssid" direction="in"/>
+      <arg type="s" name="uuid" direction="in"/>
+    </method>
+    <method name="ExportSettings">
+      <arg type="s" name="settings" direction="out"/>
+    </method>
+    <method name="ImportSettings">
+      <arg type="s" name="settings" direction="in"/>
+    </method>
+    <signal name="RouterChanged">
+      <arg type="s" name="ssid"/>
+      <arg type="s" name="uuid"/>
+    </signal>
     <signal name="Applied">
       <arg type="s" name="profile"/>
       <arg type="u" name="timeout"/>

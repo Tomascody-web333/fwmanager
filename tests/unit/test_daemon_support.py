@@ -77,6 +77,12 @@ def test_interface_is_fixed_command_set():
         "SetNetworkProfile",
         "RemoveNetwork",
         "GetNetworkProfile",
+        "CheckNetwork",
+        "ListNetworkRouters",
+        "TrustRouter",
+        "ForgetRouters",
+        "ExportSettings",
+        "ImportSettings",
     }
     apply = next(m for m in info.methods if m.name == "ApplyProfile")
     assert [a.signature for a in apply.in_args] == ["s"]

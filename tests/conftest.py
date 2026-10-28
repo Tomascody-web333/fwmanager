@@ -8,6 +8,49 @@ import pytest
 from helpers.harness import make_ufw_root
 from helpers.nftcli import NftCli
 
+ROOT = Path(__file__).resolve().parents[1]
+
+# On CI (FWMANAGER_TEST_NO_SKIPS=1) every tool is installed, so a skipped test means something
+# is missing there, not that it cannot run: it fails instead. Only these skips are expected.
+EXPECTED_SKIPS = ("already root",)
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+    if os.environ.get("FWMANAGER_TEST_NO_SKIPS") != "1" or not report.skipped:
+        return
+    if hasattr(report, "wasxfail"):
+        return
+    reason = report.longrepr[-1] if isinstance(report.longrepr, tuple) else str(report.longrepr)
+    if not any(expected in reason for expected in EXPECTED_SKIPS):
+        report.outcome = "failed"
+        report.longrepr = f"skipped on CI, where it should run: {reason}"
+
+
+def _readable_by_others(path: Path) -> bool:
+    return all(os.stat(p).st_mode & 0o005 == 0o005 for p in [path, *path.parents])
+
+
+@pytest.fixture(scope="session")
+def src_for_others():
+    """The source tree where an unprivileged account (nobody) can read it.
+
+    A CI checkout often sits under a home folder others cannot enter; then a copy is used.
+    """
+    src = ROOT / "src"
+    if _readable_by_others(src):
+        yield src
+        return
+    copy = Path(tempfile.mkdtemp(prefix="fwm-src-"))
+    shutil.copytree(src / "fwmanager", copy / "fwmanager",
+                    ignore=shutil.ignore_patterns("__pycache__"))  # fmt: skip
+    for path in [copy, *copy.rglob("*")]:
+        path.chmod(0o755 if path.is_dir() else 0o644)
+    yield copy
+    shutil.rmtree(copy)
+
 
 @pytest.fixture(scope="session")
 def netns_prefix():

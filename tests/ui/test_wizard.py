@@ -125,7 +125,7 @@ def test_skipping_goes_to_the_normal_window_and_remembers(make):
 
 def test_the_language_choice_is_reported(make):
     e = make()
-    e.wizard.language.set_selected(0)  # Português
+    e.wizard.language.set_selected(1)  # Português
     assert e.languages == ["pt"]
 
 

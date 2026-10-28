@@ -78,6 +78,11 @@ def test_many_clients_at_once(nft, netns_prefix, private_bus, tmp_path, ufw_root
             d.client.rollback()
         except FwError:
             pass
+        # Edits and rules may have changed what the active profile means since it was applied;
+        # applying it once more must then leave ufw holding exactly that.
+        active = d.client.status()["active_profile"]
+        d.client.apply_profile(active)
+        d.client.confirm()
         assert_consistent(d)
     finally:
         log = d.stop()

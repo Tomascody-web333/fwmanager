@@ -240,5 +240,8 @@ def uninstall(deps: Deps, yes: bool = False) -> int:
     result = _run_helper(deps, "uninstall", None)
     if not result.ok:
         return _helper_failed(result, paths.UNINSTALL_COMMAND)
+    from fwmanager.ui.settings import set_autostart
+
+    set_autostart(False)  # nothing left to start at login (for whoever ran this)
     print(_("fwmanager was removed"))
     return EXIT_OK
