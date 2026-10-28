@@ -272,3 +272,22 @@ def test_ppa_upload_retries_and_does_not_forget_the_others(
     assert len(sent) == uploads
     if code:
         assert "NOT uploaded for: resolute" in r.stderr and "series" in r.stderr
+
+
+@pytest.mark.skipif(
+    not (shutil.which("dpkg-buildpackage") and shutil.which("dh")), reason="needs debhelper"
+)
+def test_ppa_upload_by_default_is_one_plain_version_for_24_04(gnupg, tmp_path):
+    env, fingerprint = gnupg
+    bin_dir, log = fake_dput(tmp_path, "never-matches", 0)
+    clean = {k: v for k, v in env.items() if k != "LAUNCHPAD_SERIES"}
+    r = subprocess.run(
+        ["sh", str(ROOT / "packaging/ppa/upload.sh"), "someone/fwmanager", fingerprint],
+        env={**clean, "APT_GPG_PASSPHRASE": "secret", "PATH": f"{bin_dir}:{os.environ['PATH']}"},
+        capture_output=True, text=True, timeout=600,
+    )  # fmt: skip
+    assert r.returncode == 0, r.stderr[-2000:]
+    (sent,) = log.read_text().split()
+    release = DEB.split(".", 1)[1].removesuffix(".deb")
+    assert sent.endswith(f"fwmanager_{release}_source.changes")  # no ~ubuntu suffix
+    assert "~" not in sent

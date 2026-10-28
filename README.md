@@ -201,12 +201,20 @@ It needs, in **Settings → Secrets and variables → Actions**:
 | `APT_GPG_PASSPHRASE` | secret | its passphrase, if it has one |
 | `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
 | `APT_GPG_KEY_ID` | variable | optional: which key signs, if the secret holds several |
-| `LAUNCHPAD_SERIES` | variable | optional: which Ubuntu releases, e.g. `noble=24.04 resolute=26.04` |
+| `LAUNCHPAD_SERIES` | variable | optional: other Ubuntu releases for the PPA (below) |
 
 GitHub Pages must use **Source: GitHub Actions**. Without the key only the release is
-published; without `LAUNCHPAD_PPA` the PPA is skipped. The PPA gets one upload per Ubuntu
-release from 24.04 on that Launchpad still builds for (asked from Launchpad each time), as
-`<version>~ubuntu<release>.1`, so a newer Ubuntu always gets the newer build.
+published; without `LAUNCHPAD_PPA` the PPA is skipped.
+
+The PPA gets **one** upload, for Ubuntu 24.04, with exactly the release's version (`1.1.0`).
+fwmanager is pure Python (`Architecture: all`), so for every newer Ubuntu you copy that very
+package on Launchpad, keeping the same version: PPA page → **View package details** →
+**Copy packages** → tick fwmanager → *Destination series*: **The same series** is not what you
+want, pick the newer series (or *All*) → **Copy existing binaries** → Copy. Launchpad refuses
+the same version for two releases when the source differs, which is why uploading once and
+copying is the way to keep plain `1.1.0` everywhere. (Setting `LAUNCHPAD_SERIES` to several
+releases, e.g. `noble=24.04 resolute=26.04`, or to `auto` for every supported one, uploads
+for each instead, as `<version>~ubuntu<release>.1`.)
 
 Every push and pull request also runs the whole test suite on GitHub (`tests.yml`): as root,
 with ufw in network namespaces, the windows on a virtual screen and a real install of the

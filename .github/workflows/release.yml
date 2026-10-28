@@ -8,8 +8,9 @@
 # GitHub Pages. If that secret holds more than one key, the variable APT_GPG_KEY_ID says which
 # one signs. With the variable LAUNCHPAD_PPA ("launchpad-user/ppa-name") set as well, the source
 # package is signed with the same key and uploaded to that PPA, where Launchpad builds it, once
-# for every supported Ubuntu from 24.04 on (or the ones in the variable LAUNCHPAD_SERIES,
-# "noble=24.04 resolute=26.04"). Run again from the Actions tab with skip_tests (and series, to
+# for Ubuntu 24.04 with exactly the release's version; the other Ubuntu releases get it with
+# "Copy packages" on the PPA page (the variable LAUNCHPAD_SERIES, "noble=24.04 resolute=26.04"
+# or "auto", uploads for several instead, as <version>~ubuntu<release>.1). Run again from the Actions tab with skip_tests (and series, to
 # redo only some Ubuntu releases) when only a later step failed; a PPA problem does not keep the
 # site from being published.
 name: Release
@@ -27,7 +28,7 @@ on:
         type: boolean
         default: false
       series:
-        description: "Only these Ubuntu releases for the PPA, e.g. resolute=26.04 (empty: all)"
+        description: "Ubuntu releases for the PPA, e.g. noble=24.04 (empty: 24.04 only)"
         required: false
         default: ""
 

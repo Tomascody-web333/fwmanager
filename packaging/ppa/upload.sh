@@ -1,16 +1,20 @@
 #!/bin/sh
-# Builds the source package (debian/) once per Ubuntu release, signs it and uploads it to a
-# Launchpad PPA, which then builds the .deb itself.
+# Builds the source package (debian/), signs it and uploads it to a Launchpad PPA, which then
+# builds the .deb itself.
 #
 #   packaging/ppa/upload.sh PPA KEY [--no-upload]
 #
 # PPA is "launchpad-user/ppa-name" (as in ppa:launchpad-user/ppa-name). KEY is the GPG key
 # registered in that Launchpad account; a passphrase, if any, is read from APT_GPG_PASSPHRASE.
 #
-# The releases are every Ubuntu from 24.04 on that Launchpad still builds for, asked from
-# api.launchpad.net. LAUNCHPAD_SERIES ("noble=24.04 resolute=26.04") chooses them instead.
-# Each one gets its own version, VERSION~ubuntuNN.NN.1, so a newer Ubuntu sorts higher and
-# Launchpad never sees the same version twice.
+# By default it uploads once, for Ubuntu 24.04 (noble), with exactly the version of
+# debian/changelog (1.1.0). The package is pure Python (Architecture: all), so the PPA page's
+# "Copy packages" gives every newer Ubuntu the very same 1.1.0, binary and all.
+#
+# LAUNCHPAD_SERIES chooses other releases: "noble=24.04 resolute=26.04", or "auto" for every
+# Ubuntu from 24.04 on that Launchpad still builds for (asked from api.launchpad.net). With
+# more than one, each gets its own version, VERSION~ubuntuNN.NN.1: Launchpad refuses the same
+# version for two releases when the source differs.
 #
 # --no-upload stops after signing (the files are left in the printed folder).
 # Needs dpkg-dev, debhelper, gpg, python3 and, to upload, dput.
@@ -35,7 +39,9 @@ command -v dpkg-buildpackage >/dev/null 2>&1 || die "dpkg-buildpackage not found
 [ "$UPLOAD" -eq 0 ] || command -v dput >/dev/null 2>&1 || die "dput not found (apt install dput)"
 
 # -- which releases ---
-if [ -n "${LAUNCHPAD_SERIES:-}" ]; then
+if [ -z "${LAUNCHPAD_SERIES:-}" ]; then
+    SERIES="noble 24.04"
+elif [ "$LAUNCHPAD_SERIES" != "auto" ]; then
     SERIES=$(printf '%s\n' $LAUNCHPAD_SERIES | tr '=' ' ')
 else
     SERIES=$(curl -fsS "https://api.launchpad.net/devel/ubuntu/series?ws.size=100" \
@@ -67,7 +73,11 @@ CHANGES_FILES=""
 for pair in $(echo "$SERIES" | tr ' ' '='); do
     name=${pair%%=*}
     number=${pair#*=}
-    version="$VERSION~ubuntu$number.1"
+    if [ "$(echo "$SERIES" | wc -l)" -eq 1 ]; then
+        version=$VERSION  # one release: the plain version, copied to the others on Launchpad
+    else
+        version="$VERSION~ubuntu$number.1"
+    fi
     SRC="$WORK/$name/fwmanager-$version"
     mkdir -p "$SRC"
     # Exactly what is in git (no virtualenv, caches or build output).
