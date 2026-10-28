@@ -85,11 +85,28 @@ done
 rm -f "$WORK/pass"
 
 if [ "$UPLOAD" -eq 1 ]; then
+    FAILED=""
     for changes in $CHANGES_FILES; do
+        name=$(basename "$(dirname "$changes")")
         # -u: the files were signed a moment ago, and Launchpad checks the signature itself.
-        dput -u "ppa:$PPA" "$changes"
+        # Launchpad's upload server now and then answers "550 internal server error": the same
+        # upload a little later works, so each one is tried a few times before giving up, and a
+        # failure of one release does not stop the others.
+        ok=0
+        for attempt in 1 2 3 4; do
+            if dput -u "ppa:$PPA" "$changes"; then ok=1; break; fi
+            echo "ppa-upload: $name failed (attempt $attempt of 4)" >&2
+            [ "$attempt" -lt 4 ] && sleep $((attempt * ${PPA_RETRY_DELAY:-20}))
+        done
+        [ "$ok" -eq 1 ] || FAILED="$FAILED $name"
     done
     rm -rf "$WORK"
+    if [ -n "$FAILED" ]; then
+        # Not uploaded: say which, and how to do just those (the others must not be sent twice).
+        echo "ppa-upload: NOT uploaded for:$FAILED" >&2
+        echo "ppa-upload: run again with series set to those releases only" >&2
+        exit 1
+    fi
     echo "Uploaded fwmanager $VERSION to ppa:$PPA for: $(echo "$SERIES" | cut -d' ' -f1 | tr '\n' ' ')"
     echo "Launchpad e-mails when each one is built."
 else

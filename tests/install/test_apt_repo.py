@@ -227,3 +227,48 @@ def test_ppa_upload_refuses_a_malformed_ppa_name(gnupg):
         env=env, capture_output=True, text=True,
     )  # fmt: skip
     assert r.returncode != 0 and "launchpad-user/ppa-name" in r.stderr
+
+
+def fake_dput(tmp_path, failing_series: str, failures: int):
+    """A dput that fails ``failures`` times for one release, then works; logs every upload."""
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    log, count = tmp_path / "uploads.log", tmp_path / "count"
+    script = bin_dir / "dput"
+    script.write_text(
+        "#!/bin/sh\n"
+        'changes=$1; [ "$changes" = "-u" ] && { shift; shift; changes=$1; }\n'
+        f'echo "$changes" >> "{log}"\n'
+        f'case "$changes" in *{failing_series}*) n=$(cat "{count}" 2>/dev/null || echo 0)\n'
+        f'  n=$((n + 1)); echo $n > "{count}"\n'
+        f'  [ "$n" -le {failures} ] && {{ echo "550 internal server error" >&2; exit 1; }};; esac\n'
+        "exit 0\n"
+    )
+    script.chmod(0o755)
+    return bin_dir, log
+
+
+@pytest.mark.skipif(
+    not (shutil.which("dpkg-buildpackage") and shutil.which("dh")), reason="needs debhelper"
+)
+@pytest.mark.parametrize(
+    "failures,code,uploads",
+    [(2, 0, 4), (9, 1, 5)],  # works on the third try / never works: the others still go up
+)
+def test_ppa_upload_retries_and_does_not_forget_the_others(
+    gnupg, tmp_path, failures, code, uploads
+):
+    env, fingerprint = gnupg
+    bin_dir, log = fake_dput(tmp_path, "ubuntu26.04", failures)
+    r = subprocess.run(
+        ["sh", str(ROOT / "packaging/ppa/upload.sh"), "someone/fwmanager", fingerprint],
+        env={**env, "APT_GPG_PASSPHRASE": "secret", "PATH": f"{bin_dir}:{os.environ['PATH']}",
+             "LAUNCHPAD_SERIES": "noble=24.04 resolute=26.04", "PPA_RETRY_DELAY": "0"},
+        capture_output=True, text=True, timeout=600,
+    )  # fmt: skip
+    assert r.returncode == code, r.stderr[-2000:]
+    sent = log.read_text().split()
+    assert sum("ubuntu24.04" in s for s in sent) == 1  # the working one is sent exactly once
+    assert len(sent) == uploads
+    if code:
+        assert "NOT uploaded for: resolute" in r.stderr and "series" in r.stderr
