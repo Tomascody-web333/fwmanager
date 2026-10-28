@@ -17,7 +17,8 @@
   `/etc/default/ufw`; se não for confirmada em 30 s (ou se a aplicação falhar a meio), é
   restaurada.
 - **A configuração inicial** é o único passo que precisa de direitos de administrador. Passa
-  pelo polkit (`pkexec`) para um só auxiliar, `/usr/local/libexec/fwmanager/fwmanager-setup`. O
+  pelo polkit (`pkexec`) para um só auxiliar, `/usr/libexec/fwmanager/fwmanager-setup` (em
+  `/usr/local` na instalação de desenvolvimento). O
   auxiliar não aceita argumentos livres: adiciona ao grupo `fwmanager` a conta que executou o
   `pkexec` (`PKEXEC_UID`, nunca um valor da linha de comandos) e arranca o serviço. A
   autorização é `auth_admin_keep`: uma palavra-passe, sem credencial guardada.
@@ -41,7 +42,11 @@
 - **A desinstalação** (botão nas Definições ou `fwmanager-cli uninstall`) passa pelo mesmo
   auxiliar com uma segunda ação do polkit, `org.fwmanager.uninstall`, distinguida pelo primeiro
   argumento do auxiliar. Pede sempre a palavra-passe de administrador (`auth_admin`, nada fica
-  guardado) e só executa o desinstalador instalado.
+  guardado) e só executa o desinstalador instalado (no pacote, `apt-get purge fwmanager`).
+- **Os pacotes são assinados.** O envio para o PPA e o repositório APT no GitHub Pages são
+  assinados com a chave `413E F57C A7FE 5D37 6108 0D61 D519 2575 2DA1 7E4A`; o apt recusa um
+  índice cuja assinatura não confira. Um `.deb` descarregado das Releases confere-se com o
+  `SHA256SUMS`.
 - **Nada é enviado para lado nenhum.** Sem acesso à rede, contas ou telemetria; os registos
   nunca contêm o conteúdo das regras.
 - **Outras firewalls nunca são desativadas automaticamente.** O firewalld bloqueia o fwmanager
