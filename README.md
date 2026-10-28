@@ -160,7 +160,9 @@ key. Pushing a tag such as `1.0.0` (matching the version in `pyproject.toml`) ma
 Actions build both files and attach them to a new release. If the repository has the secret
 `APT_GPG_PRIVATE_KEY` (plus `APT_GPG_PASSPHRASE` when the key has one), the same run rebuilds
 the APT repository from every release with `packaging/apt/build-repo.sh`, signs it with that
-key and publishes it on GitHub Pages.
+key and publishes it on GitHub Pages. With the variable `LAUNCHPAD_PPA` set too
+(`launchpad-user/ppa-name`), it signs the source package in `debian/` with the same key and
+uploads it to that PPA (`packaging/ppa/upload.sh`), where Launchpad builds it.
 
 The package installs under `/usr` (`/usr/bin`, `/usr/lib/fwmanager`,
 `/usr/libexec/fwmanager`), keeps its translations in `/usr/share/fwmanager/locale` (minimal
@@ -275,13 +277,6 @@ install/uninstall test changes the machine, so it is opt-in:
 
 ## License
 
-[PolyForm Noncommercial 1.0.0](LICENSE). In short (the [license text](LICENSE) is what counts):
-
-- You may use, study, change and share fwmanager for any **noncommercial** purpose: at home,
-  for learning, in hobby projects, in schools, charities and public institutions.
-- You may **not** sell it or use it commercially without the author's permission.
-- Whoever passes it on must keep the license and the line
-  `Required Notice: Copyright (c) 2026 Tomascody-web333`, so nobody can present the work as
-  their own.
-
-For commercial use, ask the author by opening an issue.
+[MIT](LICENSE): you may use, copy, change, share and sell fwmanager, as long as the copyright
+notice (`Copyright (c) 2026 Tomascody-web333`) and the license text stay with it. It comes with
+no warranty.

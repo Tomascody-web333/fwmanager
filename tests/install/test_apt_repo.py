@@ -176,3 +176,37 @@ def test_apt_installs_from_the_signed_repository(repo, netns_prefix, tmp_path):
         for f in lists.glob("_srv_fwmanager-apt-test_*"):
             f.unlink()
     assert not installed()
+
+
+@pytest.mark.skipif(
+    not (shutil.which("dpkg-buildpackage") and shutil.which("dh")), reason="needs debhelper"
+)
+def test_ppa_upload_signs_the_source_package_with_the_key(gnupg):
+    env, fingerprint = gnupg
+    subprocess.run(["gpgconf", "--kill", "gpg-agent"], env=env, check=True)  # no cached secret
+    r = subprocess.run(
+        ["sh", str(ROOT / "packaging/ppa/upload.sh"), "someone/fwmanager", fingerprint,
+         "--no-upload"],
+        env={**env, "APT_GPG_PASSPHRASE": "secret"}, capture_output=True, text=True, timeout=300,
+    )  # fmt: skip
+    assert r.returncode == 0, r.stderr[-3000:]
+    work = Path(r.stdout.strip().splitlines()[-1])
+    try:
+        version = DEB.split(".", 1)[1].removesuffix(".deb")
+        for name in (f"fwmanager_{version}.dsc", f"fwmanager_{version}_source.changes"):
+            v = subprocess.run(["gpg", "--batch", "--verify", str(work / name)], env=env,
+                               capture_output=True, text=True)  # fmt: skip
+            assert v.returncode == 0 and "Good signature" in v.stderr, v.stderr
+        assert (work / f"fwmanager_{version}.tar.xz").is_file()
+        assert not (work / "pass").exists()  # the passphrase never stays on disk
+    finally:
+        shutil.rmtree(work)
+
+
+def test_ppa_upload_refuses_a_malformed_ppa_name(gnupg):
+    env, fingerprint = gnupg
+    r = subprocess.run(
+        ["sh", str(ROOT / "packaging/ppa/upload.sh"), "fwmanager", fingerprint, "--no-upload"],
+        env=env, capture_output=True, text=True,
+    )  # fmt: skip
+    assert r.returncode != 0 and "launchpad-user/ppa-name" in r.stderr

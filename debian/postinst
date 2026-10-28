@@ -26,4 +26,7 @@ if [ "$1" = configure ]; then
         systemctl try-restart fwmanagerd.service || true  # an upgrade runs the new code
     fi
 fi
+# Lines debhelper adds in the Launchpad/PPA build (a plain comment in the GitHub .deb).
+#DEBHELPER#
+
 exit 0

@@ -1,0 +1,8 @@
+# Default exclusions (.git and friends), plus what a working copy accumulates.
+tar-ignore
+tar-ignore = ".venv"
+tar-ignore = "dist"
+tar-ignore = "*.egg-info"
+tar-ignore = "__pycache__"
+tar-ignore = ".pytest_cache"
+tar-ignore = ".ruff_cache"

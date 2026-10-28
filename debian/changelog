@@ -1,0 +1,6 @@
+fwmanager (1.0.0) noble; urgency=medium
+
+  * First release: profiles per network for ufw, a window and a command line,
+    changes undone after 30 seconds unless confirmed, Portuguese and English.
+
+ -- Tomascody-web333 <general@homeserverlab.org>  Wed, 28 Oct 2026 14:00:00 +0000
