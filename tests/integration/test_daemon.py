@@ -18,12 +18,15 @@ def test_first_boot_then_apply_confirm_status(daemon):
     c = daemon.client
     assert set(c.list_profiles()) == {"casa", "trabalho", "publico", "personalizado"}
     assert c.status()["active_profile"] == "publico"  # first boot
+    assert c.status()["configured"] is False  # nobody has chosen anything yet: setup to do
     c.apply_profile("casa")
     st = c.status()
     assert st["pending_profile"] == "casa" and st["seconds_left"] >= 1
+    assert st["configured"] is False  # not until it is confirmed
     c.confirm()
     st = c.status()
     assert st["active_profile"] == "casa" and st["pending_profile"] == ""
+    assert st["configured"] is True  # done once, in any client, done for all of them
 
 
 def test_timeout_reverts_via_daemon(daemon):

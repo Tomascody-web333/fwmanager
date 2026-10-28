@@ -37,6 +37,7 @@ done
 
 if [ "$STAGED" -eq 0 ]; then
     [ "$(id -u)" -eq 0 ] || die "must run as root (use sudo)" "tem de correr como root (use sudo)"
+    [ -d /run/systemd/system ] || USE_SYSTEMD=0  # containers and chroots have no systemd
 else
     USE_SYSTEMD=0
 fi

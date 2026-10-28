@@ -1,9 +1,14 @@
-"""The one privileged step of first-run setup, run through ``pkexec`` (polkit asks for a password).
+"""The only privileged steps of the app, run through ``pkexec`` (polkit asks for a password).
 
-It does exactly two things for the account that asked, and takes no arguments beyond the verb:
-add that account to the ``fwmanager`` group, and start the service. The account is never read
-from the command line: ``pkexec`` puts the caller's uid in ``PKEXEC_UID`` and nothing else is
-trusted. Everything it runs is a fixed argument list with an absolute path.
+Two verbs, no other arguments:
+
+- ``setup``: add the account that asked to the ``fwmanager`` group and start the service. The
+  account is never read from the command line: ``pkexec`` puts the caller's uid in
+  ``PKEXEC_UID`` and nothing else is trusted.
+- ``uninstall``: run the installed uninstaller, which undoes fwmanager's changes to ufw and
+  removes the app (window, command line and service alike).
+
+Everything it runs is a fixed argument list with an absolute path.
 """
 
 from __future__ import annotations
@@ -18,6 +23,7 @@ from pathlib import Path
 
 GROUP = "fwmanager"
 SERVICE = "fwmanagerd.service"
+UNINSTALLER = Path("/usr/local/libexec/fwmanager/uninstall")
 USERNAME_RE = re.compile(r"^[a-z_][a-z0-9_-]{0,31}\$?$")
 
 EXIT_OK, EXIT_FAILED, EXIT_REFUSED, EXIT_USAGE = 0, 1, 3, 64
@@ -86,13 +92,33 @@ def setup(
     return EXIT_OK
 
 
+def uninstall(
+    run: Callable = subprocess.run,
+    uninstaller: Path = UNINSTALLER,
+    euid: Callable[[], int] = os.geteuid,
+) -> int:
+    """Remove fwmanager for everyone. Its changes to ufw are undone first, by the uninstaller."""
+    if euid() != 0:
+        raise Refused("must run as root (through pkexec)")
+    if not uninstaller.is_file():
+        raise Refused("uninstaller not found")
+    # Everything this process needs is already loaded: the uninstaller deletes our own files.
+    result = run(["/bin/sh", str(uninstaller)], capture_output=True, text=True, timeout=300)
+    if result.returncode != 0:
+        print("fwmanager-setup: the uninstaller failed", file=sys.stderr)
+        print(result.stderr[-2000:], file=sys.stderr)
+        return EXIT_FAILED
+    print("fwmanager-setup: fwmanager was removed")
+    return EXIT_OK
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = sys.argv[1:] if argv is None else argv
-    if argv != ["setup"]:
-        print("usage: fwmanager-setup setup   (run it through pkexec)", file=sys.stderr)
+    if argv not in (["setup"], ["uninstall"]):
+        print("usage: fwmanager-setup setup|uninstall   (run it through pkexec)", file=sys.stderr)
         return EXIT_USAGE
     try:
-        return setup(os.environ)
+        return setup(os.environ) if argv == ["setup"] else uninstall()
     except Refused as exc:
         print(f"fwmanager-setup: refused: {exc}", file=sys.stderr)
         return EXIT_REFUSED

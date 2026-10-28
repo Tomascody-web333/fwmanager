@@ -18,5 +18,22 @@
       <allow_active>auth_admin_keep</allow_active>
     </defaults>
     <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/fwmanager/fwmanager-setup</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">setup</annotate>
+  </action>
+
+  <!-- Removing the app for everyone: always asks, never remembered. pkexec tells the two apart
+       by the helper's first argument (polkit 0.113 and later). -->
+  <action id="org.fwmanager.uninstall">
+    <description>Uninstall fwmanager</description>
+    <description xml:lang="pt">Desinstalar o fwmanager</description>
+    <message>Authentication is required to remove fwmanager and undo its changes to the firewall</message>
+    <message xml:lang="pt">É preciso autenticação para remover o fwmanager e desfazer as suas alterações à firewall</message>
+    <defaults>
+      <allow_any>no</allow_any>
+      <allow_inactive>no</allow_inactive>
+      <allow_active>auth_admin</allow_active>
+    </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/local/libexec/fwmanager/fwmanager-setup</annotate>
+    <annotate key="org.freedesktop.policykit.exec.argv1">uninstall</annotate>
   </action>
 </policyconfig>

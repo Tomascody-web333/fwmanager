@@ -167,6 +167,7 @@ class ControlService:
                         "blocking_conflicts": GLib.Variant("as", list(conflicts.blocking)),
                         "warnings": GLib.Variant("as", list(conflicts.warnings)),
                         "startup": GLib.Variant("s", self._startup),
+                        "configured": GLib.Variant("b", self._configured()),
                     },
                 ),
             )
@@ -374,6 +375,15 @@ class ControlService:
 
     def _save_networks(self, nets: list[Network]) -> None:
         self._require_store().save_networks(nets)
+
+    def _configured(self) -> bool:
+        """A profile was confirmed at least once: setup is done (in the window or the CLI)."""
+        if self._store is None:
+            return False
+        try:
+            return self._store.load_state() is not None
+        except FwError:
+            return False
 
     def _persist_confirmed(self, name: str | None) -> None:
         """Remember the confirmed profile; a disk problem must not undo the confirmation."""

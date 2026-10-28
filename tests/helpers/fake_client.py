@@ -34,6 +34,7 @@ class FakeDaemon:
         self.seconds = 30
         self.ufw_installed = True
         self.firewall_active = True
+        self.configured = False  # a profile was confirmed once (setup done somewhere)
         self.conflicts = []
         self.warnings = []
         self.startup = "ok"
@@ -66,6 +67,7 @@ class FakeClient:
         return {
             "ufw_installed": d.ufw_installed,
             "firewall_active": d.firewall_active,
+            "configured": d.configured,
             "active_profile": d.active,
             "pending_profile": d.pending,
             "seconds_left": d.seconds if d.pending else 0,
@@ -120,6 +122,7 @@ class FakeClient:
     def confirm(self):
         self._call("confirm")
         self.d.active, self.d.pending = self.d.pending, ""
+        self.d.configured = True  # like the real service, which saves the confirmed profile
 
     def rollback(self):
         self._call("rollback")

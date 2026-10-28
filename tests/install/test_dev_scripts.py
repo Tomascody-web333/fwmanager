@@ -54,6 +54,7 @@ def test_staged_install_places_every_file(staged):
         "usr/share/locale/en/LC_MESSAGES/fwmanager.mo",
         "usr/share/applications/org.fwmanager.App.desktop",
         "usr/local/libexec/fwmanager/fwmanager-setup",
+        "usr/local/libexec/fwmanager/uninstall",
         "usr/share/polkit-1/actions/org.fwmanager.setup.policy",
     ]
     for rel in expect:
@@ -62,6 +63,7 @@ def test_staged_install_places_every_file(staged):
     for exe in ("fwmanagerd", "fwmanager-cli", "fwmanager"):
         assert os.access(staged / "usr/local/bin" / exe, os.X_OK)
     assert os.access(staged / "usr/local/libexec/fwmanager/fwmanager-setup", os.X_OK)
+    assert os.access(staged / "usr/local/libexec/fwmanager/uninstall", os.X_OK)
     shim = staged / "etc/NetworkManager/dispatcher.d/90-fwmanager"
     assert os.access(shim, os.X_OK)  # NetworkManager only runs executable scripts
     assert (staged / "etc/systemd/system/fwmanagerd.service").read_text() == (
@@ -177,14 +179,17 @@ def test_polkit_policy_matches_the_installed_helper(staged):
     stage(staged)
     policy = staged / "usr/share/polkit-1/actions/org.fwmanager.setup.policy"
     root = ET.parse(policy).getroot()
-    action = root.find("action")
-    assert action is not None and action.get("id") == "org.fwmanager.setup"
-    paths = [
-        a.text
-        for a in action.iter("annotate")
-        if a.get("key") == "org.freedesktop.policykit.exec.path"
-    ]
-    assert paths == ["/usr/local/libexec/fwmanager/fwmanager-setup"]
+    actions = {}
+    for action in root.iter("action"):
+        notes = {a.get("key").rsplit(".", 1)[-1]: a.text for a in action.iter("annotate")}
+        defaults = action.find("defaults").find("allow_active").text
+        actions[action.get("id")] = (notes, defaults)
+    helper = "/usr/local/libexec/fwmanager/fwmanager-setup"
+    # Same helper, told apart by its first argument; removing the app always asks again.
+    assert actions == {
+        "org.fwmanager.setup": ({"path": helper, "argv1": "setup"}, "auth_admin_keep"),
+        "org.fwmanager.uninstall": ({"path": helper, "argv1": "uninstall"}, "auth_admin"),
+    }
     if shutil.which("xmllint"):
         dtd = Path("/usr/share/polkit-1/policyconfig-1.dtd")
         if dtd.exists():

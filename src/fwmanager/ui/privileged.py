@@ -34,11 +34,16 @@ class HelperResult:
 
 
 def run_setup_helper(
-    pkexec: str = PKEXEC, helper: str = HELPER, run=subprocess.run
+    pkexec: str = PKEXEC, helper: str = HELPER, run=subprocess.run, verb: str = "setup"
 ) -> HelperResult:
-    """Blocking (the password dialog is modal for the user): call it from a worker thread."""
+    """Blocking (the password dialog is modal for the user): call it from a worker thread.
+
+    ``verb`` is ``setup`` or ``uninstall``; each has its own polkit action and message.
+    """
+    if verb not in ("setup", "uninstall"):
+        raise ValueError(verb)
     try:
-        done = run([pkexec, helper, "setup"], capture_output=True, text=True, timeout=300)
+        done = run([pkexec, helper, verb], capture_output=True, text=True, timeout=300)
     except (OSError, subprocess.TimeoutExpired):
         return HelperResult(-1)  # no pkexec here: the wizard falls back to showing a command
     return HelperResult(done.returncode)

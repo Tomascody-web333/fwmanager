@@ -111,6 +111,9 @@ write_wrapper "$BIN" fwmanager-cli fwmanager.cli.main
 write_wrapper "$BIN" fwmanager fwmanager.ui.main
 # The one program that asks for administrator rights (through polkit), for first-run setup.
 write_wrapper "$LIBEXEC" fwmanager-setup fwmanager.setup_helper
+# The uninstaller stays on the machine, so the app can remove itself (Settings, or
+# `fwmanager-cli uninstall`) without the source tree.
+install -m 755 "$REPO/scripts/dev-uninstall.sh" "$LIBEXEC/uninstall"
 
 install -m 644 "$REPO/data/dbus/org.fwmanager.Control.conf" "$ROOT/etc/dbus-1/system.d/"
 install -m 644 "$REPO/data/systemd/fwmanagerd.service" "$ROOT/etc/systemd/system/"

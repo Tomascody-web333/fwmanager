@@ -73,8 +73,9 @@ def test_a_failing_step_stops_and_reports():
     assert code == sh.EXIT_FAILED and len(rec.calls) == 1  # the service is not started
 
 
-def test_main_only_accepts_the_one_verb(capsys):
-    for argv in ([], ["setup", "extra"], ["shell"], ["setup; id"], ["--help"]):
+def test_main_only_accepts_its_two_verbs(capsys):
+    for argv in ([], ["setup", "extra"], ["shell"], ["setup; id"], ["--help"],
+                 ["uninstall", "--force"], ["uninstall;id"]):  # fmt: skip
         assert sh.main(argv) == sh.EXIT_USAGE
     assert "usage" in capsys.readouterr().err
 
@@ -112,6 +113,39 @@ def test_helper_runs_exactly_pkexec_helper_setup():
     privileged.run_setup_helper("/x/pkexec", "/x/helper", lambda argv, **k: (
         seen.append(argv), subprocess.CompletedProcess(argv, 0))[1])  # fmt: skip
     assert seen == [["/x/pkexec", "/x/helper", "setup"]]
+
+
+def test_helper_runs_the_uninstall_verb_and_nothing_else():
+    seen = []
+    run = lambda argv, **k: (seen.append(argv), subprocess.CompletedProcess(argv, 0))[1]  # noqa: E731
+    privileged.run_setup_helper("/x/pkexec", "/x/helper", run, verb="uninstall")
+    assert seen == [["/x/pkexec", "/x/helper", "uninstall"]]
+    with pytest.raises(ValueError):
+        privileged.run_setup_helper("/x/pkexec", "/x/helper", run, verb="setup; id")
+
+
+def test_uninstall_runs_the_installed_uninstaller_as_root(tmp_path):
+    script = tmp_path / "uninstall"
+    script.write_text("#!/bin/sh\n")
+    rec = Recorder()
+    assert sh.uninstall(rec, script, euid=lambda: 0) == sh.EXIT_OK
+    assert rec.calls == [["/bin/sh", str(script)]]
+
+
+def test_uninstall_refuses_without_root_or_uninstaller(tmp_path):
+    with pytest.raises(sh.Refused):
+        sh.uninstall(Recorder(), tmp_path / "uninstall", euid=lambda: 0)  # not installed
+    script = tmp_path / "uninstall"
+    script.write_text("#!/bin/sh\n")
+    with pytest.raises(sh.Refused):
+        sh.uninstall(Recorder(), script, euid=lambda: 1000)
+
+
+def test_a_failing_uninstaller_is_reported(tmp_path, capsys):
+    script = tmp_path / "uninstall"
+    script.write_text("#!/bin/sh\n")
+    assert sh.uninstall(Recorder(fail_on="/bin/sh"), script, euid=lambda: 0) == sh.EXIT_FAILED
+    assert "failed" in capsys.readouterr().err
 
 
 def test_missing_pkexec_is_reported_not_raised():
