@@ -14,7 +14,18 @@ cuts your connection.
 
 ## Quick start
 
-Download `fwmanager.<version>.deb` and `SHA256SUMS` from the
+With APT (updates then arrive with `sudo apt upgrade`):
+
+```sh
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://tomascody-web333.github.io/fwmanager/fwmanager.asc \
+  | sudo tee /etc/apt/keyrings/fwmanager.asc >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/fwmanager.asc] https://tomascody-web333.github.io/fwmanager stable main" \
+  | sudo tee /etc/apt/sources.list.d/fwmanager.list
+sudo apt update && sudo apt install fwmanager
+```
+
+Or download `fwmanager.<version>.deb` and `SHA256SUMS` from the
 [Releases](https://github.com/Tomascody-web333/fwmanager/releases) page, into the same folder:
 
 ```sh
@@ -23,7 +34,7 @@ sudo apt install ./fwmanager.<version>.deb      # also installs ufw and what the
 fwmanager                                      # or open it from the app menu
 ```
 
-No signing key or extra repository is needed. To update, download the new `.deb` and run the
+This way needs no signing key or extra repository. To update, download the new `.deb` and run the
 same `apt install`; your profiles and network choices are kept.
 
 Installing only copies files: the service is not started yet, so installing over SSH cannot
@@ -143,7 +154,10 @@ packaging/deb/build-deb.sh          # writes dist/fwmanager.<version>.deb and di
 
 It needs `dpkg-deb` and PyGObject with GdkPixbuf (for the PNG icons); no root and no signing
 key. Pushing a tag such as `1.0.0` (matching the version in `pyproject.toml`) makes GitHub
-Actions build both files and attach them to a new release.
+Actions build both files and attach them to a new release. If the repository has the secret
+`APT_GPG_PRIVATE_KEY` (plus `APT_GPG_PASSPHRASE` when the key has one), the same run rebuilds
+the APT repository from every release with `packaging/apt/build-repo.sh`, signs it with that
+key and publishes it on GitHub Pages.
 
 The package installs under `/usr` (`/usr/bin`, `/usr/lib/fwmanager`,
 `/usr/libexec/fwmanager`), keeps its translations in `/usr/share/fwmanager/locale` (minimal

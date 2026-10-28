@@ -14,7 +14,18 @@ segurança que desfaz qualquer alteração que lhe corte a ligação.
 
 ## Início rápido
 
-Descarregue `fwmanager.<versão>.deb` e `SHA256SUMS` da página
+Com o APT (as atualizações chegam depois com `sudo apt upgrade`):
+
+```sh
+sudo install -d -m 0755 /etc/apt/keyrings
+curl -fsSL https://tomascody-web333.github.io/fwmanager/fwmanager.asc \
+  | sudo tee /etc/apt/keyrings/fwmanager.asc >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/fwmanager.asc] https://tomascody-web333.github.io/fwmanager stable main" \
+  | sudo tee /etc/apt/sources.list.d/fwmanager.list
+sudo apt update && sudo apt install fwmanager
+```
+
+Ou descarregue `fwmanager.<versão>.deb` e `SHA256SUMS` da página
 [Releases](https://github.com/Tomascody-web333/fwmanager/releases), para a mesma pasta:
 
 ```sh
@@ -23,7 +34,7 @@ sudo apt install ./fwmanager.<versão>.deb       # instala também o ufw e o que
 fwmanager                                      # ou abra-o no menu de aplicações
 ```
 
-Não é preciso chave de assinatura nem repositório extra. Para atualizar, descarregue o `.deb`
+Desta forma não é preciso chave de assinatura nem repositório extra. Para atualizar, descarregue o `.deb`
 novo e corra o mesmo `apt install`; os perfis e as escolhas de rede mantêm-se.
 
 A instalação só copia ficheiros: o serviço ainda não arranca, por isso instalar por SSH não o
@@ -149,7 +160,10 @@ packaging/deb/build-deb.sh          # cria dist/fwmanager.<versão>.deb e dist/S
 
 Precisa do `dpkg-deb` e do PyGObject com GdkPixbuf (para os ícones PNG); não precisa de root
 nem de chave de assinatura. Ao enviar uma tag como `1.0.0` (igual à versão no
-`pyproject.toml`), o GitHub Actions constrói os dois ficheiros e junta-os a uma nova release.
+`pyproject.toml`), o GitHub Actions constrói os dois ficheiros e junta-os a uma nova release. Se o repositório
+tiver o segredo `APT_GPG_PRIVATE_KEY` (e `APT_GPG_PASSPHRASE`, se a chave tiver palavra-passe),
+a mesma execução refaz o repositório APT com todas as versões (`packaging/apt/build-repo.sh`),
+assina-o com essa chave e publica-o no GitHub Pages.
 
 O pacote instala em `/usr` (`/usr/bin`, `/usr/lib/fwmanager`, `/usr/libexec/fwmanager`), guarda
 as traduções em `/usr/share/fwmanager/locale` (as imagens mínimas do Ubuntu ignoram
