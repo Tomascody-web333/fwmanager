@@ -2,6 +2,8 @@
 # Builds dist/fwmanager.<version>.deb and dist/SHA256SUMS from this source tree.
 #
 #   packaging/deb/build-deb.sh [--out DIR]
+#   packaging/deb/build-deb.sh --stage DIR   only put the program's files under DIR (what
+#                                            debian/rules does for the Launchpad/PPA build)
 #
 # Needs dpkg-deb and a Python 3 with PyGObject and GdkPixbuf (for the PNG icons). No root, no
 # signing key: the .deb is installed with  sudo apt install ./fwmanager.<version>.deb
@@ -10,16 +12,18 @@ set -eu
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
 HERE="$REPO/packaging/deb"
 OUT="$REPO/dist"
+STAGE=""
 
 die() { echo "build-deb: $1" >&2; exit 1; }
 while [ $# -gt 0 ]; do
     case "$1" in
         --out) [ $# -ge 2 ] || die "--out needs a value"; OUT=$2; shift 2 ;;
-        -h|--help) sed -n '2,7p' "$0"; exit 0 ;;
+        --stage) [ $# -ge 2 ] || die "--stage needs a value"; STAGE=$2; shift 2 ;;
+        -h|--help) sed -n '2,9p' "$0"; exit 0 ;;
         *) die "unknown argument: $1" ;;
     esac
 done
-command -v dpkg-deb >/dev/null 2>&1 || die "dpkg-deb not found"
+[ -n "$STAGE" ] || command -v dpkg-deb >/dev/null 2>&1 || die "dpkg-deb not found"
 
 PYTHON=${PYTHON:-}
 if [ -z "$PYTHON" ]; then
@@ -35,6 +39,9 @@ fi
 
 VERSION=$(sed -n 's/^version = "\(.*\)"$/\1/p' "$REPO/pyproject.toml" | head -n 1)
 [ -n "$VERSION" ] || die "no version in pyproject.toml"
+CHANGELOG_VERSION=$(sed -n '1s/^fwmanager (\([^)]*\)).*/\1/p' "$REPO/debian/changelog")
+[ "$CHANGELOG_VERSION" = "$VERSION" ] \
+    || die "debian/changelog says $CHANGELOG_VERSION but pyproject.toml says $VERSION"
 # Reproducible: every file gets the date of the last commit (or now, outside git).
 SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH:-$(git -C "$REPO" log -1 --format=%ct 2>/dev/null || date +%s)}
 export SOURCE_DATE_EPOCH
@@ -42,6 +49,10 @@ export SOURCE_DATE_EPOCH
 WORK=$(mktemp -d)
 trap 'rm -rf "$WORK"' EXIT
 PKG="$WORK/fwmanager"
+if [ -n "$STAGE" ]; then
+    mkdir -p "$STAGE"
+    PKG=$(cd "$STAGE" && pwd)
+fi
 umask 022
 
 # -- the program ---
@@ -116,31 +127,22 @@ done
 [ -f "$HICOLOR/128x128/apps/org.fwmanager.App.png" ] || die "the PNG icons were not made"
 install -m 644 "$HICOLOR/128x128/apps/org.fwmanager.App.png" "$PKG/usr/share/pixmaps/"
 
-# -- documentation and licence ---
+# In a Debian/Launchpad build, debhelper adds the documentation and the package metadata.
+[ -z "$STAGE" ] || exit 0
+
+# -- documentation and licence (the same files the Launchpad build ships) ---
 DOC="$PKG/usr/share/doc/fwmanager"
 install -d "$DOC"
-install -m 644 "$REPO/README.md" "$REPO/README.pt.md" "$DOC/"
-{
-    echo "Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/"
-    echo "Upstream-Name: fwmanager"
-    echo "Source: https://github.com/Tomascody-web333/fwmanager"
-    echo
-    echo "Files: *"
-    echo "Copyright: 2026 Tomascody-web333"
-    echo "License: PolyForm-Noncommercial-1.0.0"
-    sed 's/^$/./; s/^/ /' "$REPO/LICENSE"
-} > "$DOC/copyright"
-DATE=$(date -u -R -d "@$SOURCE_DATE_EPOCH")
-printf 'fwmanager (%s) unstable; urgency=medium\n\n  * Release %s.\n\n -- Tomascody-web333 <Tomascody-web333@users.noreply.github.com>  %s\n' \
-    "$VERSION" "$VERSION" "$DATE" | gzip -n -9 > "$DOC/changelog.gz"
-chmod 644 "$DOC/copyright" "$DOC/changelog.gz"
+install -m 644 "$REPO/README.md" "$REPO/README.pt.md" "$REPO/debian/copyright" "$DOC/"
+gzip -n -9 -c "$REPO/debian/changelog" > "$DOC/changelog.gz"
+chmod 644 "$DOC/changelog.gz"
 
 # -- package metadata ---
 install -d "$PKG/DEBIAN"
 SIZE=$(du -s -k --exclude=DEBIAN "$PKG" | cut -f1)
 sed "s/@VERSION@/$VERSION/; s/@SIZE@/$SIZE/" "$HERE/control.in" > "$PKG/DEBIAN/control"
 for script in postinst prerm postrm; do
-    install -m 755 "$HERE/$script" "$PKG/DEBIAN/$script"
+    install -m 755 "$REPO/debian/$script" "$PKG/DEBIAN/$script"
 done
 (cd "$PKG" && find . -path ./DEBIAN -prune -o -type f -print | sed 's|^\./||' | LC_ALL=C sort \
     | xargs md5sum) > "$PKG/DEBIAN/md5sums"

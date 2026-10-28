@@ -1,0 +1,27 @@
+Source: fwmanager
+Section: net
+Priority: optional
+Maintainer: Tomascody-web333 <general@homeserverlab.org>
+Build-Depends: debhelper-compat (= 13),
+               python3 (>= 3.11),
+               python3-gi,
+               gir1.2-gdkpixbuf-2.0,
+               librsvg2-common
+Standards-Version: 4.6.2
+Rules-Requires-Root: no
+Homepage: https://github.com/Tomascody-web333/fwmanager
+Vcs-Browser: https://github.com/Tomascody-web333/fwmanager
+Vcs-Git: https://github.com/Tomascody-web333/fwmanager.git
+
+Package: fwmanager
+Architecture: all
+Depends: python3 (>= 3.11), python3-gi, ufw, pkexec | policykit-1, dbus, ${misc:Depends}
+Recommends: gir1.2-gtk-4.0, gir1.2-adw-1 (>= 1.5), network-manager
+Description: beginner-friendly firewall with a profile per network (for ufw)
+ fwmanager is a window and a command line for ufw. Pick a profile (Home, Work,
+ Public) for each network and fwmanager switches to it when you join that
+ network. Every change is undone after 30 seconds unless you confirm it, so a
+ mistake cannot lock you out.
+ .
+ The window needs GTK 4 and libadwaita 1.5 or newer; the command line
+ (fwmanager-cli) works without them.

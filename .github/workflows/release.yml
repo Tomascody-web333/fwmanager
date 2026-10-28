@@ -5,7 +5,8 @@
 # With the secret APT_GPG_PRIVATE_KEY set (and APT_GPG_PASSPHRASE if the key has one), it also
 # rebuilds the APT repository from every release, signs it with that key and publishes it on
 # GitHub Pages. If that secret holds more than one key, the variable APT_GPG_KEY_ID says which
-# one signs.
+# one signs. With the variable LAUNCHPAD_PPA ("launchpad-user/ppa-name") set as well, the source
+# package is signed with the same key and uploaded to that PPA, where Launchpad builds it.
 name: Release
 
 on:
@@ -65,8 +66,13 @@ jobs:
         run: |
           version=${TAG#v}
           sed "s/@VERSION@/$version/g" packaging/deb/release-notes.md > dist/notes.md
-          gh release create "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --target "$GITHUB_SHA" \
-            --title "fwmanager $version" --notes-file dist/notes.md
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            # Made by hand already: replace its files with these, keep its text.
+            gh release upload "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --clobber
+          else
+            gh release create "$TAG" dist/fwmanager.*.deb dist/SHA256SUMS --target "$GITHUB_SHA" \
+              --title "fwmanager $version" --notes-file dist/notes.md
+          fi
 
       - name: Import the signing key
         if: env.HAS_APT_KEY == 'true'
@@ -100,6 +106,15 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+      - name: Upload to the Launchpad PPA
+        if: env.HAS_APT_KEY == 'true' && vars.LAUNCHPAD_PPA != ''
+        env:
+          APT_GPG_PASSPHRASE: ${{ secrets.APT_GPG_PASSPHRASE }}
+          LAUNCHPAD_PPA: ${{ vars.LAUNCHPAD_PPA }}
+        run: |
+          sudo apt-get install -y --no-install-recommends debhelper dpkg-dev dput
+          packaging/ppa/upload.sh "$LAUNCHPAD_PPA" "$APT_KEY"
 
       - name: No APT repository this time
         if: env.HAS_APT_KEY != 'true'

@@ -1,7 +1,7 @@
 Package: fwmanager
 Version: @VERSION@
 Architecture: all
-Maintainer: Tomascody-web333 <Tomascody-web333@users.noreply.github.com>
+Maintainer: Tomascody-web333 <general@homeserverlab.org>
 Installed-Size: @SIZE@
 Depends: python3 (>= 3.11), python3-gi, ufw, pkexec | policykit-1, dbus
 Recommends: gir1.2-gtk-4.0, gir1.2-adw-1 (>= 1.5), network-manager

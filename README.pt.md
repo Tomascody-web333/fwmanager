@@ -14,7 +14,14 @@ segurança que desfaz qualquer alteração que lhe corte a ligação.
 
 ## Início rápido
 
-Com o APT (as atualizações chegam depois com `sudo apt upgrade`):
+Pelo PPA do Launchpad (Ubuntu; as atualizações chegam depois com `sudo apt upgrade`):
+
+```sh
+sudo add-apt-repository ppa:tomascody-web333/fwmanager
+sudo apt install fwmanager
+```
+
+Ou pelo repositório APT no GitHub (Ubuntu ou Debian):
 
 ```sh
 sudo install -d -m 0755 /etc/apt/keyrings
@@ -24,6 +31,9 @@ echo "deb [signed-by=/etc/apt/keyrings/fwmanager.asc] https://tomascody-web333.g
   | sudo tee /etc/apt/sources.list.d/fwmanager.list
 sudo apt update && sudo apt install fwmanager
 ```
+
+O repositório é assinado pela chave `413E F57C A7FE 5D37 6108  0D61 D519 2575 2DA1 7E4A`
+(HomeServer-LAB, também no keyserver.ubuntu.com e no Launchpad).
 
 Ou descarregue `fwmanager.<versão>.deb` e `SHA256SUMS` da página
 [Releases](https://github.com/Tomascody-web333/fwmanager/releases), para a mesma pasta:
@@ -163,7 +173,9 @@ nem de chave de assinatura. Ao enviar uma tag como `1.0.0` (igual à versão no
 `pyproject.toml`), o GitHub Actions constrói os dois ficheiros e junta-os a uma nova release. Se o repositório
 tiver o segredo `APT_GPG_PRIVATE_KEY` (e `APT_GPG_PASSPHRASE`, se a chave tiver palavra-passe),
 a mesma execução refaz o repositório APT com todas as versões (`packaging/apt/build-repo.sh`),
-assina-o com essa chave e publica-o no GitHub Pages.
+assina-o com essa chave e publica-o no GitHub Pages. Com a variável `LAUNCHPAD_PPA` também
+definida (`utilizador-launchpad/nome-do-ppa`), assina o pacote fonte em `debian/` com a mesma
+chave e envia-o para esse PPA (`packaging/ppa/upload.sh`), onde o Launchpad o constrói.
 
 O pacote instala em `/usr` (`/usr/bin`, `/usr/lib/fwmanager`, `/usr/libexec/fwmanager`), guarda
 as traduções em `/usr/share/fwmanager/locale` (as imagens mínimas do Ubuntu ignoram
@@ -283,13 +295,6 @@ opcional: `sudo FWMANAGER_TEST_REAL_INSTALL=1 .venv/bin/pytest tests/install`.
 
 ## Licença
 
-[PolyForm Noncommercial 1.0.0](LICENSE). Em resumo (o que vale é o [texto da licença](LICENSE)):
-
-- Pode usar, estudar, alterar e partilhar o fwmanager para qualquer fim **não comercial**: em
-  casa, para aprender, em projetos pessoais, em escolas, associações e instituições públicas.
-- **Não** pode vendê-lo nem usá-lo comercialmente sem autorização do autor.
-- Quem o passar a outros tem de manter a licença e a linha
-  `Required Notice: Copyright (c) 2026 Tomascody-web333`, para ninguém apresentar o trabalho
-  como seu.
-
-Para uso comercial, peça autorização ao autor abrindo uma issue.
+[MIT](LICENSE): pode usar, copiar, alterar, partilhar e vender o fwmanager, desde que o aviso de
+copyright (`Copyright (c) 2026 Tomascody-web333`) e o texto da licença o acompanhem. Não tem
+qualquer garantia.

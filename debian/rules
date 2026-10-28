@@ -1,0 +1,17 @@
+#!/usr/bin/make -f
+# The files are put in place by the same script that builds the .deb on GitHub, so both
+# packages hold exactly the same program.
+
+%:
+	dh $@
+
+override_dh_auto_configure override_dh_auto_build override_dh_auto_test:
+	@# nothing to compile: fwmanager is Python run from /usr/lib/fwmanager
+
+override_dh_auto_install:
+	sh packaging/deb/build-deb.sh --stage debian/fwmanager
+
+# The first-run setup (in the window, or fwmanager-cli setup) enables and starts the service.
+# Installing must not: a firewall that starts on its own could lock out an install over SSH.
+override_dh_installsystemd:
+	dh_installsystemd --no-enable --no-start --no-stop-on-upgrade

@@ -279,3 +279,71 @@ def test_upgrade_in_place_keeps_everything(deb, clean_machine, tmp_path):
     dpkg("-i", str(deb))  # the same version again stands in for an upgrade
     assert installed() and Path("/var/lib/fwmanager/state.json").exists()
     assert "root" in group_members()
+
+
+# -- the source package Launchpad builds (debian/) ---
+
+
+def control_fields(text: str) -> dict:
+    fields, key = {}, None
+    for line in text.splitlines():
+        if line[:1] in (" ", "\t") and key:
+            fields[key] += " " + line.strip()
+        elif ":" in line:
+            key, value = line.split(":", 1)
+            fields[key] = value.strip()
+    return fields
+
+
+def test_debian_changelog_has_the_released_version():
+    first = (ROOT / "debian/changelog").read_text().splitlines()[0]
+    assert first.startswith(f"fwmanager ({VERSION}) ")
+
+
+def test_both_packages_ask_for_the_same_things():
+    ours = control_fields((ROOT / "packaging/deb/control.in").read_text())
+    binary = (ROOT / "debian/control").read_text().split("\n\n")[1]
+    theirs = control_fields(binary)
+    assert theirs["Depends"].replace(", ${misc:Depends}", "") == ours["Depends"]
+    for name in ("Recommends", "Architecture", "Description"):
+        assert theirs[name] == ours[name], name
+
+
+def test_maintainer_scripts_live_once_in_debian():
+    for name in ("postinst", "prerm", "postrm"):
+        text = (ROOT / "debian" / name).read_text()
+        assert text.startswith("#!/bin/sh") and "#DEBHELPER#" in text
+        assert not (ROOT / "packaging/deb" / name).exists()
+
+
+@pytest.mark.skipif(
+    not (shutil.which("dpkg-buildpackage") and shutil.which("dh")), reason="needs debhelper"
+)
+def test_launchpad_style_build_holds_the_same_program(deb, tmp_path):
+    src = tmp_path / f"fwmanager-{VERSION}"
+    files = subprocess.run(
+        ["git", "ls-files", "--cached", "--others", "--exclude-standard"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.split()
+    for rel in files:
+        if (ROOT / rel).is_file():
+            (src / rel).parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(ROOT / rel, src / rel)
+    r = subprocess.run(
+        ["dpkg-buildpackage", "-us", "-uc", "-b"], cwd=src, capture_output=True, text=True,
+        timeout=600,
+    )  # fmt: skip
+    assert r.returncode == 0, r.stdout[-3000:] + r.stderr[-3000:]
+    built = tmp_path / f"fwmanager_{VERSION}_all.deb"
+
+    def program(path):
+        listing = subprocess.run(
+            ["dpkg-deb", "-c", str(path)], capture_output=True, text=True, check=True
+        ).stdout
+        names = {line.split()[-1] for line in listing.splitlines()}
+        return {n for n in names if "/usr/share/doc/" not in n}
+
+    assert program(built) == program(deb)
