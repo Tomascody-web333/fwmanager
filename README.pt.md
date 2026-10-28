@@ -9,12 +9,13 @@ segurança que desfaz qualquer alteração que lhe corte a ligação.
 
 100% local: sem contas, sem servidores, sem telemetria.
 
-> Estado: completo para a instalação de desenvolvimento; o empacotamento (apt) fica para o fim.
-> O que só uma máquina real consegue provar está em [docs/VALIDATION.pt.md](docs/VALIDATION.pt.md).
+> Versão 1.0.0: no PPA do Launchpad, no repositório APT do GitHub Pages e como `.deb` nas
+> [Releases](https://github.com/Tomascody-web333/fwmanager/releases). O que só uma máquina
+> real consegue provar está em [docs/VALIDATION.pt.md](docs/VALIDATION.pt.md).
 
 ## Início rápido
 
-Pelo PPA do Launchpad (Ubuntu; as atualizações chegam depois com `sudo apt upgrade`):
+Pelo PPA do Launchpad (Ubuntu 24.04 ou mais recente; as atualizações chegam com `sudo apt upgrade`):
 
 ```sh
 sudo add-apt-repository ppa:tomascody-web333/fwmanager
@@ -44,8 +45,9 @@ sudo apt install ./fwmanager.<versão>.deb       # instala também o ufw e o que
 fwmanager                                      # ou abra-o no menu de aplicações
 ```
 
-Desta forma não é preciso chave de assinatura nem repositório extra. Para atualizar, descarregue o `.deb`
-novo e corra o mesmo `apt install`; os perfis e as escolhas de rede mantêm-se.
+Desta forma não é preciso chave de assinatura nem repositório extra. Para atualizar,
+descarregue o `.deb` novo e corra o mesmo `apt install`; os perfis e as escolhas de rede
+mantêm-se.
 
 A instalação só copia ficheiros: o serviço ainda não arranca, por isso instalar por SSH não o
 deixa trancado fora. Na primeira vez que abre o **fwmanager**, um assistente curto
@@ -67,8 +69,8 @@ regras do ufw mantidas). Pede sempre a palavra-passe de administrador. É o mesm
 `sudo apt purge fwmanager`. O `sudo apt remove fwmanager` também desfaz as alterações ao ufw,
 mas guarda os perfis e as escolhas de rede para uma reinstalação.
 
-A interface precisa do GTK 4 e do libadwaita 1.5 ou superior (Ubuntu 24.04, Fedora 40 ou
-posterior); o `fwmanager-cli` funciona em sistemas mais antigos.
+A interface precisa do GTK 4 e do libadwaita 1.5 ou superior (Ubuntu 24.04 ou mais
+recente); o `fwmanager-cli` funciona em sistemas mais antigos.
 
 ## Como funciona
 
@@ -162,25 +164,49 @@ são precisas ferramentas gettext). Depois de alterar texto visível, execute
 `python3 scripts/update-po.py`, traduza as entradas novas e `python3 scripts/update-po.py --check`
 (também corrido pelos testes) tem de passar.
 
-## Construir o .deb
+## Lançar uma versão nova
+
+Cada versão é publicada em três sítios ao mesmo tempo, todos assinados com a chave acima: o
+PPA do Launchpad, o repositório APT no GitHub Pages e uma release com o `.deb` e o
+`SHA256SUMS`.
+
+1. Suba a versão no `pyproject.toml` e acrescente uma entrada no topo do `debian/changelog`
+   com o mesmo número (por exemplo `1.0.1`). Os testes confirmam que os dois coincidem.
+2. Faça merge para o `main`.
+3. Em **Actions → Release → Run workflow**, escolha `main` e escreva a versão. Use
+   **Run workflow** e nunca **Re-run** numa execução antiga: um re-run repete o commit antigo.
+
+O workflow corre os testes, constrói o `.deb`, cria a tag e a release, refaz e assina o
+repositório APT com todas as versões, publica-o no GitHub Pages e envia o pacote fonte
+assinado para o PPA, onde o Launchpad o constrói (envia um e-mail quando o aceita e quando o
+constrói). Enviar uma tag como `1.0.1` lança o mesmo workflow.
+
+Precisa, em **Settings → Secrets and variables → Actions**, de:
+
+| Nome | Tipo | Valor |
+|---|---|---|
+| `APT_GPG_PRIVATE_KEY` | secret | a chave privada de assinatura (`gpg --armor --export-secret-keys`) |
+| `APT_GPG_PASSPHRASE` | secret | a palavra-passe dela, se tiver |
+| `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
+| `APT_GPG_KEY_ID` | variable | opcional: que chave assina, se o secret tiver várias |
+
+O GitHub Pages tem de usar **Source: GitHub Actions**. Sem a chave só a release é publicada;
+sem `LAUNCHPAD_PPA` o PPA é saltado. O Launchpad constrói para o Ubuntu 24.04 (noble); para
+outras versões do Ubuntu, use **Copy packages** na página do PPA.
+
+Cada parte também corre à mão:
 
 ```sh
-packaging/deb/build-deb.sh          # cria dist/fwmanager.<versão>.deb e dist/SHA256SUMS
+packaging/deb/build-deb.sh                    # dist/fwmanager.<versão>.deb e dist/SHA256SUMS
+packaging/apt/build-repo.sh DEBS SAIDA CHAVE  # um repositório APT assinado a partir de .deb
+packaging/ppa/upload.sh tomascody-web333/fwmanager CHAVE   # assina o pacote fonte e envia-o
 ```
-
-Precisa do `dpkg-deb` e do PyGObject com GdkPixbuf (para os ícones PNG); não precisa de root
-nem de chave de assinatura. Ao enviar uma tag como `1.0.0` (igual à versão no
-`pyproject.toml`), o GitHub Actions constrói os dois ficheiros e junta-os a uma nova release. Se o repositório
-tiver o segredo `APT_GPG_PRIVATE_KEY` (e `APT_GPG_PASSPHRASE`, se a chave tiver palavra-passe),
-a mesma execução refaz o repositório APT com todas as versões (`packaging/apt/build-repo.sh`),
-assina-o com essa chave e publica-o no GitHub Pages. Com a variável `LAUNCHPAD_PPA` também
-definida (`utilizador-launchpad/nome-do-ppa`), assina o pacote fonte em `debian/` com a mesma
-chave e envia-o para esse PPA (`packaging/ppa/upload.sh`), onde o Launchpad o constrói.
 
 O pacote instala em `/usr` (`/usr/bin`, `/usr/lib/fwmanager`, `/usr/libexec/fwmanager`), guarda
 as traduções em `/usr/share/fwmanager/locale` (as imagens mínimas do Ubuntu ignoram
 `/usr/share/locale`), cria o grupo `fwmanager` e não arranca o serviço: é a configuração
-inicial que o faz.
+inicial que o faz. A pasta `debian/`, a partir da qual o Launchpad constrói, usa o mesmo script
+(`build-deb.sh --stage`), por isso os dois pacotes têm os mesmos ficheiros.
 
 ## Instalação de desenvolvimento (só VM/contentor)
 

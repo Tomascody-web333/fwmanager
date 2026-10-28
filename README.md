@@ -9,12 +9,13 @@ cuts your connection.
 
 100% local: no accounts, no servers, no telemetry.
 
-> Status: feature complete for the development install; packaging (apt) comes last. The parts
-> that need a real machine are listed in [docs/VALIDATION.md](docs/VALIDATION.md).
+> Version 1.0.0: on the Launchpad PPA, in the APT repository on GitHub Pages and as a `.deb`
+> in [Releases](https://github.com/Tomascody-web333/fwmanager/releases). What only a real
+> machine can prove is in [docs/VALIDATION.md](docs/VALIDATION.md).
 
 ## Quick start
 
-From the Launchpad PPA (Ubuntu; updates then arrive with `sudo apt upgrade`):
+From the Launchpad PPA (Ubuntu 24.04 or newer; updates then arrive with `sudo apt upgrade`):
 
 ```sh
 sudo add-apt-repository ppa:tomascody-web333/fwmanager
@@ -67,7 +68,7 @@ kept). It asks for an administrator password every time. It is the same as
 `sudo apt purge fwmanager`. `sudo apt remove fwmanager` also undoes fwmanager's changes to ufw,
 but keeps your profiles and network choices for a later reinstall.
 
-The interface needs GTK 4 and libadwaita 1.5 or newer (Ubuntu 24.04, Fedora 40 or later);
+The interface needs GTK 4 and libadwaita 1.5 or newer (Ubuntu 24.04 or newer);
 `fwmanager-cli` works on older systems.
 
 ## How it works
@@ -156,25 +157,49 @@ Translations live in `po/*.po`; the `.mo` files are compiled by `dev-install.sh`
 tools needed). After changing user-visible text run `python3 scripts/update-po.py`, translate the
 new entries, and `python3 scripts/update-po.py --check` (also run by the tests) must pass.
 
-## Building the .deb
+## Releasing a new version
+
+Every version is published in three places at once, all signed with the key above: the
+Launchpad PPA, the APT repository on GitHub Pages and a release with the `.deb` and
+`SHA256SUMS`.
+
+1. Raise the version in `pyproject.toml` and add an entry at the top of `debian/changelog`
+   with the same number (for example `1.0.1`). The tests check that both agree.
+2. Merge into `main`.
+3. In **Actions → Release → Run workflow**, pick `main` and type the version. Use
+   **Run workflow**, never **Re-run** on an old run: a re-run repeats the old commit.
+
+The workflow runs the tests, builds the `.deb`, creates the tag and the release, rebuilds and
+signs the APT repository from every release, publishes it on GitHub Pages and uploads the
+signed source package to the PPA, where Launchpad builds it (it e-mails when it is accepted
+and when it is built). Pushing a tag such as `1.0.1` starts the same workflow.
+
+It needs, in **Settings → Secrets and variables → Actions**:
+
+| Name | Kind | Value |
+|---|---|---|
+| `APT_GPG_PRIVATE_KEY` | secret | the private signing key (`gpg --armor --export-secret-keys`) |
+| `APT_GPG_PASSPHRASE` | secret | its passphrase, if it has one |
+| `LAUNCHPAD_PPA` | variable | `tomascody-web333/fwmanager` |
+| `APT_GPG_KEY_ID` | variable | optional: which key signs, if the secret holds several |
+
+GitHub Pages must use **Source: GitHub Actions**. Without the key only the release is
+published; without `LAUNCHPAD_PPA` the PPA is skipped. Launchpad builds for Ubuntu 24.04
+(noble); to offer a newer Ubuntu, use **Copy packages** on the PPA page.
+
+The pieces can also run by hand:
 
 ```sh
-packaging/deb/build-deb.sh          # writes dist/fwmanager.<version>.deb and dist/SHA256SUMS
+packaging/deb/build-deb.sh                    # dist/fwmanager.<version>.deb and dist/SHA256SUMS
+packaging/apt/build-repo.sh DEBS OUT KEY      # a signed APT repository from a folder of .deb files
+packaging/ppa/upload.sh tomascody-web333/fwmanager KEY   # sign the source package and dput it
 ```
-
-It needs `dpkg-deb` and PyGObject with GdkPixbuf (for the PNG icons); no root and no signing
-key. Pushing a tag such as `1.0.0` (matching the version in `pyproject.toml`) makes GitHub
-Actions build both files and attach them to a new release. If the repository has the secret
-`APT_GPG_PRIVATE_KEY` (plus `APT_GPG_PASSPHRASE` when the key has one), the same run rebuilds
-the APT repository from every release with `packaging/apt/build-repo.sh`, signs it with that
-key and publishes it on GitHub Pages. With the variable `LAUNCHPAD_PPA` set too
-(`launchpad-user/ppa-name`), it signs the source package in `debian/` with the same key and
-uploads it to that PPA (`packaging/ppa/upload.sh`), where Launchpad builds it.
 
 The package installs under `/usr` (`/usr/bin`, `/usr/lib/fwmanager`,
 `/usr/libexec/fwmanager`), keeps its translations in `/usr/share/fwmanager/locale` (minimal
 Ubuntu images skip `/usr/share/locale`), creates the `fwmanager` group and does not start the
-service: the first-run setup does.
+service: the first-run setup does. The `debian/` folder Launchpad builds from uses the same
+script (`build-deb.sh --stage`), so both packages hold the same files.
 
 ## Dev install (VM/container only)
 

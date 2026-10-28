@@ -23,7 +23,7 @@ Do this in a VM with a desktop session, **from its console, not over SSH**. Take
 
 | # | Check | How | Expected |
 |---|-------|-----|----------|
-| 1 | Install | `sudo scripts/dev-install.sh` | Ends with “the setup continues in its window”; nothing is started yet |
+| 1 | Install | `sudo add-apt-repository ppa:tomascody-web333/fwmanager && sudo apt install fwmanager` (or `sudo scripts/dev-install.sh` for a source checkout) | fwmanager is in the app menu; the service is not started yet |
 | 2 | First-run wizard | open `fwmanager` from the menu | Wizard lists the missing items; **Fix this** shows one polkit prompt; afterwards fwmanager restarts itself and shows the profile choice |
 | 3 | Polkit denied | cancel the prompt, or use a non-admin account | A clear message and the commands to run instead; nothing changed |
 | 4 | systemd hardening | `systemctl status fwmanagerd`, `journalctl -u fwmanagerd` | Active, no “permission denied” on `/etc/ufw`, `/run`, netlink |

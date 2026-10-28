@@ -15,7 +15,8 @@
 - **Safe changes**: before each change a byte-exact snapshot of `/etc/ufw` and `/etc/default/ufw`
   is taken; unless confirmed within 30 s (or if applying fails halfway) it is restored.
 - **First-run setup** is the only step that needs administrator rights. It goes through polkit
-  (`pkexec`) to one helper, `/usr/local/libexec/fwmanager/fwmanager-setup`. The helper takes no
+  (`pkexec`) to one helper, `/usr/libexec/fwmanager/fwmanager-setup` (under `/usr/local` for
+  the development install). The helper takes no
   free arguments: it adds the account that ran `pkexec` (`PKEXEC_UID`, never a command-line
   value) to the group `fwmanager` and starts the service. Authorisation is
   `auth_admin_keep`: one password, no stored credential.
@@ -36,7 +37,10 @@
 - **Uninstalling** (Settings button or `fwmanager-cli uninstall`) goes through the same helper
   with a second polkit action, `org.fwmanager.uninstall`, told apart by the helper's first
   argument. It asks for the administrator password every time (`auth_admin`, nothing kept) and
-  runs only the installed uninstaller.
+  runs only the installed uninstaller (in the package, `apt-get purge fwmanager`).
+- **Packages are signed.** The PPA upload and the APT repository on GitHub Pages are signed
+  with the key `413E F57C A7FE 5D37 6108 0D61 D519 2575 2DA1 7E4A`; apt refuses an index that
+  does not verify. A `.deb` downloaded from Releases is checked with `SHA256SUMS`.
 - **Nothing is sent anywhere.** No network access, accounts or telemetry; logs never contain rule
   content.
 - **Other firewalls are never disabled automatically.** firewalld blocks fwmanager (with an

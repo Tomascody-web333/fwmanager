@@ -26,7 +26,7 @@ primeiro um instantâneo.
 
 | # | Verificação | Como | Esperado |
 |---|-------------|------|----------|
-| 1 | Instalar | `sudo scripts/dev-install.sh` | Termina com “a configuração continua na janela”; nada foi arrancado |
+| 1 | Instalar | `sudo add-apt-repository ppa:tomascody-web333/fwmanager && sudo apt install fwmanager` (ou `sudo scripts/dev-install.sh` a partir do código) | O fwmanager aparece no menu de aplicações; o serviço ainda não arrancou |
 | 2 | Assistente inicial | abrir o `fwmanager` pelo menu | O assistente lista o que falta; **Corrigir** mostra um só pedido do polkit; depois o fwmanager reinicia-se e mostra a escolha de perfil |
 | 3 | Polkit recusado | cancelar o pedido ou usar uma conta sem privilégios | Mensagem clara e os comandos a executar; nada alterado |
 | 4 | Endurecimento do systemd | `systemctl status fwmanagerd`, `journalctl -u fwmanagerd` | Ativo, sem “permission denied” em `/etc/ufw`, `/run`, netlink |
